@@ -13,7 +13,7 @@ import java.time.Duration;
 
 @Configuration(proxyBeanMethods = false)
 @EnableMongoHttpSession
-public class HttpSessionConfig {
+public class Config {
 
     @Bean
     public JdkMongoSessionConverter jdkMongoSessionConverter() {

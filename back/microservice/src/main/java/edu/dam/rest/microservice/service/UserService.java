@@ -1,7 +1,7 @@
 package edu.dam.rest.microservice.service;
 
 import edu.dam.rest.microservice.bean.InsertUserRequest;
-import edu.dam.rest.microservice.bean.UserLoginRequest;
+import edu.dam.rest.microservice.bean.LoginUserRequest;
 import edu.dam.rest.microservice.bean.UserSession;
 import edu.dam.rest.microservice.persistence.model.User;
 import edu.dam.rest.microservice.persistence.repository.UserRepository;
@@ -34,10 +34,10 @@ public class UserService {
         }
     }
 
-    public UserSession loginUser(UserLoginRequest userLoginRequest) {
-        var userFound = this.findUserByNameOrEmail(userLoginRequest.getUserIdentifier());
+    public UserSession loginUser(LoginUserRequest loginUserRequest) {
+        var userFound = this.findUserByNameOrEmail(loginUserRequest.getUserIdentifier());
         if (userFound != null) {
-            if (userFound.getPassword().equals(userLoginRequest.getPassword())) {
+            if (userFound.getPassword().equals(loginUserRequest.getPassword())) {
                 return new UserSession(userFound);
             } else {
                 return null;

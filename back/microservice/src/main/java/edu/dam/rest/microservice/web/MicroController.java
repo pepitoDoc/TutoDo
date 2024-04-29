@@ -1,10 +1,9 @@
 package edu.dam.rest.microservice.web;
 
 import edu.dam.rest.microservice.bean.InsertUserRequest;
-import edu.dam.rest.microservice.bean.UserLoginRequest;
+import edu.dam.rest.microservice.bean.LoginUserRequest;
 import edu.dam.rest.microservice.bean.UserSession;
 import edu.dam.rest.microservice.constants.ApiConstants;
-import edu.dam.rest.microservice.persistence.model.User;
 import edu.dam.rest.microservice.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +29,7 @@ public class MicroController {
         var insertResult = userService.insertUser(insertUserRequest);
         if (!insertResult.equals("user_registered")) {
             return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .status(HttpStatus.EXPECTATION_FAILED)
                     .contentType(MediaType.TEXT_PLAIN)
                     .body(insertResult);
         } else {
@@ -43,7 +42,7 @@ public class MicroController {
 
     @PostMapping("user/login")
     public ResponseEntity<String> loginUser(
-            @RequestBody UserLoginRequest userLoginRequest, HttpSession httpSession
+            @RequestBody LoginUserRequest loginUserRequest, HttpSession httpSession
     ) {
         var userLogged = (UserSession) httpSession.getAttribute("user");
         if (userLogged != null) {
@@ -52,7 +51,7 @@ public class MicroController {
                     .contentType(MediaType.TEXT_PLAIN)
                     .body("already_logged");
         } else {
-            var loginResult = userService.loginUser(userLoginRequest);
+            var loginResult = userService.loginUser(loginUserRequest);
             if (loginResult != null) {
                 httpSession.setAttribute("user", loginResult);
                 return ResponseEntity
@@ -61,12 +60,27 @@ public class MicroController {
                         .body("login_succesful");
             } else {
                 return ResponseEntity
-                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .status(HttpStatus.EXPECTATION_FAILED)
                         .contentType(MediaType.TEXT_PLAIN)
                         .body("credentials_wrong");
             }
         }
+    }
 
+    @GetMapping("user/checkSession")
+    public ResponseEntity<String> checkSession(HttpSession httpSession) {
+        var userLogged = (UserSession) httpSession.getAttribute("user");
+        if (userLogged != null) {
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .body("session_confirmed");
+        } else {
+            return ResponseEntity
+                    .status(HttpStatus.EXPECTATION_FAILED)
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .body("session_expired");
+        }
     }
 
     @DeleteMapping("user/delete")

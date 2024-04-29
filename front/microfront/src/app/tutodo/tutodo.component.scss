@@ -1,0 +1,7 @@
+.container-fluid {
+  height: 95%;
+  padding-bottom: 10px;
+  @media (max-width: 1400px) {
+    height: 100%;
+  }
+}
