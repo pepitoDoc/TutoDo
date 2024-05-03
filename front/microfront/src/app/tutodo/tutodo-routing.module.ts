@@ -6,6 +6,7 @@ import { TutodoRoutes } from './tutodo.routes';
 import { HomeComponent } from './components/home/home.component';
 import { AuthGuardService } from './service/auth.guard.service';
 import { FrontPageComponent } from './pages/front-page/front-page.component';
+import { HomePageComponent } from './pages/home-page/home-page.component';
 
 const routes: Routes = [
   {
@@ -18,7 +19,7 @@ const routes: Routes = [
       },
       {
         path: TutodoRoutes.HOME,
-        component: HomeComponent
+        component: HomePageComponent
       },
       {
         path: '**',

@@ -1,40 +1,36 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="#">Tutodo</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#">Página principal</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Link</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                        Dropdown
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Action</a></li>
-                        <li><a class="dropdown-item" href="#">Another action</a></li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li><a class="dropdown-item" href="#">Something else here</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link disabled" aria-disabled="true">Disabled</a>
-                </li>
-            </ul>
-            <form class="d-flex" role="search">
-                <input class="form-control me-2" type="search" placeholder="Buscar guías" aria-label="Search">
-                <button class="btn btn-outline-success" type="submit">Búsqueda</button>
+<nav class="navbar sticky-top navBorder navbar-expand-lg bg-body-tertiary">
+    <div class="navbarRow">
+        <div class="leftColumn">
+            <a class="navbar-brand alignElements mx-3" routerLink="/home" routerLinkActive="active">TutoDo</a>
+            <a class="nav-link active alignElements" aria-current="page" routerLink="/home"
+                routerLinkActive="active">Página principal</a>
+            <mat-icon class="mx-1 alignIcon" aria-hidden="false" aria-label="home">home</mat-icon>
+            <!-- <a class="nav-link active spaceOptions" aria-current="page" routerLink="/home"
+                routerLinkActive="active">Guías</a> -->
+            <li class="nav-item dropdown spaceOptionsLeft">
+                <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                    Guías
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#">Action</a></li>
+                    <li><a class="dropdown-item" href="#">Another action</a></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item" href="#">Something else here</a></li>
+                </ul>
+            </li>
+            <form class="d-flex mx-3">
+                <input class="form-control me-2" type="search" placeholder="Búsqueda rápida" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">
+                    <mat-icon class="pt-1" aria-hidden="false" aria-label="search">search</mat-icon>
+                </button>
             </form>
+        </div>
+        <div class="rightColumn">
+            <p class="nav-link active alignElements mx-2">Opciones</p>
+            <mat-icon class="spaceOptionsRight" aria-hidden="false" aria-label="settings">settings</mat-icon>
         </div>
     </div>
 </nav>

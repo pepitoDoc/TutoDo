@@ -12,6 +12,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { HomeComponent } from './components/home/home.component';
 import { FrontPageComponent } from './pages/front-page/front-page.component';
+import { HomePageComponent } from './pages/home-page/home-page.component';
+import {MatIconModule} from '@angular/material/icon';
 
 
 
@@ -21,7 +23,8 @@ import { FrontPageComponent } from './pages/front-page/front-page.component';
     NavbarComponent,
     TutodoComponent,
     HomeComponent,
-    FrontPageComponent
+    FrontPageComponent,
+    HomePageComponent
   ],
   imports: [
     CommonModule,
@@ -30,7 +33,8 @@ import { FrontPageComponent } from './pages/front-page/front-page.component';
     ReactiveFormsModule,
     MatInputModule,
     MatButtonModule,
-    MatCardModule
+    MatCardModule,
+    MatIconModule
   ]
 })
 export class TutodoModule { }
