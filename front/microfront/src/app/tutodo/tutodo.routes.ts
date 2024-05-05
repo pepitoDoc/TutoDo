@@ -1,5 +1,8 @@
 export enum TutodoRoutes {
   ROOT = '',
   LOGIN = 'login',
-  HOME = 'home'
+  HOME = 'home',
+  MAIN = 'main',
+  CREATE = 'guide-create',
+  STEPS = 'guide-steps'
 }

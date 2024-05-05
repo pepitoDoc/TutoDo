@@ -14,6 +14,12 @@ import { HomeComponent } from './components/home/home.component';
 import { FrontPageComponent } from './pages/front-page/front-page.component';
 import { HomePageComponent } from './pages/home-page/home-page.component';
 import {MatIconModule} from '@angular/material/icon';
+import { GuideCreateComponent } from './components/guide-create/guide-create.component';
+import { MainComponent } from './components/main/main.component';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { GuideStepsComponent } from './components/guide-steps/guide-steps.component';
 
 
 
@@ -24,7 +30,10 @@ import {MatIconModule} from '@angular/material/icon';
     TutodoComponent,
     HomeComponent,
     FrontPageComponent,
-    HomePageComponent
+    HomePageComponent,
+    GuideCreateComponent,
+    MainComponent,
+    GuideStepsComponent
   ],
   imports: [
     CommonModule,
@@ -34,7 +43,10 @@ import {MatIconModule} from '@angular/material/icon';
     MatInputModule,
     MatButtonModule,
     MatCardModule,
-    MatIconModule
+    MatIconModule,
+    MatChipsModule,
+    MatFormFieldModule,
+    MatAutocompleteModule
   ]
 })
 export class TutodoModule { }

@@ -1,4 +1,4 @@
-package edu.dam.rest.microservice.bean;
+package edu.dam.rest.microservice.bean.user;
 
 import edu.dam.rest.microservice.persistence.model.User;
 import lombok.*;

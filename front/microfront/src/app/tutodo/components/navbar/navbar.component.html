@@ -5,16 +5,15 @@
             <a class="nav-link active alignElements" aria-current="page" routerLink="/home"
                 routerLinkActive="active">Página principal</a>
             <mat-icon class="mx-1 alignIcon" aria-hidden="false" aria-label="home">home</mat-icon>
-            <!-- <a class="nav-link active spaceOptions" aria-current="page" routerLink="/home"
-                routerLinkActive="active">Guías</a> -->
             <li class="nav-item dropdown spaceOptionsLeft">
                 <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"
                     aria-expanded="false">
                     Guías
                 </a>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#">Action</a></li>
-                    <li><a class="dropdown-item" href="#">Another action</a></li>
+                    <li><a class="dropdown-item" routerLink="/home/guide-create"
+                        routerLinkActive="active">Crear guía</a></li>
+                    <li><a class="dropdown-item" href="#">Búsqueda de guías</a></li>
                     <li>
                         <hr class="dropdown-divider">
                     </li>

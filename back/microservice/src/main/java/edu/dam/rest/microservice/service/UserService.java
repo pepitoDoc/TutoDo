@@ -1,8 +1,8 @@
 package edu.dam.rest.microservice.service;
 
-import edu.dam.rest.microservice.bean.InsertUserRequest;
-import edu.dam.rest.microservice.bean.LoginUserRequest;
-import edu.dam.rest.microservice.bean.UserSession;
+import edu.dam.rest.microservice.bean.user.InsertUserRequest;
+import edu.dam.rest.microservice.bean.user.LoginUserRequest;
+import edu.dam.rest.microservice.bean.user.UserSession;
 import edu.dam.rest.microservice.persistence.model.User;
 import edu.dam.rest.microservice.persistence.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +32,7 @@ public class UserService {
             this.userRepository.save(createUser);
             return "user_registered";
         }
+
     }
 
     public UserSession loginUser(LoginUserRequest loginUserRequest) {

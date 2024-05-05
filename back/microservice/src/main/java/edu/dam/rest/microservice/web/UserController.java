@@ -1,8 +1,8 @@
 package edu.dam.rest.microservice.web;
 
-import edu.dam.rest.microservice.bean.InsertUserRequest;
-import edu.dam.rest.microservice.bean.LoginUserRequest;
-import edu.dam.rest.microservice.bean.UserSession;
+import edu.dam.rest.microservice.bean.user.InsertUserRequest;
+import edu.dam.rest.microservice.bean.user.LoginUserRequest;
+import edu.dam.rest.microservice.bean.user.UserSession;
 import edu.dam.rest.microservice.constants.ApiConstants;
 import edu.dam.rest.microservice.service.UserService;
 import jakarta.servlet.http.HttpSession;
@@ -13,18 +13,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(ApiConstants.ENDPOINT)
-public class MicroController {
+@RequestMapping(ApiConstants.USER_ENDPOINT)
+public class UserController {
 
     private UserService userService;
 
 
     @Autowired
-    public MicroController(UserService userService) {
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
-    @PostMapping("user/insert")
+    @PostMapping("insert")
     public ResponseEntity<String> insertUser(@RequestBody InsertUserRequest insertUserRequest) {
         var insertResult = userService.insertUser(insertUserRequest);
         if (!insertResult.equals("user_registered")) {
@@ -40,7 +40,7 @@ public class MicroController {
         }
     }
 
-    @PostMapping("user/login")
+    @PostMapping("login")
     public ResponseEntity<String> loginUser(
             @RequestBody LoginUserRequest loginUserRequest, HttpSession httpSession
     ) {
@@ -67,7 +67,7 @@ public class MicroController {
         }
     }
 
-    @GetMapping("user/checkSession")
+    @GetMapping("checkSession")
     public ResponseEntity<String> checkSession(HttpSession httpSession) {
         var userLogged = (UserSession) httpSession.getAttribute("user");
         if (userLogged != null) {
@@ -83,7 +83,7 @@ public class MicroController {
         }
     }
 
-    @DeleteMapping("user/delete")
+    @DeleteMapping("delete")
     public void deleteUser(HttpSession httpSession) {
         var user = (UserSession) httpSession.getAttribute("user");
         this.userService.deleteUser(user);

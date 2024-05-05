@@ -1,4 +1,4 @@
-package edu.dam.rest.microservice.bean;
+package edu.dam.rest.microservice.bean.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

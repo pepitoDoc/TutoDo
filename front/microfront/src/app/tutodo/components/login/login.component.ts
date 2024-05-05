@@ -25,6 +25,7 @@ export class LoginComponent implements OnInit {
 
   inputState: boolean = true;
   loginResult: boolean = false;
+  hidePassword: boolean = true;
   loginMessage!: string;
 
   constructor(

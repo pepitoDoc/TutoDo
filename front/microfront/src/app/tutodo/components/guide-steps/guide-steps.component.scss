@@ -1,0 +1,91 @@
+.alignFlexRow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.alignFlexColumn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.whiteCard-info {
+  padding: 20px 20px;
+  margin-bottom: 100px;
+  margin-top: 40px;
+  width: 30%;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: white;
+  border-radius: 20px;
+  border: 1px solid black;
+}
+
+.whiteCard-step {
+  padding: 20px 20px;
+  margin-bottom: 50px;
+  margin-top: 40px;
+  width: 100%;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: white;
+  border-radius: 20px;
+  border: 1px solid black;
+}
+
+#stepInput {
+  width: 50%;
+  @media (max-width: 1000px) {
+    width: 75%;
+  }
+}
+
+h2, h3, mat-label, p {
+  text-align: center;
+  width: 70%;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+mat-form-field {
+  width: 90%;
+  margin: 10px 5px;
+}
+
+.buttonSpace {
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.page {
+  height: auto;
+  background: #a8ff78;
+  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #78ffd6, #a8ff78);
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #78ffd6, #a8ff78);
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  margin: 12px 0px;
+  border-radius: 20px;
+  border: 1px solid rgb(180, 160, 160);
+  @media (max-width: 1400px) {
+    height: fit-content;
+    padding-bottom: 20px;
+  }
+}

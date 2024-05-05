@@ -1,0 +1,56 @@
+<div class="page">
+  <div class="alignFlexColumn mt-4">
+    <div class="whiteCard-info">
+      <h1>Creación de los pasos</h1>
+      <h3>Ahora podrá crear los pasos para la guía.<br>Deberá tener en cuenta lo siguiente:<br>
+        <br>
+        <h4>1. La guía deberá tener 5 pasos como mínimo<br>
+          2. Hay un número máximo de 20 pasos para la guía</h4>
+      </h3>
+      <div class="alignFlexRow">
+        <button mat-flat-button class="buttonSpace mx-4" routerLink="/home" routerLinkActive="active"
+          color="primary">Comenzar con la creación de pasos</button>
+      </div>
+    </div>
+    <div id="stepInput">
+      <form [formGroup]="stepsForm">
+        <div formArrayName="steps" class="alignFlexColumn">
+          <div *ngFor="let step of steps.controls; let i = index" class="alignFlexColumn">
+            <div [formGroupName]="i" class="whiteCard-step">
+              <h2>Paso número {{i+1}}</h2>
+              <mat-form-field class="example-full-width" appareance="fill">
+                <mat-label>Título</mat-label>
+                <input type="text" matInput #inputTitle formControlName="title" placeholder="Título del paso {{i+1}}"
+                  [maxLength]="50">
+                <mat-hint align="start">{{inputTitle.value.length}}/50 (mínimo 10 caracteres)</mat-hint>
+                <mat-error *ngIf="step.get('title')?.touched && step.get('title')?.hasError('required')">
+                  <strong>Es necesario el título de la guía</strong>
+                </mat-error>
+              </mat-form-field>
+              <mat-form-field class="example-full-width" appareance="fill">
+                <mat-label>Descripción</mat-label>
+                <textarea type="text" matInput formControlName="description" placeholder="Breve descripción de la guía"
+                  cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5"
+                  #inputDescription [maxLength]="200"></textarea>
+                <mat-hint align="start">{{inputDescription.value.length}}/200 (mínimo 50 caracteres)</mat-hint>
+                <mat-error *ngIf="step.get('description')?.touched && step.get('description')?.hasError('required')">
+                  <strong>Es necesaria una descripción del paso</strong>
+                </mat-error>
+              </mat-form-field>
+              <div class="alignFlex mt-4">
+                <button mat-flat-button class="buttonSpace mx-5" color="warn"
+                  *ngIf="steps.controls.length > 1"
+                  (click)="cancelStep(i)">Cancelar</button>
+                <button mat-flat-button [disabled]="!step.valid" class="buttonSpace mx-5" color="primary"
+                  (click)="saveStep(i)" *ngIf="!step.get('saved')?.value">Guardar paso</button>
+                <button mat-flat-button class="buttonSpace mx-5" color="accent" (click)="modifyStep(i)"
+                  *ngIf="step.get('saved')?.value">Modificar paso</button>
+              </div>
+            </div>
+            <button type="button" mat-flat-button color="primary mb-5" (click)="addStep(i)">Añadir paso</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

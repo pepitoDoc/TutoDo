@@ -1,0 +1,60 @@
+<div class="page">
+  <div class="alignFlex mt-4">
+    <div class="whiteCard">
+      <h1>Información básica sobre la guía</h1>
+      <h3>Por favor, rellene el siguiente formulario para obtener
+        información esencial sobre la guía que desea crear
+      </h3>
+      <form class="example-form" [formGroup]="guideInfo">
+        <mat-form-field class="example-full-width" appareance="fill">
+          <mat-label>Título</mat-label>
+          <input type="text" matInput #inputTitle minlength="10" maxlength="50" formControlName="title"
+            placeholder="Título de la guía">
+          <mat-hint align="start">{{inputTitle.value.length}}/50 (mínimo 10 caracteres)</mat-hint>
+          <mat-error *ngIf="guideInfo.get('title')?.hasError('required')">
+            <strong>Es necesario el título de la guía</strong>
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field class="example-full-width" appareance="fill">
+          <mat-label>Descripción</mat-label>
+          <textarea type="text" matInput formControlName="description" placeholder="Breve descripción de la guía"
+            cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5"
+            #inputDescription minlength="40" maxlength="100"></textarea>
+          <mat-hint align="start">{{inputDescription.value.length}}/100 (mínimo 40 caracteres)</mat-hint>
+          <mat-error *ngIf="guideInfo.get('description')?.hasError('required')">
+            <strong>Es necesaria una descripción de la guía</strong>
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field class="example-chip-list">
+          <mat-label>Tipos de la guía</mat-label>
+          <mat-chip-grid #chipGrid aria-label="Guide types">
+            @for (guideType of chosenTypes; track guideType) {
+            <mat-chip-row (removed)="remove(guideType)">
+              {{guideType}}
+              <button matChipRemove [attr.aria-label]="'remove ' + guideType">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </mat-chip-row>
+            }
+          </mat-chip-grid>
+          <input placeholder="Introduzca los tipos de guía" #guideTypeInput formControlName="guideTypes"
+            [matChipInputFor]="chipGrid" [matAutocomplete]="auto" [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+            [disabled]="chosenTypes.length === 5" />
+          <mat-hint align="start">{{chosenTypes.length}}/5 (mínimo 1 tipo de guía)</mat-hint>
+          <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
+            @for (guideType of filteredTypes | async; track guideType) {
+            <mat-option [value]="guideType" *ngIf="!chosenTypes.includes(guideType | titlecase)">{{guideType |
+              titlecase}}</mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
+        <div class="alignFlex">
+          <button mat-flat-button class="buttonSpace mx-5" routerLink="/home"
+          routerLinkActive="active" color="warn">Cancelar</button>
+          <button mat-flat-button [disabled]="!guideInfo.valid || chosenTypes.length < 1" class="buttonSpace"
+            color="primary">Crear guía</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

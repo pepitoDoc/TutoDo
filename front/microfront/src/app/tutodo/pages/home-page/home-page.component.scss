@@ -1,5 +1,5 @@
 .page {
-  height: 95%;
+  height: 96%;
   background: #a8ff78;
   /* fallback for old browsers */
   background: -webkit-linear-gradient(to right, #78ffd6, #a8ff78);
@@ -10,7 +10,7 @@
   border-radius: 20px;
   border: 1px solid rgb(180, 160, 160);
   @media (max-width: 1400px) {
-    height: fit-content;
+    height: 85%;
   }
 }
 

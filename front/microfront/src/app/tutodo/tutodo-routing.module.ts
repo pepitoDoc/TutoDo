@@ -7,6 +7,9 @@ import { HomeComponent } from './components/home/home.component';
 import { AuthGuardService } from './service/auth.guard.service';
 import { FrontPageComponent } from './pages/front-page/front-page.component';
 import { HomePageComponent } from './pages/home-page/home-page.component';
+import { MainComponent } from './components/main/main.component';
+import { GuideCreateComponent } from './components/guide-create/guide-create.component';
+import { GuideStepsComponent } from './components/guide-steps/guide-steps.component';
 
 const routes: Routes = [
   {
@@ -19,7 +22,21 @@ const routes: Routes = [
       },
       {
         path: TutodoRoutes.HOME,
-        component: HomePageComponent
+        component: HomePageComponent,
+        children: [
+          {
+            path: '',
+            component: MainComponent
+          },
+          {
+            path: TutodoRoutes.CREATE,
+            component: GuideCreateComponent
+          },
+          {
+            path: TutodoRoutes.STEPS,
+            component: GuideStepsComponent
+          }
+        ]
       },
       {
         path: '**',

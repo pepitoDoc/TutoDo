@@ -5,25 +5,29 @@
     <mat-form-field class="example-full-width" appareance="fill">
       <mat-label>Usuario</mat-label>
       <input type="text" matInput formControlName="userIdentifier" placeholder="Nombre de usuario o correo electrónico">
+      <mat-icon matSuffix>person</mat-icon>
       <mat-error *ngIf="loginForm.get('userIdentifier')?.hasError('required')">
         <strong>Se requiere el usuario</strong>
       </mat-error>
     </mat-form-field>
     <mat-form-field class="example-full-width" appareance="fill">
       <mat-label>Contraseña</mat-label>
-      <input type="password" matInput formControlName="password" placeholder="Contraseña">
+      <input type="password" matInput formControlName="password" placeholder="Contraseña" [type]="hidePassword ? 'password' : 'text'">
+      <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePassword">
+        <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+      </button>
       <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
         <strong>Se requiere la contraseña</strong>
       </mat-error>
     </mat-form-field>
-    <button mat-flat-button color="primary" [disabled]="!loginForm.valid" (click)="login()">Iniciar sesión</button>
+    <button mat-flat-button class="buttonSpace" color="primary" [disabled]="!loginForm.valid" (click)="login()">Iniciar sesión</button>
     <mat-error *ngIf="loginResult">
       <strong>{{ loginMessage }}</strong>
     </mat-error>
   </form>
   <div class="rowAlign">
     <p>¿No tiene cuenta?</p>
-    <button mat-button color="accent" (click)="changeInputState()">Regístrese aquí</button>
+    <button mat-button class="buttonSpace" color="accent" (click)="changeInputState()">Regístrese aquí</button>
   </div>
 </div>
 <div class="columnContent" *ngIf="!inputState">
@@ -51,13 +55,13 @@
         <strong>Se requiere la contraseña</strong>
       </mat-error>
     </mat-form-field>
-    <button mat-flat-button color="primary" [disabled]="!registerForm.valid" (click)="register()">Registrarse</button>
+    <button mat-flat-button class="buttonSpace" color="primary" [disabled]="!registerForm.valid" (click)="register()">Registrarse</button>
     <mat-error *ngIf="loginResult">
       <strong>{{ loginMessage }}</strong>
     </mat-error>
   </form>
   <div class="rowAlign">
     <p>¿Ya tienes cuenta?</p>
-    <button mat-button color="accent" (click)="changeInputState()">Inicia sesión</button>
+    <button mat-button class="buttonSpace" color="accent" (click)="changeInputState()">Inicia sesión</button>
   </div>
 </div>
