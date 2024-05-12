@@ -38,7 +38,7 @@
             }
           </mat-chip-grid>
           <input placeholder="Introduzca los tipos de guía" #guideTypeInput formControlName="guideTypes"
-            [matChipInputFor]="chipGrid" [matAutocomplete]="auto" [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+            [matChipInputFor]="chipGrid" [matAutocomplete]="auto" [matChipInputSeparatorKeyCodes]="_separatorKeysCodes"
             [disabled]="chosenTypes.length === 5" />
           <mat-hint align="start">{{chosenTypes.length}}/5 (mínimo 1 tipo de guía)</mat-hint>
           <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
@@ -52,7 +52,7 @@
           <button mat-flat-button class="buttonSpace mx-5" routerLink="/home"
           routerLinkActive="active" color="warn">Cancelar</button>
           <button mat-flat-button [disabled]="!guideInfo.valid || chosenTypes.length < 1" class="buttonSpace"
-            color="primary">Crear guía</button>
+            color="primary" (click)="guideCreate()">Crear guía</button>
         </div>
       </form>
     </div>

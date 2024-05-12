@@ -1,9 +1,6 @@
 package edu.dam.rest.microservice.persistence.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -14,6 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 public class Guide {
 
     @Id
@@ -24,9 +22,9 @@ public class Guide {
     private boolean published;
     private String creationDate;
     private List<Step> steps;
-    private String guideType;
+    private List<String> guideTypes;
     private List<String> checkList;
     private List<String> comments;
-    private List<Integer> ratings;
+    private List<Rating> ratings;
 
 }

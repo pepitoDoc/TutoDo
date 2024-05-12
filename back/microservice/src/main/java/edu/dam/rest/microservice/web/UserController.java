@@ -12,6 +12,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 @RestController
 @RequestMapping(ApiConstants.USER_ENDPOINT)
 public class UserController {
@@ -45,7 +48,9 @@ public class UserController {
             @RequestBody LoginUserRequest loginUserRequest, HttpSession httpSession
     ) {
         var userLogged = (UserSession) httpSession.getAttribute("user");
-        if (userLogged != null) {
+        if (userLogged != null && (
+                Objects.equals(userLogged.getUsername(), loginUserRequest.getUserIdentifier())
+                        || Objects.equals(userLogged.getEmail(), loginUserRequest.getUserIdentifier()))) {
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .contentType(MediaType.TEXT_PLAIN)
@@ -67,7 +72,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("checkSession")
+    @GetMapping("check-session")
     public ResponseEntity<String> checkSession(HttpSession httpSession) {
         var userLogged = (UserSession) httpSession.getAttribute("user");
         if (userLogged != null) {

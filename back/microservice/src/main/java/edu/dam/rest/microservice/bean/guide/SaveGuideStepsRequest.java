@@ -10,9 +10,10 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class SaveProgressRequest {
+public class SaveGuideStepsRequest {
 
     private String guideId;
     private List<Step> steps;
+    private boolean published;
 
 }

@@ -8,6 +8,8 @@ import edu.dam.rest.microservice.persistence.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+
 @Service
 public class UserService {
 
@@ -24,13 +26,20 @@ public class UserService {
                 .email(insertUserRequest.getEmail())
                 .password(insertUserRequest.getPassword())
                 .confirmed(false)
+                .completed(new ArrayList<>())
+                .progress(new ArrayList<>())
+                .creating(new ArrayList<>())
                 .build();
         String checkUser = this.findUserByNameAndEmail(createUser);
         if (!checkUser.equals("user_valid")) {
             return checkUser;
         } else {
-            this.userRepository.save(createUser);
-            return "user_registered";
+            var dbCheck = this.userRepository.save(createUser);
+            if (this.userRepository.existsById(dbCheck.getId())) {
+                return "user_registered";
+            } else {
+                return "error_registering_user";
+            }
         }
 
     }
@@ -77,6 +86,24 @@ public class UserService {
             return userRepository.findByEmail(userIdentifier);
         } else {
             return userRepository.findByUsername(userIdentifier);
+        }
+    }
+
+    public String updateUserCreating(String userId, String guideId) {
+        var result = this.userRepository.findById(userId);
+        if (result.isPresent()) {
+            var user = result.orElseThrow();
+            var creating = user.getCreating();
+            creating.add(guideId);
+            user.setCreating(creating);
+            var dbCheck = this.userRepository.save(user);
+            if (dbCheck.getCreating() == creating) {
+                return "guides_updated";
+            } else {
+                return "guides_not_updated";
+            }
+        } else {
+            return "user_does_not_exist";
         }
     }
 

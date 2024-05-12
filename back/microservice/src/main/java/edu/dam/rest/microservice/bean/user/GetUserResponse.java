@@ -1,2 +1,10 @@
-package edu.dam.rest.microservice.bean.user;public class GetUserResponse {
+package edu.dam.rest.microservice.bean.user;
+
+import lombok.*;
+
+
+public class GetUserResponse {
+
+
+
 }

@@ -1,15 +1,17 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { NgModule, inject } from '@angular/core';
+import { GuardResult, MaybeAsync, RouterModule, Routes } from '@angular/router';
 import { LoginComponent } from './components/login/login.component';
 import { TutodoComponent } from './tutodo.component';
 import { TutodoRoutes } from './tutodo.routes';
 import { HomeComponent } from './components/home/home.component';
-import { AuthGuardService } from './service/auth.guard.service';
+import { AuthGuardService } from './shared/auth.guard.service';
 import { FrontPageComponent } from './pages/front-page/front-page.component';
 import { HomePageComponent } from './pages/home-page/home-page.component';
 import { MainComponent } from './components/main/main.component';
 import { GuideCreateComponent } from './components/guide-create/guide-create.component';
 import { GuideStepsComponent } from './components/guide-steps/guide-steps.component';
+import { AuthService } from './service/auth.service';
+import { Observable } from 'rxjs';
 
 const routes: Routes = [
   {
@@ -17,12 +19,14 @@ const routes: Routes = [
     component: TutodoComponent,
     children: [
       {
-        path: TutodoRoutes.ROOT,
+        path: TutodoRoutes.LOGIN,
         component: FrontPageComponent
       },
       {
         path: TutodoRoutes.HOME,
         component: HomePageComponent,
+        // canActivate: [(): Observable<MaybeAsync<GuardResult>> => inject(AuthService).canActivate()],
+        // canActivateChild: [(): Observable<MaybeAsync<GuardResult>> => inject(AuthService).canActivateChild()],
         children: [
           {
             path: '',
@@ -33,7 +37,7 @@ const routes: Routes = [
             component: GuideCreateComponent
           },
           {
-            path: TutodoRoutes.STEPS,
+            path: `${TutodoRoutes.STEPS}`,
             component: GuideStepsComponent
           }
         ]

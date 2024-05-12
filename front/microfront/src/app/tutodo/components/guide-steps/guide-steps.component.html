@@ -1,22 +1,32 @@
 <div class="page">
-  <div class="alignFlexColumn mt-4">
-    <div class="whiteCard-info">
-      <h1>Creación de los pasos</h1>
-      <h3>Ahora podrá crear los pasos para la guía.<br>Deberá tener en cuenta lo siguiente:<br>
-        <br>
-        <h4>1. La guía deberá tener 5 pasos como mínimo<br>
-          2. Hay un número máximo de 20 pasos para la guía</h4>
-      </h3>
-      <div class="alignFlexRow">
-        <button mat-flat-button class="buttonSpace mx-4" routerLink="/home" routerLinkActive="active"
-          color="primary">Comenzar con la creación de pasos</button>
+  <div class="alignFlexColumn">
+    <div class="optionsDivTop sticky-top">
+      <div class="btn-group">
+        <button type="button" class="btn btn-primary" (click)="saveProgress()">Guardar cambios</button>
+        <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"
+          aria-expanded="false">
+          <span class="visually-hidden">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><button class="dropdown-item" type="button" (click)="showInfo()">Información</button></li>
+          <li><button class="dropdown-item" type="button" (click)="showInfo()">Publicar guía</button></li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li><button class="dropdown-item" type="button" (click)="showInfo()">Modificar información básica</button></li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li><button class="dropdown-item" type="button" (click)="showInfo()">Salir del creador</button></li>
+        </ul>
       </div>
     </div>
     <div id="stepInput">
       <form [formGroup]="stepsForm">
         <div formArrayName="steps" class="alignFlexColumn">
           <div *ngFor="let step of steps.controls; let i = index" class="alignFlexColumn">
-            <div [formGroupName]="i" class="whiteCard-step">
+            <div [formGroupName]="i" class="whiteCard-step"
+              *ngIf="showSteps(i, paginator.pageIndex, paginator.pageSize)">
               <h2>Paso número {{i+1}}</h2>
               <mat-form-field class="example-full-width" appareance="fill">
                 <mat-label>Título</mat-label>
@@ -38,19 +48,29 @@
                 </mat-error>
               </mat-form-field>
               <div class="alignFlex mt-4">
-                <button mat-flat-button class="buttonSpace mx-5" color="warn"
-                  *ngIf="steps.controls.length > 1"
-                  (click)="cancelStep(i)">Cancelar</button>
-                <button mat-flat-button [disabled]="!step.valid" class="buttonSpace mx-5" color="primary"
+                <button type="button" mat-flat-button class="buttonSpace mx-5" color="warn"
+                  *ngIf="steps.controls.length > 1" (click)="cancelStep(i)">Cancelar</button>
+                <button type="button" mat-flat-button [disabled]="!step.valid" class="buttonSpace mx-5" color="primary"
                   (click)="saveStep(i)" *ngIf="!step.get('saved')?.value">Guardar paso</button>
-                <button mat-flat-button class="buttonSpace mx-5" color="accent" (click)="modifyStep(i)"
+                <button type="button" mat-flat-button class="buttonSpace mx-5" color="accent" (click)="modifyStep(i)"
                   *ngIf="step.get('saved')?.value">Modificar paso</button>
               </div>
             </div>
-            <button type="button" mat-flat-button color="primary mb-5" (click)="addStep(i)">Añadir paso</button>
+            <button type="button" mat-flat-button color="primary mb-5" (click)="addStep(i)"
+              *ngIf="showSteps(i, paginator.pageIndex, paginator.pageSize)">Insertar paso</button>
           </div>
         </div>
       </form>
+    </div>
+    <div class="optionsDiv sticky-bottom">
+      <mat-slide-toggle class="whiteCard-info" [checked]="isPublished" (change)="changePublished()">Estado de la guía:
+        {{ isPublished ? 'publicado' : 'no publicado' }}</mat-slide-toggle>
+    </div>
+    <div class="alignFlexRow sticky-bottom">
+      <mat-paginator class="mx-4" #paginator [length]="steps.controls.length" [pageSize]="4"
+        [pageSizeOptions]="[4, 8, 20]" aria-label="Select page" [showFirstLastButtons]="true"
+        (page)="handlePageEvent($event)">
+      </mat-paginator>
     </div>
   </div>
 </div>
