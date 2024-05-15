@@ -40,4 +40,9 @@ public class SharedController {
         sharedData.forEach(httpSession::setAttribute);
     }
 
+    @PutMapping("delete-data")
+    public void deleteData(@RequestBody List<String> sharedData, HttpSession httpSession) {
+        sharedData.forEach(httpSession::removeAttribute);
+    }
+
 }

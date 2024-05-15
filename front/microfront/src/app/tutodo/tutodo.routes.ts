@@ -4,5 +4,7 @@ export enum TutodoRoutes {
   HOME = 'home',
   MAIN = 'main',
   CREATE = 'guide-create',
-  STEPS = 'guide-steps'
+  MODIFY = 'guide-modify',
+  MY_GUIDES = 'my-guides',
+  SEARCH = 'guide-search'
 }

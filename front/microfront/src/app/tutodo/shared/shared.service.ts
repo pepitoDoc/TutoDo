@@ -17,7 +17,7 @@ export class SharedService {
   private readonly _dataSubject: ReplaySubject<Object> = new ReplaySubject<Object>();
 
   setData(persistedData: Object): void {
-    this._setPersistedData$(persistedData).subscribe();
+    this.setPersistedData$(persistedData).subscribe();
     this._dataSubject.next(persistedData);
   }
 
@@ -25,11 +25,15 @@ export class SharedService {
     return this._dataSubject.asObservable();
   }
 
+  removePersistedData$(...data: string[]): Observable<any> {
+    return this._http.put(`${this._sharedEndpoint}/delete-data`, data, { withCredentials: true }).pipe(shareReplay(1));
+  }
+
   getPersistedData$(...data: string[]): Observable<any> {
     return this._http.post(`${this._sharedEndpoint}/get-data`, data, { withCredentials: true }).pipe(shareReplay(1));
   }
 
-  private _setPersistedData$(data: Object): Observable<any> {
+  setPersistedData$(data: Object): Observable<any> {
     return this._http.post(`${this._sharedEndpoint}/post-data`, data, { withCredentials: true }).pipe(shareReplay(1));
   }
 

@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../environment/environment';
-import { CreateGuideRequest, Guide, InsertUserRequest, LoginUserRequest, SaveGuideStepsRequest } from '../model/data';
+import { CreateGuideRequest, FindByFilterRequest, Guide, InsertUserRequest, LoginUserRequest, SaveGuideStepsRequest } from '../model/data';
 import { Observable, map, share, shareReplay } from 'rxjs';
 import { UserData } from '../model/user-data';
 
@@ -19,12 +19,12 @@ export class ApiService {
   private readonly _guideTypeEndpoint = `${this._endpoint}/guideType`;
   private readonly _guideEndpoint = `${this._endpoint}/guide`;
 
-  loginUser$(data: LoginUserRequest): Observable<string> {
-    return this._http.post(`${this._userEndpoint}/login`, data, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
+  loginUser$(loginUserRequest: LoginUserRequest): Observable<string> {
+    return this._http.post(`${this._userEndpoint}/login`, loginUserRequest, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
-  insertUser$(data: InsertUserRequest): Observable<string> {
-    return this._http.post(`${this._userEndpoint}/insert`, data, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
+  insertUser$(insertUserRequest: InsertUserRequest): Observable<string> {
+    return this._http.post(`${this._userEndpoint}/insert`, insertUserRequest, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
   checkSession$(): Observable<string> {
@@ -43,19 +43,27 @@ export class ApiService {
   }
 
   createGuide$(createGuideRequest: CreateGuideRequest): Observable<string> {
-    return this._http.post(`${this._guideEndpoint}/create-guide`, createGuideRequest, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
+    return this._http.post(`${this._guideEndpoint}/create`, createGuideRequest, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
   saveGuideSteps$(saveGuideStepsRequest: SaveGuideStepsRequest): Observable<string> {
-    return this._http.post(`${this._guideEndpoint}/save-guide-steps`, saveGuideStepsRequest, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
+    return this._http.post(`${this._guideEndpoint}/save-steps`, saveGuideStepsRequest, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
-  findGuide$(guideId: string): Observable<Guide> {
-    return this._http.get<Guide>(`${this._guideEndpoint}/find-guide`, { params: new HttpParams().set('guideId', guideId) }).pipe(shareReplay(1));
+  findGuideById$(guideId: string): Observable<Guide> {
+    return this._http.get<Guide>(`${this._guideEndpoint}/find-by-id`, { params: new HttpParams().set('guideId', guideId) }).pipe(shareReplay(1));
   }
 
   findGuideIsPublished$(guideId: string): Observable<boolean> {
-    return this._http.get<boolean>(`${this._guideEndpoint}/find-guide`, { params: new HttpParams().set('guideId', guideId) }).pipe(shareReplay(1));
+    return this._http.get<boolean>(`${this._guideEndpoint}/find-published-by-id`, { params: new HttpParams().set('guideId', guideId) }).pipe(shareReplay(1));
+  }
+
+  findGuideByFilter$(findByFilterRequest: FindByFilterRequest): Observable<Guide[]> {
+    return this._http.post<Guide[]>(`${this._guideEndpoint}/find-by-filter`, findByFilterRequest).pipe(shareReplay(1));
+  }
+
+  findOwnGuides$(): Observable<Guide[]> {
+    return this._http.get<Guide[]>(`${this._guideEndpoint}/find-own-guides`, { withCredentials: true }).pipe(shareReplay(1));
   }
 
 }

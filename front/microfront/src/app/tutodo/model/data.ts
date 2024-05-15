@@ -39,7 +39,7 @@ export interface SharedData {
 
 export interface Rating {
     userId: string;
-    puntuation: number;
+    punctuation: number;
 }
 export interface Guide {
     id: string;
@@ -53,4 +53,11 @@ export interface Guide {
     checkList: string[];
     comments: string[];
     ratings: Rating[];
+}
+
+export interface FindByFilterRequest {
+    username: string;
+    title: string;
+    guideTypes: string[];
+    rating: number;
 }

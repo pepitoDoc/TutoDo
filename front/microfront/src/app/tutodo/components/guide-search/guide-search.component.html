@@ -1,1 +1,100 @@
-<p>guide-search works!</p>
+<div class="page">
+  <div class="alignFlex mt-4" *ngIf="searchMode">
+    <div class="whiteCard">
+      <h1>Filtrar búsqueda de guías</h1>
+      <h3>Por favor, rellene el siguiente formulario con la información que desee
+        para filtrar la búsqueda de las guías según los criterios
+      </h3>
+      <form class="example-form" [formGroup]="guideFilter">
+        <mat-form-field class="example-full-width" appareance="fill">
+          <mat-label>Título</mat-label>
+          <input type="text" matInput #inputTitle [maxlength]="50" formControlName="title"
+            placeholder="Título de la guía a buscar">
+          <mat-hint align="start">{{inputTitle.value.length}}/50</mat-hint>
+        </mat-form-field>
+        <mat-form-field class="example-full-width" appareance="fill">
+          <mat-label>Nombre del usuario creador</mat-label>
+          <input type="text" matInput #inputUser [maxlength]="30" formControlName="username"
+            placeholder="Nombre del usuario que ha creado la guía">
+          <mat-hint align="start">{{inputUser.value.length}}/30</mat-hint>
+        </mat-form-field>
+        <mat-form-field class="example-chip-list">
+          <mat-label>Tipos de la guía</mat-label>
+          <mat-chip-grid #chipGrid aria-label="Guide types">
+            @for (guideType of chosenTypes; track guideType) {
+            <mat-chip-row (removed)="remove(guideType)">
+              {{guideType}}
+              <button matChipRemove [attr.aria-label]="'remove ' + guideType">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </mat-chip-row>
+            }
+          </mat-chip-grid>
+          <input placeholder="Introduzca los tipos de guía que desea buscar" #guideTypeInput
+            formControlName="guideTypes" [matChipInputFor]="chipGrid" [matAutocomplete]="auto"
+            [matChipInputSeparatorKeyCodes]="_separatorKeysCodes" />
+          <mat-hint align="start">{{chosenTypes.length}}/5 (mínimo 1 tipo de guía)</mat-hint>
+          <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
+            @for (guideType of filteredTypes | async; track guideType) {
+            <mat-option [value]="guideType" *ngIf="!chosenTypes.includes(guideType | titlecase)">{{guideType |
+              titlecase}}</mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
+        <mat-form-field class="example-full-width rating" appareance="fill" name="rating">
+          <mat-label>Puntuaciones</mat-label>
+          <mat-select formControlName="rating">
+            <mat-option></mat-option>
+            @for (rating of ratings; track rating) {
+            <mat-option [value]="rating.value">{{rating.description}}</mat-option>
+            }
+          </mat-select>
+          <mat-hint align="start">Se buscarán guías con puntuación igual o mayor a la elegida</mat-hint>
+        </mat-form-field>
+        <div class="alignFlex">
+          <button mat-flat-button class="buttonSpace mx-4" routerLink="/home" routerLinkActive="active"
+            color="warn">Cancelar</button>
+          <button mat-flat-button class="buttonSpace mx-4" [disabled]="!atLeastOneValue()" color="primary"
+            (click)="searchGuide()">Realizar búsqueda</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div *ngIf="!searchMode">
+    <div class="alignGrid">
+      <div *ngFor="let guide of guidesFound">
+        <mat-card class="example-card guideCard">
+          <mat-card-header>
+            <mat-card-title>{{ guide.title }}</mat-card-title>
+            <mat-card-subtitle>Usuario creador: johnny poppers</mat-card-subtitle>
+          </mat-card-header>
+          <mat-divider></mat-divider>
+          <mat-card-content class="guideResume">
+            <div class="guideInfo">
+              <p>Guía sobre:{{ formatGuideTypes(guide.guideTypes) }}</p>
+              <p>Comentarios: {{ guide.comments.length }}</p>
+              <p>Puntuación media: {{ ratingMean(guide.ratings) }}</p>
+            </div>
+            <div class="guideInfo">
+              <img mat-card-image src="https://material.angular.io/assets/img/examples/shiba2.jpg"
+                alt="Photo of a Shiba Inu">
+            </div>
+          </mat-card-content>
+          <mat-divider></mat-divider>
+          <mat-card-content>
+            <p>
+              {{ guide.description }} aaaaaaaaaaaaa
+            </p>
+          </mat-card-content>
+          <mat-card-actions>
+            <button mat-button (click)="visualizeGuide(guide.id)">Visualizar guía</button>
+            <button mat-button>Añadir a Guardados</button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+    </div>
+    <div class="optionsDivBottom sticky-bottom">
+      <button mat-flat-button (click)="resetSearch()" color="warn">Volver al filtro</button>
+    </div>
+  </div>
+</div>

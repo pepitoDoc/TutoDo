@@ -14,12 +14,11 @@ import { HomeComponent } from './components/home/home.component';
 import { FrontPageComponent } from './pages/front-page/front-page.component';
 import { HomePageComponent } from './pages/home-page/home-page.component';
 import { MatIconModule } from '@angular/material/icon';
-import { GuideCreateComponent } from './components/guide-create/guide-create.component';
 import { MainComponent } from './components/main/main.component';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { GuideStepsComponent } from './components/guide-steps/guide-steps.component';
+import { GuideModifyComponent } from './components/guide-modify/guide-modify.component';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { InfoDialogComponent } from './components/info-dialog/info-dialog.component';
 import { OptionDialogComponent } from './components/option-dialog/option-dialog.component';
@@ -30,7 +29,12 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle'
+import { MatDivider, MatDividerModule } from '@angular/material/divider'
 import { ToastrModule } from 'ngx-toastr';
+import { MyGuidesComponent } from './components/my-guides/my-guides.component';
+import { GuideSearchComponent } from './components/guide-search/guide-search.component';
+import { GuideSeeComponent } from './components/guide-see/guide-see.component';
+import { GuideCreateComponent } from './components/guide-create/guide-create.component';
 
 
 @NgModule({
@@ -41,11 +45,15 @@ import { ToastrModule } from 'ngx-toastr';
     HomeComponent,
     FrontPageComponent,
     HomePageComponent,
+    GuideModifyComponent,
+    GuideModifyComponent,
+    GuideSearchComponent,
+    GuideSeeComponent,
     GuideCreateComponent,
     MainComponent,
-    GuideStepsComponent,
     InfoDialogComponent,
-    OptionDialogComponent
+    OptionDialogComponent,
+    MyGuidesComponent
   ],
   imports: [
     CommonModule,
@@ -67,6 +75,7 @@ import { ToastrModule } from 'ngx-toastr';
     MatTooltipModule,
     MatMenuModule,
     MatSlideToggleModule,
+    MatDividerModule,
     ToastrModule.forRoot({
       timeOut: 4000,
       positionClass: 'toast-bottom-right'

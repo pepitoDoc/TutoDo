@@ -4,6 +4,7 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Document("guide")
@@ -20,7 +21,7 @@ public class Guide {
     private String title;
     private String description;
     private boolean published;
-    private String creationDate;
+    private LocalDate creationDate;
     private List<Step> steps;
     private List<String> guideTypes;
     private List<String> checkList;

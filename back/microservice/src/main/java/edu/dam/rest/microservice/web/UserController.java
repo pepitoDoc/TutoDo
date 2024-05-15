@@ -12,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 @RestController
@@ -28,8 +27,8 @@ public class UserController {
     }
 
     @PostMapping("insert")
-    public ResponseEntity<String> insertUser(@RequestBody InsertUserRequest insertUserRequest) {
-        var insertResult = userService.insertUser(insertUserRequest);
+    public ResponseEntity<String> create(@RequestBody InsertUserRequest insertUserRequest) {
+        var insertResult = userService.create(insertUserRequest);
         if (!insertResult.equals("user_registered")) {
             return ResponseEntity
                     .status(HttpStatus.EXPECTATION_FAILED)
@@ -56,7 +55,7 @@ public class UserController {
                     .contentType(MediaType.TEXT_PLAIN)
                     .body("already_logged");
         } else {
-            var loginResult = userService.loginUser(loginUserRequest);
+            var loginResult = userService.login(loginUserRequest);
             if (loginResult != null) {
                 httpSession.setAttribute("user", loginResult);
                 return ResponseEntity
@@ -91,7 +90,12 @@ public class UserController {
     @DeleteMapping("delete")
     public void deleteUser(HttpSession httpSession) {
         var user = (UserSession) httpSession.getAttribute("user");
-        this.userService.deleteUser(user);
+        this.userService.delete(user);
     }
+
+    /*@GetMapping("find-all-user-info")
+    public ResponseEntity<User> findAllUserInfo(HttpSession httpSession) {
+
+    }*/
 
 }

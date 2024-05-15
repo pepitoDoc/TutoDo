@@ -1,9 +1,9 @@
-<h2 mat-dialog-title>{{ data.title }}</h2>
+<h2 mat-dialog-title class="dialog-text">{{ data.title }}</h2>
 <div *ngFor="let text of data.text">
-  <mat-dialog-content>
+  <mat-dialog-content class="dialog-text">
     {{ text }}
   </mat-dialog-content>
 </div>
-<mat-dialog-actions class="d-flex justify-content-center">
+<mat-dialog-actions class="dialog-buttons">
   <button mat-button color="primary" mat-dialog-close>Aceptar</button>
 </mat-dialog-actions>

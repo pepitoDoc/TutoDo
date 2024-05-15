@@ -10,6 +10,6 @@ import lombok.*;
 public class Rating {
 
     private String userid;
-    private int puntuation;
+    private int punctuation;
 
 }

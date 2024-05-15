@@ -1,6 +1,8 @@
 package edu.dam.rest.microservice.web;
 
 import edu.dam.rest.microservice.bean.guide.CreateGuideRequest;
+import edu.dam.rest.microservice.bean.guide.FindByFilterRequest;
+import edu.dam.rest.microservice.bean.guide.SaveGuideInfoRequest;
 import edu.dam.rest.microservice.bean.guide.SaveGuideStepsRequest;
 import edu.dam.rest.microservice.bean.user.UserSession;
 import edu.dam.rest.microservice.constants.ApiConstants;
@@ -14,6 +16,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(ApiConstants.GUIDE_ENDPOINT)
 public class GuideController {
@@ -25,18 +29,18 @@ public class GuideController {
         this.guideService = guideService;
     }
 
-    @PostMapping("create-guide")
+    @PostMapping("create")
     public ResponseEntity<String> createGuide(
             @RequestBody CreateGuideRequest createGuideRequest, HttpSession httpSession) {
         var userLogged = (UserSession) httpSession.getAttribute("user");
         var result = this.guideService.guideCreate(createGuideRequest, userLogged.getId());
-        return ResponseEntity.status(result.contains("guides_updated")
+        return ResponseEntity.status(result.contains("creating_updated")
                         ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR)
                 .contentType(MediaType.TEXT_PLAIN)
                 .body(result);
     }
 
-    @PostMapping("save-guide-steps")
+    @PostMapping("save-steps")
     public ResponseEntity<String> saveGuideSteps(
             @RequestBody SaveGuideStepsRequest saveGuideStepsRequest) {
         var result = this.guideService.saveGuideSteps(saveGuideStepsRequest);
@@ -46,7 +50,17 @@ public class GuideController {
                 .body(result);
     }
 
-    @GetMapping("find-guide")
+    @PostMapping("save-info")
+    public ResponseEntity<String> saveGuideInfo(
+            @RequestBody SaveGuideInfoRequest saveGuideInfoRequest) {
+        var result = this.guideService.saveGuideInfo(saveGuideInfoRequest);
+        return ResponseEntity.status(result.contains("guide_updated")
+                        ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR)
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(result);
+    }
+
+    @GetMapping("find-by-id")
     public ResponseEntity<Guide> findGuide(@PathParam("guideId") String guideId) {
         var guideFound = this.guideService.findGuide(guideId);
         return ResponseEntity.status(guideFound == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK)
@@ -54,12 +68,28 @@ public class GuideController {
                 .body(guideFound);
     }
 
-    @GetMapping("find-guide-published")
+    @GetMapping("find-published-by-id")
     public ResponseEntity<Boolean> findGuideIsPublished(@PathParam("guideId") String guideId) {
         var result = this.guideService.findGuidePublished(guideId);
         return ResponseEntity.status(result == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(result);
+    }
+
+    @PostMapping("find-by-filter")
+    public ResponseEntity<List<Guide>> findByFilter(
+            @RequestBody FindByFilterRequest findByFilterRequest) {
+        var result = this.guideService.findByFilter(findByFilterRequest);
+        return ResponseEntity.status(result.isEmpty() ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR).
+                contentType(MediaType.APPLICATION_JSON).body(result);
+    }
+
+    @GetMapping("find-own-guides")
+    public ResponseEntity<List<Guide>> findOwnGuides(HttpSession httpSession) {
+        var userLogged = (UserSession) httpSession.getAttribute("user");
+        var result = this.guideService.findOwnGuides(userLogged.getId());
+        return ResponseEntity.status(result == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON).body(result);
     }
 
 }

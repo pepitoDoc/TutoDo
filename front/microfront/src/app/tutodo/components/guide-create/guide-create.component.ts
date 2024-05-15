@@ -1,6 +1,6 @@
 import { Component, ElementRef, inject, NgZone, OnInit, ViewChild } from '@angular/core';
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { COMMA, ENTER, T } from '@angular/cdk/keycodes';
+import { FormBuilder, FormControl, FormGroup, NonNullableFormBuilder, Validators } from '@angular/forms';
 import { MatChipEditedEvent, MatChipInputEvent } from '@angular/material/chips';
 import { ApiService } from '../../service/api.service';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
@@ -22,7 +22,7 @@ import { SharedService } from '../../shared/shared.service';
 })
 export class GuideCreateComponent implements OnInit {
 
-  guideInfo: FormGroup = this._fb.group({
+  guideInfo = this._nnfb.group({
     title: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(50)]],
     description: ['', [Validators.required, Validators.minLength(40), Validators.maxLength(100)]],
     guideTypes: ['']
@@ -39,7 +39,7 @@ export class GuideCreateComponent implements OnInit {
   constructor(
     private _ngZone: NgZone,
     private readonly _service: ApiService,
-    private readonly _fb: FormBuilder,
+    private readonly _nnfb: NonNullableFormBuilder,
     private readonly _router: Router,
     private readonly _route: ActivatedRoute,
     private readonly _sharedService: SharedService
@@ -49,9 +49,8 @@ export class GuideCreateComponent implements OnInit {
     this._service.findAllGuideTypes$().subscribe({
       next: (response) => {
         this.guideTypes = response;
-        this.filteredTypes = this.guideInfo.get('guideTypes')!.valueChanges.pipe(
-          startWith(null),
-          map((guideType: string | null) => (guideType ? this._filter(guideType) : this.guideTypes.slice())),
+        this.filteredTypes = this.guideInfo.controls.guideTypes.valueChanges.pipe(
+          map((guideType: string) => (guideType === '' ? this._filter(guideType) : this.guideTypes.slice())),
         );
       }
     });
@@ -67,25 +66,30 @@ export class GuideCreateComponent implements OnInit {
       this.chosenTypes.splice(index, 1);
       this.announcer.announce(`Removed ${guideType}`);
     }
-    this.guideTypes.push(guideType);
-    this.guideInfo.get('guideTypes')?.setValue(null);
+    if (this.chosenTypes.length === 4) this.guideInfo.controls['guideTypes'].enable();
+    this.guideInfo.controls.guideTypes.reset();
   }
 
   selected(event: MatAutocompleteSelectedEvent): void {
     this.chosenTypes.push(event.option.viewValue);
+    if (this.chosenTypes.length === 5) this.guideInfo.controls['guideTypes'].disable();
     this.guideTypeInput.nativeElement.value = '';
-    this.guideInfo.get('guideTypes')?.setValue(null);
+    this.guideInfo.controls.guideTypes.reset();
   }
 
   guideCreate(): void {
-    const payload: CreateGuideRequest = this.guideInfo.getRawValue();
-    payload.guideTypes = this.chosenTypes;
+    const {title, description} = {...this.guideInfo.getRawValue()};
+    const payload: CreateGuideRequest = {
+      title: title,
+      description: description,
+      guideTypes: this.chosenTypes
+    }
     this._service.createGuide$(payload).subscribe({
       next: (response) => {
-        if (response.includes('guides_updated')) {
-          const guideId: string = response.slice(response.indexOf('?id=') + 4)
-          this._sharedService.setData({ guideId });
-          this._router.navigate([`../${TutodoRoutes.STEPS}`], { relativeTo: this._route })
+        if (response.includes('creating_updated')) {
+          const guideIdModifying: string = response.slice(response.indexOf('?id=') + 4)
+          this._sharedService.setData({ guideIdModifying });
+          this._router.navigate([`../${TutodoRoutes.MODIFY}`], { relativeTo: this._route });
         } else {
           
         }

@@ -3,24 +3,35 @@ package edu.dam.rest.microservice.service;
 import edu.dam.rest.microservice.bean.user.InsertUserRequest;
 import edu.dam.rest.microservice.bean.user.LoginUserRequest;
 import edu.dam.rest.microservice.bean.user.UserSession;
+import edu.dam.rest.microservice.constants.Constants;
 import edu.dam.rest.microservice.persistence.model.User;
 import edu.dam.rest.microservice.persistence.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Objects;
+
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+import static org.springframework.data.mongodb.core.query.Query.query;
 
 @Service
 public class UserService {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final MongoTemplate mongoTemplate;
+
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, MongoTemplate mongoTemplate) {
+        this.mongoTemplate = mongoTemplate;
         this.userRepository = userRepository;
     }
 
-    public String insertUser(InsertUserRequest insertUserRequest) {
+    public String create(InsertUserRequest insertUserRequest) {
         var createUser = User.builder()
                 .username(insertUserRequest.getUsername())
                 .email(insertUserRequest.getEmail())
@@ -30,7 +41,7 @@ public class UserService {
                 .progress(new ArrayList<>())
                 .creating(new ArrayList<>())
                 .build();
-        String checkUser = this.findUserByNameAndEmail(createUser);
+        String checkUser = this.findByNameAndEmail(createUser);
         if (!checkUser.equals("user_valid")) {
             return checkUser;
         } else {
@@ -44,34 +55,33 @@ public class UserService {
 
     }
 
-    public UserSession loginUser(LoginUserRequest loginUserRequest) {
-        var userFound = this.findUserByNameOrEmail(loginUserRequest.getUserIdentifier());
-        if (userFound != null) {
-            if (userFound.getPassword().equals(loginUserRequest.getPassword())) {
-                return new UserSession(userFound);
+    public UserSession login(LoginUserRequest loginUserRequest) {
+        var foundUser = this.findByNameOrEmail(loginUserRequest.getUserIdentifier());
+        if (foundUser != null) {
+            if (foundUser.getPassword().equals(loginUserRequest.getPassword())) {
+                return new UserSession(foundUser);
             } else {
                 return null;
             }
         } else {
             return null;
         }
-
     }
 
-    public void deleteUser(UserSession userLogged) {
+    public void delete(UserSession userLogged) {
         this.userRepository.deleteById(userLogged.getId());
     }
 
-    public String findUserByNameAndEmail(User user) {
-        var usersFound = this.userRepository.findByUsernameOrEmail(user.getUsername(), user.getEmail());
+    public String findByNameAndEmail(User user) {
+        var foundUsers = this.userRepository.findByUsernameOrEmail(user.getUsername(), user.getEmail());
         var sb = new StringBuilder();
-        usersFound.forEach( (userFound) -> {
-            if (userFound.getUsername().equals(user.getUsername())
-                    && userFound.getEmail().equals(user.getEmail())) {
+        foundUsers.forEach( (foundUser) -> {
+            if (foundUser.getUsername().equals(user.getUsername())
+                    && foundUser.getEmail().equals(user.getEmail())) {
                 sb.append("username_takenemail_taken");
-            } else if (userFound.getUsername().equals(user.getUsername())) {
+            } else if (foundUser.getUsername().equals(user.getUsername())) {
                 sb.append("username_taken");
-            } else if (userFound.getEmail().equals(user.getEmail())) {
+            } else if (foundUser.getEmail().equals(user.getEmail())) {
                 sb.append("email_taken");
             }
         });
@@ -81,7 +91,7 @@ public class UserService {
         return sb.toString();
     }
 
-    public User findUserByNameOrEmail(String userIdentifier) {
+    public User findByNameOrEmail(String userIdentifier) {
         if (userIdentifier.contains("@")) {
             return userRepository.findByEmail(userIdentifier);
         } else {
@@ -89,22 +99,19 @@ public class UserService {
         }
     }
 
-    public String updateUserCreating(String userId, String guideId) {
-        var result = this.userRepository.findById(userId);
-        if (result.isPresent()) {
-            var user = result.orElseThrow();
-            var creating = user.getCreating();
-            creating.add(guideId);
-            user.setCreating(creating);
-            var dbCheck = this.userRepository.save(user);
-            if (dbCheck.getCreating() == creating) {
-                return "guides_updated";
-            } else {
-                return "guides_not_updated";
-            }
+    public String updateCreating(String userId, String guideId) {
+        var result = this.mongoTemplate.updateFirst(
+                query(where(Constants.ID).is(userId)),
+                new Update().push("creating", guideId), Constants.USER_COLLECTION);
+        if (result.wasAcknowledged() && result.getModifiedCount() == 1) {
+            return "creating_updated";
         } else {
-            return "user_does_not_exist";
+            return "user_not_found";
         }
     }
+
+    /*public User findAllUserInfo(String userId) {
+
+    }*/
 
 }
