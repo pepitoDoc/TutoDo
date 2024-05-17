@@ -51,7 +51,7 @@ export class MyGuidesComponent implements OnInit {
 
   editGuide(guideId: string): void {
     this._sharedService.setPersistedData$({ guideIdModifying: guideId }).subscribe( 
-      () => this._router.navigate([`./${TutodoRoutes.MODIFY}`], { relativeTo: this._route }));
+      () => this._router.navigate([`../${TutodoRoutes.MODIFY}`], { relativeTo: this._route }));
   }
 
   formatGuideTypes(guideTypes: string[]): string {

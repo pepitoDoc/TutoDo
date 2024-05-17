@@ -30,6 +30,7 @@ export class GuideSearchComponent implements OnInit, OnDestroy {
     rating: ['']
   });
   @ViewChild('guideTypeInput') guideTypeInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('paginator') paginator!: MatPaginator;
   filteredTypes!: Observable<string[]>;
   addOnBlur = true;
   readonly _separatorKeysCodes = [] as const;
@@ -41,6 +42,7 @@ export class GuideSearchComponent implements OnInit, OnDestroy {
   guidesFound!: Guide[];
   hasGuides$!: Observable<boolean>;
   formValid = false;
+  private unsubscribe = new Subject<void>();
 
   constructor(
     private readonly _nnfb: NonNullableFormBuilder,
@@ -76,19 +78,24 @@ export class GuideSearchComponent implements OnInit, OnDestroy {
       guideTypes: this.chosenTypes,
       rating: parseInt(rating)
     }
-    this._service.findGuideByFilter$(payload).subscribe(response => {
-      if (response.length > 0) {
-        this.guidesFound = response;
-        this.searchMode = false;
-      } else {
-        this._dialog.open(InfoDialogComponent, {
-          width: '400px',
-          height: 'auto',
-          data: {
-            title: 'No se han encontrado resultados',
-            text: ['No se ha encontrado ninguna guía que cumplan con los criterios del filtro de búsqueda.']
-          }
-        });
+    this._service.findGuideByFilter$(payload).subscribe({
+      next: (response) => {
+        if (response !== null  && response.length > 0) {
+          this.guidesFound = response;
+          this.searchMode = false;
+        } else {
+          this._dialog.open(InfoDialogComponent, {
+            width: '400px',
+            height: 'auto',
+            data: {
+              title: 'No se han encontrado resultados',
+              text: ['No se ha encontrado ninguna guía que cumplan con los criterios del filtro de búsqueda.']
+            }
+          });
+        }
+      },
+      error: (response) => {
+        // Respuesta error
       }
     });
   }
@@ -102,8 +109,7 @@ export class GuideSearchComponent implements OnInit, OnDestroy {
     
   }
 
-  @ViewChild('paginator') paginator!: MatPaginator;
-  private unsubscribe = new Subject<void>();
+  
 
   remove(guideType: string): void {
     const index = this.chosenTypes.indexOf(guideType);

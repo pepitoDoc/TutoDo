@@ -14,6 +14,7 @@ import { AuthService } from './service/auth.service';
 import { Observable } from 'rxjs';
 import { MyGuidesComponent } from './components/my-guides/my-guides.component';
 import { GuideSearchComponent } from './components/guide-search/guide-search.component';
+import { GuideSeeComponent } from './components/guide-see/guide-see.component';
 
 const routes: Routes = [
   {
@@ -30,14 +31,12 @@ const routes: Routes = [
         component: FrontPageComponent
       },
       {
-        path: TutodoRoutes.HOME,
-        component: HomePageComponent,
-        // canActivate: [(): Observable<MaybeAsync<GuardResult>> => inject(AuthService).canActivate()],
-        // canActivateChild: [(): Observable<MaybeAsync<GuardResult>> => inject(AuthService).canActivateChild()],
+        path: TutodoRoutes.TUTODO,
+        component: HomePageComponent, 
         children: [
           {
-            path: '',
-            component: MainComponent
+            path: TutodoRoutes.HOME,
+            component: HomeComponent
           },
           {
             path: TutodoRoutes.CREATE,
@@ -45,7 +44,7 @@ const routes: Routes = [
           },
           {
             path: `${TutodoRoutes.MODIFY}`,
-            component: GuideCreateComponent
+            component: GuideModifyComponent
           },
           {
             path: `${TutodoRoutes.MY_GUIDES}`,
@@ -54,12 +53,30 @@ const routes: Routes = [
           {
             path: `${TutodoRoutes.SEARCH}`,
             component: GuideSearchComponent
+          },
+          {
+            path: `${TutodoRoutes.SEE}`,
+            component: GuideSeeComponent
+          },
+          {
+            path: `${TutodoRoutes.SAVED}`,
+            component: GuideSearchComponent
+          },
+          {
+            path: `${TutodoRoutes.MAIN}`,
+            component: MainComponent
+          },
+          {
+            path: '**', 
+            redirectTo: TutodoRoutes.HOME, 
+            pathMatch: 'full'
           }
         ]
       },
       {
-        path: '**',
-        component: FrontPageComponent
+        path: '**', 
+        redirectTo: TutodoRoutes.TUTODO, 
+        pathMatch: 'full'
       }
     ]
   }

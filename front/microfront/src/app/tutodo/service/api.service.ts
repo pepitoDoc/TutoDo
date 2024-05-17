@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../environment/environment';
-import { CreateGuideRequest, FindByFilterRequest, Guide, InsertUserRequest, LoginUserRequest, SaveGuideStepsRequest } from '../model/data';
+import { CreateGuideRequest, FindByFilterRequest, Guide, InsertUserRequest, LoginUserRequest, SaveGuideInfoRequest, SaveGuideStepsRequest } from '../model/data';
 import { Observable, map, share, shareReplay } from 'rxjs';
 import { UserData } from '../model/user-data';
 
@@ -48,6 +48,10 @@ export class ApiService {
 
   saveGuideSteps$(saveGuideStepsRequest: SaveGuideStepsRequest): Observable<string> {
     return this._http.post(`${this._guideEndpoint}/save-steps`, saveGuideStepsRequest, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
+  }
+
+  saveGuideInfo$(saveGuideInfoRequest: SaveGuideInfoRequest): Observable<string> {
+    return this._http.post(`${this._guideEndpoint}/save-info`, saveGuideInfoRequest, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
   findGuideById$(guideId: string): Observable<Guide> {

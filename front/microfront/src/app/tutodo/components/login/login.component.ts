@@ -45,7 +45,7 @@ export class LoginComponent implements OnInit {
     this.apiService.loginUser$(data).subscribe({
       next: (response) => {
         if (response === 'login_succesful' || response === 'already_logged') {
-          this.router.navigate([`../${TutodoRoutes.HOME}`], { relativeTo: this.route });
+          this.router.navigate([`../${TutodoRoutes.TUTODO}`], { relativeTo: this.route });
           this.loginResult = false;
         } else {
           this.loginResult = true;
@@ -64,7 +64,7 @@ export class LoginComponent implements OnInit {
     this.apiService.insertUser$(data).subscribe({
       next: (response) => {
         if (response === 'user_registered') {
-          this.router.navigate([`../${TutodoRoutes.HOME}`], { relativeTo: this.route });
+          this.router.navigate([`../${TutodoRoutes.TUTODO}`], { relativeTo: this.route });
           this.loginResult = false;
         } else {
           this.loginResult = true;

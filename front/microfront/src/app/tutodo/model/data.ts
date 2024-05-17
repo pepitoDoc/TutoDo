@@ -26,6 +26,12 @@ export interface Step {
     description: string;
 }
 
+export interface FormStep {
+    title: string;
+    description: string;
+    saved: boolean;
+}
+
 export interface SaveGuideStepsRequest {
     guideId: string;
     steps: Step[];
@@ -60,4 +66,11 @@ export interface FindByFilterRequest {
     title: string;
     guideTypes: string[];
     rating: number;
+}
+
+export interface SaveGuideInfoRequest {
+    guideId: string;
+    title: string;
+    description: string;
+    guideTypes: string[];
 }

@@ -1,40 +1,19 @@
 <div class="page">
-  <div class="alignFlexColumn" *ngIf="!modifyInfo">
-    <div class="optionsDivTop sticky-top">
-      <div class="btn-group">
-        <button type="button" class="btn btn-primary" (click)="saveProgress()">Guardar cambios</button>
-        <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"
-          aria-expanded="false">
-          <span class="visually-hidden">Toggle Dropdown</span>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end">
-          <li><button class="dropdown-item" type="button" (click)="showInfo()">Información</button></li>
-          <li><button class="dropdown-item" type="button" (click)="showInfo()">Publicar guía</button></li>
-          <li>
-            <hr class="dropdown-divider">
-          </li>
-          <li><button class="dropdown-item" type="button" (click)="modifyInfo = false">Modificar información básica</button></li>
-          <li>
-            <hr class="dropdown-divider">
-          </li>
-          <li><button class="dropdown-item" type="button" (click)="showInfo()">Salir del creador</button></li>
-        </ul>
-      </div>
-    </div>
+  <div class="alignFlexColumn" *ngIf="!showGuideInfo">
     <div id="stepInput">
       <form [formGroup]="stepsForm">
         <div formArrayName="steps" class="alignFlexColumn">
           <div *ngFor="let step of steps.controls; let i = index" class="alignFlexColumn">
             <div [formGroupName]="i" class="whiteCard-step"
               *ngIf="showSteps(i, paginator.pageIndex, paginator.pageSize)">
-              <h2>Paso número {{i+1}}</h2>
+              <h1>Paso número {{i+1}}</h1>
               <mat-form-field class="example-full-width" appareance="fill">
                 <mat-label>Título</mat-label>
                 <input type="text" matInput #inputTitle formControlName="title" placeholder="Título del paso {{i+1}}"
                   [maxLength]="50">
                 <mat-hint align="start">{{inputTitle.value.length}}/50 (mínimo 10 caracteres)</mat-hint>
-                <mat-error *ngIf="step.get('title')?.touched && step.get('title')?.hasError('required')">
-                  <strong>Es necesario el título de la guía</strong>
+                <mat-error *ngIf="step.controls.title.touched && step.controls.title.hasError('required')">
+                  <strong>Es necesario el título del paso</strong>
                 </mat-error>
               </mat-form-field>
               <mat-form-field class="example-full-width" appareance="fill">
@@ -42,8 +21,8 @@
                 <textarea type="text" matInput formControlName="description" placeholder="Breve descripción de la guía"
                   cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5"
                   #inputDescription [maxLength]="200"></textarea>
-                <mat-hint align="start">{{inputDescription.value.length}}/200 (mínimo 50 caracteres)</mat-hint>
-                <mat-error *ngIf="step.get('description')?.touched && step.get('description')?.hasError('required')">
+                <mat-hint align="start">{{inputDescription.value.length}}/400 (mínimo 50 caracteres)</mat-hint>
+                <mat-error *ngIf="step.controls.description.touched && step.controls.description.hasError('required')">
                   <strong>Es necesaria una descripción del paso</strong>
                 </mat-error>
               </mat-form-field>
@@ -51,9 +30,9 @@
                 <button type="button" mat-flat-button class="buttonSpace mx-5" color="warn"
                   *ngIf="steps.controls.length > 1" (click)="cancelStep(i)">Cancelar</button>
                 <button type="button" mat-flat-button [disabled]="!step.valid" class="buttonSpace mx-5" color="primary"
-                  (click)="saveStep(i)" *ngIf="!step.get('saved')?.value">Guardar paso</button>
+                  (click)="saveStep(i)" *ngIf="!step.controls.saved.value">Guardar paso</button>
                 <button type="button" mat-flat-button class="buttonSpace mx-5" color="accent" (click)="modifyStep(i)"
-                  *ngIf="step.get('saved')?.value">Modificar paso</button>
+                  *ngIf="step.controls.saved.value">Modificar paso</button>
               </div>
             </div>
             <button type="button" mat-flat-button color="primary mb-5" (click)="addStep(i)"
@@ -62,19 +41,35 @@
         </div>
       </form>
     </div>
-    <div class="optionsDiv sticky-bottom">
-      <mat-slide-toggle class="whiteCard-info" [checked]="isPublished" (change)="changePublished()">Estado de la guía:
+    <div class="optionsDivDown">
+      <mat-slide-toggle class="whiteCard-check mx-2" [checked]="isPublished" (change)="changePublished()">Estado de la guía:
         {{ isPublished ? 'publicado' : 'no publicado' }}</mat-slide-toggle>
-    </div>
-    <div class="alignFlexRow sticky-bottom">
-      <mat-paginator class="mx-4" #paginator [length]="steps.controls.length" [pageSize]="4"
+      <mat-paginator class="mx-2" #paginator [length]="steps.controls.length" [pageSize]="4"
         [pageSizeOptions]="[4, 8, 20]" aria-label="Select page" [showFirstLastButtons]="true"
         (page)="handlePageEvent($event)">
       </mat-paginator>
+      <div class="btn-group dropend">
+        <button type="button" class="btn btn-primary" (click)="saveProgress()">Guardar cambios</button>
+        <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"
+          aria-expanded="false">
+          <span class="visually-hidden">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><button class="dropdown-item" type="button" (click)="showInfo()">Información</button></li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li><button class="dropdown-item" type="button" (click)="showModifyGuideInfo(true)">Modificar información básica</button></li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li><button class="dropdown-item" type="button" (click)="showInfo()">Salir del creador</button></li>
+        </ul>
+      </div>
     </div>
   </div>
   <!--------------------------------------------------->
-  <div class="alignFlexColumn mt-4" *ngIf="modifyInfo">
+  <div class="alignFlexColumn mt-4" *ngIf="showGuideInfo">
     <div class="whiteCard-guideInfo">
       <h1>Modificar información básica sobre la guía</h1>
       <form class="example-form" [formGroup]="guideInfo">
@@ -99,7 +94,7 @@
         </mat-form-field>
         <mat-form-field class="example-chip-list">
           <mat-label>Tipos de la guía</mat-label>
-          <mat-chip-grid #chipGrid aria-label="Guide types">
+          <mat-chip-grid #chipGrid [disabled]="isGuideTypeInput" aria-label="Guide types">
             @for (guideType of chosenTypes; track guideType) {
             <mat-chip-row (removed)="remove(guideType)">
               {{guideType}}
@@ -109,7 +104,7 @@
             </mat-chip-row>
             }
           </mat-chip-grid>
-          <input placeholder="Introduzca los tipos de guía" #guideTypeInput formControlName="guideTypes"
+          <input placeholder="Introduzca los tipos de guía" #guideTypeInput [disabled]="isGuideTypeInput" formControlName="guideTypes"
             [matChipInputFor]="chipGrid" [matAutocomplete]="auto" [matChipInputSeparatorKeyCodes]="_separatorKeysCodes"/>
           <mat-hint align="start">{{chosenTypes.length}}/5 (mínimo 1 tipo de guía)</mat-hint>
           <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
@@ -119,10 +114,13 @@
             }
           </mat-autocomplete>
         </mat-form-field>
-        <div class="alignFlex">
-          <button mat-flat-button class="buttonSpace mx-5" color="warn">Volver a modificar pasos</button>
-          <button mat-flat-button [disabled]="!guideInfo.valid || chosenTypes.length < 1" class="buttonSpace"
-            color="primary" (click)="updateInfo()">Crear guía</button>
+        <div class="optionsDivDown">
+          <button mat-flat-button class="buttonSpace mx-4" color="warn" (click)="showModifyGuideInfo(false)">Volver a modificar
+            pasos</button>
+          <button mat-flat-button [disabled]="!guideInfo.valid || chosenTypes.length < 1" class="buttonSpace mx-4"
+            color="primary" (click)="saveGuideInfo()" *ngIf="isModifyGuideInfo">Guardar información</button>
+          <button mat-flat-button *ngIf="!isModifyGuideInfo" class="buttonSpace mx-4"
+            color="primary" color="accent" (click)="modifyGuideInfo()">Modificar información</button>
         </div>
       </form>
     </div>

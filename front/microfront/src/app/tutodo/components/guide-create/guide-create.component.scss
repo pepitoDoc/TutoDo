@@ -18,6 +18,10 @@
   background-color: white;
   border-radius: 20px;
   border: 1px solid black;
+  @media (max-width: 768px) {
+    margin-top: 10px;
+    width: 95%;
+  }
 }
 
 h2, h3, mat-label, p {

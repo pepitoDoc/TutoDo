@@ -23,8 +23,8 @@ import { SharedService } from '../../shared/shared.service';
 export class GuideCreateComponent implements OnInit {
 
   guideInfo = this._nnfb.group({
-    title: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(50)]],
-    description: ['', [Validators.required, Validators.minLength(40), Validators.maxLength(100)]],
+    title: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(100)]],
+    description: ['', [Validators.required, Validators.minLength(40), Validators.maxLength(200)]],
     guideTypes: ['']
   });
   @ViewChild('autosize') autosize!: CdkTextareaAutosize;
@@ -50,7 +50,7 @@ export class GuideCreateComponent implements OnInit {
       next: (response) => {
         this.guideTypes = response;
         this.filteredTypes = this.guideInfo.controls.guideTypes.valueChanges.pipe(
-          map((guideType: string) => (guideType === '' ? this._filter(guideType) : this.guideTypes.slice())),
+          map((guideType: string) => (guideType !== '' ? this._filter(guideType) : this.guideTypes.slice())),
         );
       }
     });

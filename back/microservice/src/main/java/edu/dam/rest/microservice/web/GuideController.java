@@ -80,7 +80,7 @@ public class GuideController {
     public ResponseEntity<List<Guide>> findByFilter(
             @RequestBody FindByFilterRequest findByFilterRequest) {
         var result = this.guideService.findByFilter(findByFilterRequest);
-        return ResponseEntity.status(result.isEmpty() ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR).
+        return ResponseEntity.status(!result.isEmpty() ? HttpStatus.OK : HttpStatus.NO_CONTENT).
                 contentType(MediaType.APPLICATION_JSON).body(result);
     }
 

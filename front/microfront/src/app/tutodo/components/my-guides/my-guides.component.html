@@ -25,12 +25,12 @@
       </mat-card-content>
       <mat-card-actions>
         <button mat-button (click)="visualizeGuide(guide.id)">Visualizar guía</button>
-        <button mat-button>Añadir a Guardados</button>
+        <button mat-button (click)="editGuide(guide.id)">Editar guía</button>
       </mat-card-actions>
     </mat-card>
   </div>
 </div>
 <div class="optionsDivBottom sticky-bottom">
-  <button mat-flat-button routerLink="/home/guide-search" routerLinkActive="active"
+  <button mat-flat-button routerLink="/tutodo/guide-search" routerLinkActive="active"
     color="warn">Volver a la página principal</button>
 </div>

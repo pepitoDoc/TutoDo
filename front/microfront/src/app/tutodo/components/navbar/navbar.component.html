@@ -1,38 +1,62 @@
-<nav class="navbar sticky-top navBorder navbar-expand-lg bg-body-tertiary">
-    <div class="navbarRow">
-        <div class="leftColumn">
-            <a class="navbar-brand alignElements mx-3" routerLink="/home" routerLinkActive="active">TutoDo</a>
-            <a class="nav-link active alignElements" aria-current="page" routerLink="/home"
-                routerLinkActive="active">Página principal</a>
-            <mat-icon routerLink="/home" routerLinkActive="active" class="mx-1 alignIcon" aria-hidden="false"
-                aria-label="home">home</mat-icon>
-            <li class="nav-item dropdown spaceOptionsLeft">
-                <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Guías
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" routerLink="/home/guide-create" routerLinkActive="active">Crear
-                            guía</a></li>
-                    <li><a class="dropdown-item" routerLink="/home/guide-search" routerLinkActive="active">Búsqueda de
-                            guías</a></li>
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
-                    <li><a class="dropdown-item" href="#">Mis guías</a></li>
-                </ul>
-            </li>
-            <form class="d-flex mx-3">
-                <input class="form-control me-2" type="search" placeholder="Búsqueda rápida" aria-label="Search">
-                <button class="btn btn-outline-success" type="submit">
-                    <mat-icon class="pt-1" aria-hidden="false" aria-label="search">search</mat-icon>
-                </button>
-            </form>
-        </div>
-        <div class="rightColumn">
-            <p class="nav-link active alignElements mx-2">Usuario</p>
-            <mat-icon class="spaceOptionsRight" aria-hidden="false" aria-label="settings">account_circle</mat-icon>
-            <p class="nav-link active alignElements mx-2">Opciones</p>
-            <mat-icon class="spaceOptionsRight" aria-hidden="false" aria-label="settings">settings</mat-icon>
+<nav class="navbar navBorder sticky-top navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">TutoDo</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item alignFlex">
+                    <a class="nav-link active alignElements" routerLink="/home" routerLinkActive="active"
+                        aria-current="page">Página
+                        principal
+                    </a>
+                    <mat-icon class="mx-1 alignIcon" routerLink="/home" routerLinkActive="active" aria-hidden="false"
+                        aria-label="home">home</mat-icon>
+                </li>
+                <!-- <li class="nav-item">
+                    <a class="nav-link" href="#">Link</a>
+                </li> -->
+                <li class="nav-item alignFlex dropdown">
+                    <a class="nav-link active alignElements dropdown-toggle" href="#" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        Guías
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" routerLink="/tutodo/guide-create" routerLinkActive="active">Crear
+                                guía</a></li>
+                        <li><a class="dropdown-item" routerLink="/tutodo/guide-search"
+                                routerLinkActive="active">Búsqueda
+                                de
+                                guías</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" routerLink="/tutodo/my-guides" routerLinkActive="active">Mis
+                                guías creadas</a></li>
+                        <li><a class="dropdown-item" routerLink="/tutodo/my-guides" routerLinkActive="active">Mis
+                                guías guardadas</a></li>
+                    </ul>
+                </li>
+                <!-- <li class="nav-item">
+                    <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+                </li> -->
+                <form class="d-flex alignFlex" role="search">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-outline-success alignIcon" type="submit">
+                        <mat-icon aria-hidden="false" aria-label="search">search</mat-icon>
+                    </button>
+                </form>
+            </ul>
+            <div class="alignFlex mx-2">
+                <p class="nav-link active alignElements mx-2">Usuario</p>
+                <mat-icon class="alignIcon" aria-hidden="false" aria-label="settings">account_circle</mat-icon>
+            </div>
+            <div class="alignFlex mx-2">
+                <p class="nav-link active alignElements mx-2">Opciones</p>
+                <mat-icon class="alignIcon" aria-hidden="false" aria-label="settings">settings</mat-icon>
+            </div>
         </div>
     </div>
 </nav>

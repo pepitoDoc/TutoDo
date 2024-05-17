@@ -76,7 +76,7 @@ public class GuideService {
                     new Update().set(Constants.STEPS, saveGuideStepsRequest.getSteps())
                             .set(Constants.PUBLISHED, saveGuideStepsRequest.isPublished()),
                     Constants.GUIDE_COLLECTION);
-            if (result.wasAcknowledged() && result.getModifiedCount() == 1) {
+            if (result.wasAcknowledged()) {
                 return "guide_updated";
             } else {
                 return "guide_not_found";
@@ -94,7 +94,7 @@ public class GuideService {
                             .set(Constants.DESCRIPTION, saveGuideInfoRequest.getDescription())
                             .set(Constants.GUIDE_TYPES, saveGuideInfoRequest.getGuideTypes()),
                     Constants.GUIDE_COLLECTION);
-            if (result.wasAcknowledged() && result.getModifiedCount() == 1) {
+            if (result.wasAcknowledged()) {
                 return "guide_updated";
             } else {
                 return "guide_not_found";
@@ -138,7 +138,7 @@ public class GuideService {
         if (!findByFilterRequest.getGuideTypes().isEmpty()) {
             operations.add(match(new Criteria("guideTypes").in(findByFilterRequest.getGuideTypes())));
         }
-        if (findByFilterRequest.getRating() >= 0) {
+        if (findByFilterRequest.getRating() != null && findByFilterRequest.getRating() >= 0) {
             operations.add(unwind("ratings"));
             operations.add(group("_id").avg("$ratings.punctuation").as("averagePunctuation"));
             operations.add(match(new Criteria("averagePunctuation").gt(findByFilterRequest.getRating())));
