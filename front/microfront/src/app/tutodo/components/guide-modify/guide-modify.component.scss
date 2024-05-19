@@ -136,15 +136,6 @@ mat-form-field {
 
 .page {
   height: auto;
-  background: #a8ff78;
-  /* fallback for old browsers */
-  background: -webkit-linear-gradient(to right, #78ffd6, #a8ff78);
-  /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(to right, #78ffd6, #a8ff78);
-  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-  margin: 12px 0px;
-  border-radius: 20px;
-  border: 1px solid rgb(180, 160, 160);
   @media (max-width: 768px) {
     height: fit-content;
     padding-bottom: 20px;
@@ -189,4 +180,10 @@ mat-form-field {
   @media (max-width: 768px) {
     width: 50%
   }
+}
+
+.divider {
+  width: 90%;
+  border-top: 1px solid gray;
+  border-radius: 5px;
 }

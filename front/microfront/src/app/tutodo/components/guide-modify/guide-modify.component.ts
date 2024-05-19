@@ -1,7 +1,7 @@
 import { Component, ElementRef, NgZone, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { FormGroup, NonNullableFormBuilder, Validators } from '@angular/forms';
 import { ApiService } from '../../service/api.service';
-import { FormStep, Guide, GuideStep, SaveGuideInfoRequest, SaveGuideStepsRequest, Step } from '../../model/data';
+import { FormStep, Guide, SaveGuideInfoRequest, SaveGuideStepsRequest, Step } from '../../model/data';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -10,7 +10,6 @@ import { InfoDialogComponent } from '../info-dialog/info-dialog.component';
 import { SharedService } from '../../shared/shared.service';
 import { Observable, Subject, map, take } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
-import { TutodoRoutes } from '../../tutodo.routes';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatChipGrid } from '@angular/material/chips';
@@ -48,6 +47,7 @@ export class GuideModifyComponent implements OnInit, OnDestroy {
   chosenTypes: string[] = [];
   announcer = inject(LiveAnnouncer);
   guideId!: string;
+  guideTitle: string = '';
   restoredGuide!: Guide;
   isPublished = false;
   showGuideInfo = false;
@@ -80,6 +80,7 @@ export class GuideModifyComponent implements OnInit, OnDestroy {
         this.guideId = response.guideIdModifying;
         this._service.findGuideById$(this.guideId).subscribe(response => {
           this.restoredGuide = response;
+          this.guideTitle = response.title;
           const steps: FormStep[] = [];
           this.restoredGuide.steps.forEach(step => { steps.push({ ...step, saved: true }) });
           for (let i = 0; i < steps.length - 1; i++)  this.stepsForm.controls.steps.controls.push(this._createNewStep());

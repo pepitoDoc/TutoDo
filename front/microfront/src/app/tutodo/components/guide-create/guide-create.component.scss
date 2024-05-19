@@ -50,17 +50,36 @@ mat-form-field {
 
 .page {
   height: auto;
-  background: #a8ff78;
-  /* fallback for old browsers */
-  background: -webkit-linear-gradient(to right, #78ffd6, #a8ff78);
-  /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(to right, #78ffd6, #a8ff78);
-  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-  margin: 12px 0px;
-  border-radius: 20px;
-  border: 1px solid rgb(180, 160, 160);
   @media (max-width: 1400px) {
     height: fit-content;
     padding-bottom: 20px;
+  }
+}
+
+h1, h2, h3, mat-label, p {
+  text-align: center;
+}
+
+h2, h3, mat-label, p, input {
+  font-size: 20px;
+  @media (max-width: 768px) {
+    font-size: 12px;
+  }
+}
+
+mat-hint, strong {
+  font-size: 14px;
+  @media (max-width: 768px) {
+    font-size: 10px;
+  }
+}
+
+button {
+  font-size: 20px;
+  @media (max-width: 1000px) {
+    font-size: 16px;
+  }
+  @media (max-width: 768px) {
+    font-size: 14px;
   }
 }

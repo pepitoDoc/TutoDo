@@ -8,6 +8,7 @@ import { SharedService } from '../../shared/shared.service';
 import { Guide, Rating } from '../../model/data';
 import { InfoDialogComponent } from '../info-dialog/info-dialog.component';
 import { TutodoRoutes } from '../../tutodo.routes';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'tutodo-my-guides',
@@ -46,7 +47,7 @@ export class MyGuidesComponent implements OnInit {
   }
 
   visualizeGuide(guideId: string): void {
-    
+
   }
 
   editGuide(guideId: string): void {

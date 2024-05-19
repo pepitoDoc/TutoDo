@@ -1,10 +1,13 @@
 .navBorder {
-  border: 1px solid black;
-  border-radius: 10px;
-  margin-top: 5px;
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
+  border-bottom: 1px solid gray;
+}
+
+.navbar-brand {
+  padding: 0px;
 }
 
 .alignFlex {

@@ -55,7 +55,7 @@ const routes: Routes = [
             component: GuideSearchComponent
           },
           {
-            path: `${TutodoRoutes.SEE}`,
+            path: `${TutodoRoutes.SEE}/:id`,
             component: GuideSeeComponent
           },
           {

@@ -28,8 +28,9 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle'
-import { MatDivider, MatDividerModule } from '@angular/material/divider'
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatDividerModule } from '@angular/material/divider';
+import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
 import { ToastrModule } from 'ngx-toastr';
 import { MyGuidesComponent } from './components/my-guides/my-guides.component';
 import { GuideSearchComponent } from './components/guide-search/guide-search.component';
@@ -76,6 +77,7 @@ import { GuideCreateComponent } from './components/guide-create/guide-create.com
     MatMenuModule,
     MatSlideToggleModule,
     MatDividerModule,
+    MatSnackBarModule,
     ToastrModule.forRoot({
       timeOut: 4000,
       positionClass: 'toast-bottom-right'

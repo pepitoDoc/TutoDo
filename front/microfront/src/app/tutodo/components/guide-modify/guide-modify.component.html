@@ -1,12 +1,13 @@
 <div class="page">
   <div class="alignFlexColumn" *ngIf="!showGuideInfo">
     <div id="stepInput">
+      <h1 class="mt-4">{{ guideTitle }}</h1>
       <form [formGroup]="stepsForm">
         <div formArrayName="steps" class="alignFlexColumn">
           <div *ngFor="let step of steps.controls; let i = index" class="alignFlexColumn">
             <div [formGroupName]="i" class="whiteCard-step"
               *ngIf="showSteps(i, paginator.pageIndex, paginator.pageSize)">
-              <h1>Paso número {{i+1}}</h1>
+              <h2>Paso número {{i+1}}</h2>
               <mat-form-field class="example-full-width" appareance="fill">
                 <mat-label>Título</mat-label>
                 <input type="text" matInput #inputTitle formControlName="title" placeholder="Título del paso {{i+1}}"
@@ -35,6 +36,7 @@
                   *ngIf="step.controls.saved.value">Modificar paso</button>
               </div>
             </div>
+            <hr class="divider">
             <button type="button" mat-flat-button color="primary mb-5" (click)="addStep(i)"
               *ngIf="showSteps(i, paginator.pageIndex, paginator.pageSize)">Insertar paso</button>
           </div>

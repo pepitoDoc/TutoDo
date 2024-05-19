@@ -1,36 +1,38 @@
-<div class="alignGrid">
-  <div *ngFor="let guide of guidesFound">
-    <mat-card class="example-card guideCard">
-      <mat-card-header>
-        <mat-card-title>{{ guide.title }}</mat-card-title>
-        <mat-card-subtitle>Usuario creador: johnny poppers</mat-card-subtitle>
-      </mat-card-header>
-      <mat-divider></mat-divider>
-      <mat-card-content class="guideResume">
-        <div class="guideInfo">
-          <p>Guía sobre:{{ formatGuideTypes(guide.guideTypes) }}</p>
-          <p>Comentarios: {{ guide.comments.length }}</p>
-          <p>Puntuación media: {{ ratingMean(guide.ratings) }}</p>
-        </div>
-        <div class="guideInfo">
-          <img mat-card-image src="https://material.angular.io/assets/img/examples/shiba2.jpg"
-            alt="Photo of a Shiba Inu">
-        </div>
-      </mat-card-content>
-      <mat-divider></mat-divider>
-      <mat-card-content>
-        <p>
-          {{ guide.description }} aaaaaaaaaaaaa
-        </p>
-      </mat-card-content>
-      <mat-card-actions>
-        <button mat-button (click)="visualizeGuide(guide.id)">Visualizar guía</button>
-        <button mat-button (click)="editGuide(guide.id)">Editar guía</button>
-      </mat-card-actions>
-    </mat-card>
+<div class="page">
+  <div class="alignGrid">
+    <div *ngFor="let guide of guidesFound">
+      <mat-card class="example-card guideCard">
+        <mat-card-header>
+          <mat-card-title>{{ guide.title }}</mat-card-title>
+          <mat-card-subtitle>Usuario creador: johnny poppers</mat-card-subtitle>
+        </mat-card-header>
+        <mat-divider></mat-divider>
+        <mat-card-content class="guideResume">
+          <div class="guideInfo">
+            <p>Guía sobre:{{ formatGuideTypes(guide.guideTypes) }}</p>
+            <p>Comentarios: {{ guide.comments.length }}</p>
+            <p>Puntuación media: {{ ratingMean(guide.ratings) }}</p>
+          </div>
+          <div class="guideInfo">
+            <img mat-card-image src="https://material.angular.io/assets/img/examples/shiba2.jpg"
+              alt="Photo of a Shiba Inu">
+          </div>
+        </mat-card-content>
+        <mat-divider></mat-divider>
+        <mat-card-content>
+          <p>
+            {{ guide.description }} aaaaaaaaaaaaa
+          </p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button (click)="visualizeGuide(guide.id)">Visualizar guía</button>
+          <button mat-button (click)="editGuide(guide.id)">Editar guía</button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
   </div>
-</div>
-<div class="optionsDivBottom sticky-bottom">
-  <button mat-flat-button routerLink="/tutodo/guide-search" routerLinkActive="active"
-    color="warn">Volver a la página principal</button>
+  <div class="optionsDivBottom sticky-bottom">
+    <button mat-flat-button routerLink="/tutodo/guide-search" routerLinkActive="active" color="warn">Volver a la página
+      principal</button>
+  </div>
 </div>
