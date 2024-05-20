@@ -6,6 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Guide } from '../../model/data';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'tutodo-guide-see',
@@ -15,7 +16,7 @@ import { Guide } from '../../model/data';
 export class GuideSeeComponent implements OnInit {
 
   guideWatching!: Guide;
-  guideTitle: string = 'Como cosinar un chuletaso';
+  currentStep = 0;
   
   constructor(
     private readonly nnfb: NonNullableFormBuilder,
@@ -34,7 +35,6 @@ export class GuideSeeComponent implements OnInit {
         next: (response) => {
           if (response !== null && response !== undefined) {
             this.guideWatching = response;
-            //this.guideTitle = response.title;
           }
         }
       })
@@ -44,5 +44,8 @@ export class GuideSeeComponent implements OnInit {
     }
   }
 
+  nextStep(): void {
+    this.currentStep++;
+  }
 
 }

@@ -1,40 +1,60 @@
 <div class="page">
-  <div class="alignFlexColumn">
+  <div class="alignFlexColumn" *ngIf="guideWatching !== undefined">
     <div class="title">
-      <h1>{{ guideTitle }}</h1>
+      <h1>{{ guideWatching.title }}</h1>
+    </div>
+    <div class="stepContainer">
+      <div *ngIf="guideWatching !== undefined">
+        <div *ngFor="let step of guideWatching.steps; let i = index">
+          <div [ngClass]="i < currentStep ? 'stepLayout completedStep' : 'stepLayout pendingStep'">
+            <h2>Paso {{ i + 1 }}</h2>
+            <h3>{{ step.title }}</h3>
+            <h4>{{ step.description }}</h4>
+            <div class="alignFlexRow">
+              <button type="button" *ngIf="i === currentStep" (click)="nextStep()"
+               mat-flat-button class="buttonSpace" color="primary">Marcar paso como completado</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <div class="fixed">
-      <a class="sideButton" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
-          <div class="buttonDiv bg-b-blue">
-          Pasos de la guía
-          </div>
-      </a>
-       <a href="" class="sideButton">
-          <div class="buttonDiv bg-b-orange">
-          Ingredientes/materiales
-          </div>
-      </a>
-       <!-- <a href="" class="sideButton">
-          <div class="buttonDiv bg-b-purple">
-          Button 3
-          </div>
-      </a> -->
+  <div class="sideAction">
+    <a class="sideButton sideAction" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button"
+      aria-controls="offcanvasExample">
+      <div class="buttonDiv bg-b-blue">
+        Pasos de la guía
+      </div>
+    </a>
+    <a class="sideButton sideAction" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button">
+      <div class="buttonDiv bg-b-orange">
+        Ingredientes/materiales
+      </div>
+    </a>
   </div>
-  <!-- <a class="btn btn-primary" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
+  <div class="sideHelp">
+    <a class="sideButton sideHelp" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button">
+      <div class="buttonDiv bg-b-purple">
+        Ayuda
+      </div>
+    </a>
+  </div>
+</div>
+<!-- <a class="btn btn-primary" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
       Link with href
     </a>
     <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
       Button with data-bs-target
     </button> -->
-  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
-      <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="offcanvasExampleLabel">Offcanvas</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-      </div>
-      <div class="offcanvas-body">
-        
-      </div>
-    </div>
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="offcanvasExampleLabel">Offcanvas</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+
+  </div>
+</div>

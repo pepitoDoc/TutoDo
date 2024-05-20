@@ -1,9 +1,6 @@
 package edu.dam.rest.microservice.web;
 
-import edu.dam.rest.microservice.bean.guide.CreateGuideRequest;
-import edu.dam.rest.microservice.bean.guide.FindByFilterRequest;
-import edu.dam.rest.microservice.bean.guide.SaveGuideInfoRequest;
-import edu.dam.rest.microservice.bean.guide.SaveGuideStepsRequest;
+import edu.dam.rest.microservice.bean.guide.*;
 import edu.dam.rest.microservice.bean.user.UserSession;
 import edu.dam.rest.microservice.constants.ApiConstants;
 import edu.dam.rest.microservice.persistence.model.Guide;
@@ -91,5 +88,20 @@ public class GuideController {
         return ResponseEntity.status(result == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON).body(result);
     }
+
+//    @PutMapping("add-comment")
+//    public ResponseEntity<String> addComment(
+//            @RequestBody AddCommentRequest addCommentRequest, HttpSession httpSession) {
+//
+//    }
+
+    @PutMapping("add-rating")
+    public ResponseEntity<String> addRating(
+            @RequestBody AddRatingRequest addRatingRequest, HttpSession httpSession) {
+        var userLogged = (UserSession) httpSession.getAttribute("user");
+        var result = this.guideService.addRating(addRatingRequest, userLogged.getId());
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(result);
+    }
+
 
 }

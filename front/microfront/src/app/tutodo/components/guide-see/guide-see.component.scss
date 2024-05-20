@@ -6,8 +6,19 @@
   height: 100%;
   width: 100%;
 }
+
+.alignFlexRow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
 .title {
   margin-top: 20px;
+  margin-bottom: 50px;
   background: #12c2e9;
   /* fallback for old browsers */
   background: -webkit-linear-gradient(to right, #f64f59, #c471ed, #12c2e9);
@@ -17,6 +28,14 @@
   width: fit-content;
   height: fit-content;
   border-radius: 25px;
+}
+
+.pendingStep {
+  background: white;
+}
+
+.completedStep {
+  background: rgb(179, 179, 179);
 }
 
 h1 {
@@ -31,19 +50,40 @@ h1 {
   border-radius: 20px;
 }
 
+.stepContainer {
+  width: 70%;
+}
 
+.stepLayout {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  border: 1px solid black;
+  border-radius: 20px;
+  margin-top: 20px;
+  width: 100%;
+  height: auto;
+}
+
+.buttonSpace {
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
 
 .buttonDiv {
   padding: 0 21px;
   border-radius: 30px 0 0 30px;
+  font-size: 14px;
 }
 
 .fixed {
   position: fixed;
   top: 50vh;
   right: 0;
-  width: 250px;
-  height: 200px;
+  width: 12%;
   z-index: 999;
 }
 
@@ -55,9 +95,18 @@ h1 {
   outline: none;
   text-decoration: none;
   color: #fff;
-  width: 250px;
   font-size: 16px;
+  width: 100%;
   border-radius: 20px 0 0 20px;
+}
+
+.sideAction {
+  margin-left: 20px;
+}
+
+.sideHelp {
+  margin-top: 30px;
+  margin-left: 50px;
 }
 
 .buttonDiv:hover {
@@ -80,17 +129,17 @@ h1 {
 }
 
 .bg-b-orange {
-  background: linear-gradient(45deg, #fda582, #f7cf68);
+  background: linear-gradient(45deg, #ff8353, #f7cf68);
 }
 
 .bg-b-orange:hover {
-  background: linear-gradient(45deg, #fda582, #fcac7d);
+  background: linear-gradient(45deg, #ff7d4a, #fcac7d);
 }
 
 .bg-b-purple {
-  background: linear-gradient(45deg, #a52dd8, #e29bf1);
+  background: linear-gradient(45deg, #a543cf, #e29bf1);
 }
 
 .bg-b-purple:hover {
-  background: linear-gradient(45deg, #a52dd8, #b143dd);
+  background: linear-gradient(45deg, #a543cf, #b143dd);
 }

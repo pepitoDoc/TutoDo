@@ -2,11 +2,9 @@ package edu.dam.rest.microservice.service;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.result.UpdateResult;
-import edu.dam.rest.microservice.bean.guide.CreateGuideRequest;
-import edu.dam.rest.microservice.bean.guide.FindByFilterRequest;
-import edu.dam.rest.microservice.bean.guide.SaveGuideInfoRequest;
-import edu.dam.rest.microservice.bean.guide.SaveGuideStepsRequest;
+import edu.dam.rest.microservice.bean.guide.*;
 import edu.dam.rest.microservice.constants.Constants;
+import edu.dam.rest.microservice.persistence.model.Comment;
 import edu.dam.rest.microservice.persistence.model.Guide;
 import edu.dam.rest.microservice.persistence.model.User;
 import edu.dam.rest.microservice.persistence.repository.GuideRepository;
@@ -24,7 +22,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
-import static org.springframework.data.mongodb.core.aggregation.AggregationUpdate.update;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
@@ -47,7 +44,7 @@ public class GuideService {
 
     public String guideCreate(CreateGuideRequest createGuideRequest, String userid) {
         var guide = Guide.builder()
-                .userid(userid)
+                .userId(userid)
                 .title(createGuideRequest.getTitle())
                 .description(createGuideRequest.getDescription())
                 .published(false)
@@ -153,7 +150,7 @@ public class GuideService {
                         Pattern userPattern = Pattern.compile(
                                 findByFilterRequest.getUsername(), Pattern.CASE_INSENSITIVE);
                         User foundUser = this.userRepository.findByUsernameRegex(userPattern.toString());
-                        return result.orElseThrow().getUserid().equals(foundUser.getId());
+                        return result.orElseThrow().getUserId().equals(foundUser.getId());
                     } else {
                         return true;
                     }
@@ -163,7 +160,7 @@ public class GuideService {
     }
 
     public List<Guide> findOwnGuides(String userid) {
-        var result = this.guideRepository.findByUserid(userid);
+        var result = this.guideRepository.findByUserId(userid);
         if (!result.isEmpty()) {
             return result;
         } else {
@@ -171,4 +168,38 @@ public class GuideService {
         }
     }
 
+    public String addComent(AddCommentRequest addCommentRequest, String userId) {
+        try {
+            UpdateResult result = this.mongoTemplate.updateFirst(
+                    query(where(Constants.ID).is(addCommentRequest.getGuideId())),
+                    new Update().push(Constants.COMMENTS, Comment.builder()
+                            .userId(userId).comment(addCommentRequest.getComment())),
+                    Constants.GUIDE_COLLECTION);
+            if (result.wasAcknowledged() && result.getModifiedCount() > 0) {
+                return "guide_updated";
+            } else {
+                return "guide_not_found";
+            }
+        } catch (Exception e) {
+            return "internal_server_error";
+        }
+    }
+
+    public String addRating(AddRatingRequest addRatingRequest, String userId) {
+        try {
+            UpdateResult result = this.mongoTemplate.updateFirst(
+                    query(where(Constants.ID).is(addRatingRequest.getGuideId())
+                            .and(Constants.RATINGS + "." + Constants.USERID).is(userId)),
+                    new Update().set(Constants.RATINGS + ".$",
+                                    addRatingRequest.getRating()),
+                    Constants.GUIDE_COLLECTION);
+            if (result.wasAcknowledged()) {
+                return "guide_updated";
+            } else {
+                return "guide_not_found";
+            }
+        } catch (Exception e) {
+            return "internal_server_error";
+        }
+    }
 }

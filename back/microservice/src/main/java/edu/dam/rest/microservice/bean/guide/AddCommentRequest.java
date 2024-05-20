@@ -1,4 +1,4 @@
-package edu.dam.rest.microservice.persistence.model;
+package edu.dam.rest.microservice.bean.guide;
 
 import lombok.*;
 
@@ -7,9 +7,9 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Comment {
+public class AddCommentRequest {
 
-    private String userId;
+    private String guideId;
     private String comment;
 
 }

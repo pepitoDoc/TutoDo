@@ -17,7 +17,7 @@ public class Guide {
 
     @Id
     private String id;
-    private String userid;
+    private String userId;
     private String title;
     private String description;
     private boolean published;

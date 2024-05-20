@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 public class Rating {
 
-    private String userid;
+    private String userId;
     private int punctuation;
 
 }

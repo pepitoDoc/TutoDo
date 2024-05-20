@@ -15,6 +15,7 @@ public class Constants {
     public static final String CHECK_LIST = "checkList";
     public static final String COMMENTS = "comments";
     public static final String RATINGS = "ratings";
+    public static final String PUNCTUATION = "punctuation";
 
     public static final String USER_COLLECTION = "user";
     public static final String USERNAME = "username";
