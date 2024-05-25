@@ -24,8 +24,9 @@ public class Guide {
     private LocalDate creationDate;
     private List<Step> steps;
     private List<String> guideTypes;
-    private List<String> checkList;
+    private List<String> ingredients;
     private List<String> comments;
     private List<Rating> ratings;
+    private String thumbnail;
 
 }

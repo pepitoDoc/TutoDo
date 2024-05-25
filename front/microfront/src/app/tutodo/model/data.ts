@@ -1,6 +1,6 @@
 
 export interface LoginUserRequest {
-    userIdentifier: string;
+    email: string;
     password: string;
 }
 
@@ -19,6 +19,7 @@ export interface CreateGuideRequest {
     title: string;
     description: string;
     guideTypes: string[];
+    ingredients: string[];
 }
 
 export interface Step {
@@ -53,12 +54,13 @@ export interface Guide {
     title: string;
     description: string;
     published: boolean;
-    creationData: string;
+    creationDate: string;
     steps: Step[];
     guideTypes: string[];
-    checkList: string[];
+    ingredients: string[];
     comments: string[];
     ratings: Rating[];
+    thumbnail: string;
 }
 
 export interface FindByFilterRequest {
@@ -73,4 +75,11 @@ export interface SaveGuideInfoRequest {
     title: string;
     description: string;
     guideTypes: string[];
+}
+
+export interface UploadImage {
+    title: string;
+    description: string;
+    guideTypes: string[];
+    ingredients: string[];
 }

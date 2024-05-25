@@ -6,6 +6,7 @@ import edu.dam.rest.microservice.bean.guide.*;
 import edu.dam.rest.microservice.constants.Constants;
 import edu.dam.rest.microservice.persistence.model.Comment;
 import edu.dam.rest.microservice.persistence.model.Guide;
+import edu.dam.rest.microservice.persistence.model.Rating;
 import edu.dam.rest.microservice.persistence.model.User;
 import edu.dam.rest.microservice.persistence.repository.GuideRepository;
 import edu.dam.rest.microservice.persistence.repository.UserRepository;
@@ -15,7 +16,9 @@ import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -42,25 +45,32 @@ public class GuideService {
         this.mongoTemplate = mongoTemplate;
     }
 
-    public String guideCreate(CreateGuideRequest createGuideRequest, String userid) {
-        var guide = Guide.builder()
-                .userId(userid)
-                .title(createGuideRequest.getTitle())
-                .description(createGuideRequest.getDescription())
-                .published(false)
-                .creationDate(LocalDate.now())
-                .steps(new ArrayList<>())
-                .guideTypes(createGuideRequest.getGuideTypes())
-                .checkList(new ArrayList<>())
-                .comments(new ArrayList<>())
-                .ratings(new ArrayList<>())
-                .build();
-        var dbCheck = this.guideRepository.save(guide);
-        if (this.guideRepository.existsById(dbCheck.getId())) {
-            String result = this.userService.updateCreating(userid, dbCheck.getId());
-            return result.equals("creating_updated")
-                    ? result + "?id=" + dbCheck.getId()
-                    : result;
+    public String guideCreate(CreateGuideRequest createGuideRequest, String userId, MultipartFile guideThumbnail) {
+        var encodedThumbnail = this.encodeImageAsBase64(guideThumbnail);
+        if (!encodedThumbnail.equals("error_encoding")) {
+            var guide = Guide.builder()
+                    .userId(userId)
+                    .title(createGuideRequest.getTitle())
+                    .description(createGuideRequest.getDescription())
+                    .published(false)
+                    .creationDate(LocalDate.now())
+                    .steps(new ArrayList<>())
+                    .guideTypes(createGuideRequest.getGuideTypes())
+                    .ingredients(createGuideRequest.getIngredients().isEmpty()
+                            ? new ArrayList<>() : createGuideRequest.getIngredients())
+                    .comments(new ArrayList<>())
+                    .ratings(new ArrayList<>())
+                    .thumbnail(encodedThumbnail)
+                    .build();
+            var dbCheck = this.guideRepository.save(guide);
+            if (this.guideRepository.existsById(dbCheck.getId())) {
+                String result = this.userService.updateCreating(userId, dbCheck.getId());
+                return result.equals("creating_updated")
+                        ? result + "?id=" + dbCheck.getId()
+                        : result;
+            } else {
+                return "error_creating_guide";
+            }
         } else {
             return "error_creating_guide";
         }
@@ -159,8 +169,8 @@ public class GuideService {
                 .collect(Collectors.toList());
     }
 
-    public List<Guide> findOwnGuides(String userid) {
-        var result = this.guideRepository.findByUserId(userid);
+    public List<Guide> findOwnGuides(String userId) {
+        var result = this.guideRepository.findByUserId(userId);
         if (!result.isEmpty()) {
             return result;
         } else {
@@ -187,19 +197,37 @@ public class GuideService {
 
     public String addRating(AddRatingRequest addRatingRequest, String userId) {
         try {
-            UpdateResult result = this.mongoTemplate.updateFirst(
+            UpdateResult setResult = this.mongoTemplate.updateFirst(
                     query(where(Constants.ID).is(addRatingRequest.getGuideId())
                             .and(Constants.RATINGS + "." + Constants.USERID).is(userId)),
-                    new Update().set(Constants.RATINGS + ".$",
-                                    addRatingRequest.getRating()),
+                    new Update().set(Constants.RATINGS + ".$." + Constants.PUNCTUATION,
+                            addRatingRequest.getRating()),
                     Constants.GUIDE_COLLECTION);
-            if (result.wasAcknowledged()) {
+            if (setResult.wasAcknowledged() && setResult.getModifiedCount() > 0) {
                 return "guide_updated";
             } else {
-                return "guide_not_found";
+                UpdateResult pushResult = this.mongoTemplate.updateFirst(
+                        query(where(Constants.ID).is(addRatingRequest.getGuideId())
+                                .and(Constants.RATINGS + "." + Constants.USERID).ne(userId)),
+                        new Update().push(Constants.RATINGS, Rating.builder().userId(userId)
+                                .punctuation(addRatingRequest.getRating()).build()),
+                        Constants.GUIDE_COLLECTION);
+                if (pushResult.wasAcknowledged() && pushResult.getModifiedCount() > 0) {
+                    return "guide_updated";
+                } else {
+                    return "guide_not_found";
+                }
             }
         } catch (Exception e) {
             return "internal_server_error";
+        }
+    }
+
+    private String encodeImageAsBase64(MultipartFile image) {
+        try {
+            return Base64.getEncoder().encodeToString(image.getBytes());
+        } catch (IOException e) {
+            return "error_encoding";
         }
     }
 }

@@ -47,7 +47,7 @@ export class MyGuidesComponent implements OnInit {
   }
 
   visualizeGuide(guideId: string): void {
-
+    this._router.navigate([`../${TutodoRoutes.SEE}/${guideId}`], { relativeTo: this._route });
   }
 
   editGuide(guideId: string): void {

@@ -48,4 +48,8 @@ export class GuideSeeComponent implements OnInit {
     this.currentStep++;
   }
 
+  previousStep(): void {
+    this.currentStep--;
+  }
+
 }

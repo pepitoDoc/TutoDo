@@ -4,12 +4,12 @@ import lombok.*;
 
 import java.util.List;
 
-@Builder
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateGuideRequest {
+@Builder
+public class UploadImage {
 
     private String title;
     private String description;

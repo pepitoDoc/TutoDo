@@ -5,7 +5,7 @@ public class Constants {
     public static final String ID = "_id";
 
     public static final String GUIDE_COLLECTION = "guide";
-    public static final String USERID = "userid";
+    public static final String USERID = "userId";
     public static final String TITLE = "title";
     public static final String DESCRIPTION = "description";
     public static final String PUBLISHED = "published";

@@ -12,7 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -28,9 +30,10 @@ public class GuideController {
 
     @PostMapping("create")
     public ResponseEntity<String> createGuide(
-            @RequestBody CreateGuideRequest createGuideRequest, HttpSession httpSession) {
+            @RequestPart CreateGuideRequest createGuideRequest,
+            @RequestPart MultipartFile guideThumbnail, HttpSession httpSession) {
         var userLogged = (UserSession) httpSession.getAttribute("user");
-        var result = this.guideService.guideCreate(createGuideRequest, userLogged.getId());
+        var result = this.guideService.guideCreate(createGuideRequest, userLogged.getId(), guideThumbnail);
         return ResponseEntity.status(result.contains("creating_updated")
                         ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR)
                 .contentType(MediaType.TEXT_PLAIN)
@@ -100,8 +103,16 @@ public class GuideController {
             @RequestBody AddRatingRequest addRatingRequest, HttpSession httpSession) {
         var userLogged = (UserSession) httpSession.getAttribute("user");
         var result = this.guideService.addRating(addRatingRequest, userLogged.getId());
-        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(result);
+        return !(result.equals("internal_server_error")) ?
+        ResponseEntity.status(result.equals("guide_updated") ? HttpStatus.OK : HttpStatus.NO_CONTENT)
+                .contentType(MediaType.TEXT_PLAIN).body(result) :
+        ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body(result);
     }
 
+//    @PostMapping(value = "upload-image",  consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<String> uploadImage(@RequestPart("uploadImage") UploadImage uploadImage,
+//                            @RequestPart("image") MultipartFile image) {
+//
+//    }
 
 }

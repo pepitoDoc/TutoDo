@@ -82,6 +82,14 @@ mat-paginator {
   }
 }
 
+.nextStepContainer {
+  width: 75%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 h1, h2, h3, mat-label, p {
   text-align: center;
 }
@@ -183,7 +191,33 @@ mat-form-field {
 }
 
 .divider {
-  width: 90%;
+  width: 100%;
   border-top: 1px solid gray;
   border-radius: 5px;
+}
+
+.title {
+  margin-top: 20px;
+  margin-bottom: 50px;
+  background: #12c2e9;
+  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #f64f59, #c471ed, #12c2e9);
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #f64f59, #c471ed, #12c2e9);
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  width: fit-content;
+  height: fit-content;
+  border-radius: 25px;
+}
+
+h1 {
+  width: fit-content;
+  height: fit-content;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  margin: 4px 4px;
+  padding: 10px 10px;
+  border-radius: 20px;
 }

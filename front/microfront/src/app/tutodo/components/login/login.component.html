@@ -3,14 +3,15 @@
     <img src="\assets\images\_11707f36-6180-48c1-b259-16214f3e3e34.jpeg">
   </div>
   <div class="col">
+    <!-- Login form -->
     <div class="columnContent" *ngIf="inputState">
       <h2>Inicio de sesión</h2>
       <h3>Introduzca sus credenciales de usuario</h3>
       <form class="example-form" [formGroup]="loginForm">
         <mat-form-field class="example-full-width" appareance="fill">
-          <mat-label>Usuario</mat-label>
-          <input type="text" matInput formControlName="userIdentifier"
-            placeholder="Nombre de usuario o correo electrónico">
+          <mat-label>Correo electrónico</mat-label>
+          <input type="email" [maxLength]="100" matInput formControlName="email"
+            placeholder="Correo electrónico">
           <mat-icon matSuffix>person</mat-icon>
           <mat-error *ngIf="loginForm.get('userIdentifier')?.hasError('required')">
             <strong>Se requiere el usuario</strong>
@@ -18,7 +19,7 @@
         </mat-form-field>
         <mat-form-field class="example-full-width" appareance="fill">
           <mat-label>Contraseña</mat-label>
-          <input type="password" matInput formControlName="password" placeholder="Contraseña"
+          <input type="password" [maxLength]="256" matInput formControlName="password" placeholder="Contraseña"
             [type]="hidePassword ? 'password' : 'text'">
           <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" [attr.aria-label]="'Hide password'"
             [attr.aria-pressed]="hidePassword">
@@ -39,20 +40,21 @@
         <button mat-button class="buttonSpace" color="accent" (click)="changeInputState()">Regístrese aquí</button>
       </div>
     </div>
+    <!-- Register form -->
     <div class="columnContent" *ngIf="!inputState">
       <h2>Registro de usuario</h2>
       <h3>Introduzca sus datos y pulse el botón de registro</h3>
       <form class="example-form" [formGroup]="registerForm">
         <mat-form-field class="example-full-width" appareance="fill">
           <mat-label>Nombre de usuario</mat-label>
-          <input type="text" matInput formControlName="username" placeholder="AntonioTuto">
+          <input type="text" [maxLength]="100" matInput formControlName="username" placeholder="AntonioTuto">
           <mat-error *ngIf="registerForm.get('username')?.hasError('required')">
             <strong>Se requiere el nombre de usuario</strong>
           </mat-error>
         </mat-form-field>
         <mat-form-field class="example-full-width" appareance="fill">
           <mat-label>Correo electrónico</mat-label>
-          <input type="email" matInput formControlName="email" placeholder="ejemplo@gmail.com">
+          <input type="email" [maxLength]="256" matInput formControlName="email" placeholder="ejemplo@gmail.com">
           <mat-error *ngIf="registerForm.get('email')?.hasError('required')">
             <strong>Se requiere el correo electrónico</strong>
           </mat-error>

@@ -4,6 +4,7 @@ import edu.dam.rest.microservice.bean.user.InsertUserRequest;
 import edu.dam.rest.microservice.bean.user.LoginUserRequest;
 import edu.dam.rest.microservice.bean.user.UserSession;
 import edu.dam.rest.microservice.constants.ApiConstants;
+import edu.dam.rest.microservice.persistence.model.User;
 import edu.dam.rest.microservice.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,8 +49,8 @@ public class UserController {
     ) {
         var userLogged = (UserSession) httpSession.getAttribute("user");
         if (userLogged != null && (
-                Objects.equals(userLogged.getUsername(), loginUserRequest.getUserIdentifier())
-                        || Objects.equals(userLogged.getEmail(), loginUserRequest.getUserIdentifier()))) {
+                Objects.equals(userLogged.getUsername(), loginUserRequest.getEmail())
+                        || Objects.equals(userLogged.getEmail(), loginUserRequest.getEmail()))) {
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .contentType(MediaType.TEXT_PLAIN)
@@ -64,7 +65,7 @@ public class UserController {
                         .body("login_succesful");
             } else {
                 return ResponseEntity
-                        .status(HttpStatus.EXPECTATION_FAILED)
+                        .status(HttpStatus.OK)
                         .contentType(MediaType.TEXT_PLAIN)
                         .body("credentials_wrong");
             }
@@ -81,7 +82,7 @@ public class UserController {
                     .body("session_confirmed");
         } else {
             return ResponseEntity
-                    .status(HttpStatus.EXPECTATION_FAILED)
+                    .status(HttpStatus.OK)
                     .contentType(MediaType.TEXT_PLAIN)
                     .body("session_expired");
         }
@@ -91,6 +92,14 @@ public class UserController {
     public void deleteUser(HttpSession httpSession) {
         var user = (UserSession) httpSession.getAttribute("user");
         this.userService.delete(user);
+    }
+
+    @GetMapping("get-user")
+    public ResponseEntity<User> getUser(HttpSession httpSession) {
+        var userLogged = (UserSession) httpSession.getAttribute("user");
+        var userInfo = this.userService.findById(userLogged.getId());
+        return ResponseEntity.status(userInfo != null ? HttpStatus.OK : HttpStatus.EXPECTATION_FAILED)
+                .contentType(MediaType.APPLICATION_JSON).body(userInfo);
     }
 
     /*@GetMapping("find-all-user-info")

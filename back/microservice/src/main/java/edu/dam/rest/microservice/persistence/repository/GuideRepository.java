@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface GuideRepository extends MongoRepository<Guide, String> {
 
-    List<Guide> findByUserId(String userid);
+    List<Guide> findByUserId(String userId);
 
 }

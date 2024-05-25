@@ -1,7 +1,9 @@
 <div class="page">
   <div class="alignFlexColumn" *ngIf="!showGuideInfo">
+    <div class="title">
+      <h1>{{ guideTitle }}</h1>
+    </div>
     <div id="stepInput">
-      <h1 class="mt-4">{{ guideTitle }}</h1>
       <form [formGroup]="stepsForm">
         <div formArrayName="steps" class="alignFlexColumn">
           <div *ngFor="let step of steps.controls; let i = index" class="alignFlexColumn">
@@ -29,22 +31,24 @@
               </mat-form-field>
               <div class="alignFlex mt-4">
                 <button type="button" mat-flat-button class="buttonSpace mx-5" color="warn"
-                  *ngIf="steps.controls.length > 1" (click)="cancelStep(i)">Cancelar</button>
+                  *ngIf="steps.controls.length > 1" (click)="cancelStep(i)">Eliminar paso</button>
                 <button type="button" mat-flat-button [disabled]="!step.valid" class="buttonSpace mx-5" color="primary"
                   (click)="saveStep(i)" *ngIf="!step.controls.saved.value">Guardar paso</button>
                 <button type="button" mat-flat-button class="buttonSpace mx-5" color="accent" (click)="modifyStep(i)"
                   *ngIf="step.controls.saved.value">Modificar paso</button>
               </div>
             </div>
-            <hr class="divider">
-            <button type="button" mat-flat-button color="primary mb-5" (click)="addStep(i)"
-              *ngIf="showSteps(i, paginator.pageIndex, paginator.pageSize)">Insertar paso</button>
+            <div *ngIf="showSteps(i, paginator.pageIndex, paginator.pageSize)" class="nextStepContainer">
+              <hr class="divider">
+              <button type="button" mat-flat-button color="primary mb-5" (click)="addStep(i)">Insertar paso</button>
+            </div>
           </div>
         </div>
       </form>
     </div>
     <div class="optionsDivDown">
-      <mat-slide-toggle class="whiteCard-check mx-2" [checked]="isPublished" (change)="changePublished()">Estado de la guía:
+      <mat-slide-toggle class="whiteCard-check mx-2" [checked]="isPublished" (change)="changePublished()">Estado de la
+        guía:
         {{ isPublished ? 'publicado' : 'no publicado' }}</mat-slide-toggle>
       <mat-paginator class="mx-2" #paginator [length]="steps.controls.length" [pageSize]="4"
         [pageSizeOptions]="[4, 8, 20]" aria-label="Select page" [showFirstLastButtons]="true"
@@ -61,7 +65,8 @@
           <li>
             <hr class="dropdown-divider">
           </li>
-          <li><button class="dropdown-item" type="button" (click)="showModifyGuideInfo(true)">Modificar información básica</button></li>
+          <li><button class="dropdown-item" type="button" (click)="showModifyGuideInfo(true)">Modificar información
+              básica</button></li>
           <li>
             <hr class="dropdown-divider">
           </li>
@@ -106,8 +111,9 @@
             </mat-chip-row>
             }
           </mat-chip-grid>
-          <input placeholder="Introduzca los tipos de guía" #guideTypeInput [disabled]="isGuideTypeInput" formControlName="guideTypes"
-            [matChipInputFor]="chipGrid" [matAutocomplete]="auto" [matChipInputSeparatorKeyCodes]="_separatorKeysCodes"/>
+          <input placeholder="Introduzca los tipos de guía" #guideTypeInput [disabled]="isGuideTypeInput"
+            formControlName="guideTypes" [matChipInputFor]="chipGrid" [matAutocomplete]="auto"
+            [matChipInputSeparatorKeyCodes]="_separatorKeysCodes" />
           <mat-hint align="start">{{chosenTypes.length}}/5 (mínimo 1 tipo de guía)</mat-hint>
           <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
             @for (guideType of filteredTypes | async; track guideType) {
@@ -117,12 +123,13 @@
           </mat-autocomplete>
         </mat-form-field>
         <div class="optionsDivDown">
-          <button mat-flat-button class="buttonSpace mx-4" color="warn" (click)="showModifyGuideInfo(false)">Volver a modificar
+          <button mat-flat-button class="buttonSpace mx-4" color="warn" (click)="showModifyGuideInfo(false)">Volver a
+            modificar
             pasos</button>
           <button mat-flat-button [disabled]="!guideInfo.valid || chosenTypes.length < 1" class="buttonSpace mx-4"
-            color="primary" (click)="saveGuideInfo()" *ngIf="isModifyGuideInfo">Guardar información</button>
-          <button mat-flat-button *ngIf="!isModifyGuideInfo" class="buttonSpace mx-4"
-            color="primary" color="accent" (click)="modifyGuideInfo()">Modificar información</button>
+            color="primary" (click)="saveGuideInfo(true)" *ngIf="isModifyGuideInfo">Guardar información</button>
+          <button mat-flat-button *ngIf="!isModifyGuideInfo" class="buttonSpace mx-4" color="primary" color="accent"
+            (click)="modifyGuideInfo()">Modificar información</button>
         </div>
       </form>
     </div>

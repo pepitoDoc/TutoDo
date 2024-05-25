@@ -14,14 +14,14 @@
             <p>Puntuación media: {{ ratingMean(guide.ratings) }}</p>
           </div>
           <div class="guideInfo">
-            <img mat-card-image src="https://material.angular.io/assets/img/examples/shiba2.jpg"
+            <img mat-card-image [src]="'data:image/jpeg;base64,' + guide.thumbnail"
               alt="Photo of a Shiba Inu">
           </div>
         </mat-card-content>
         <mat-divider></mat-divider>
         <mat-card-content>
           <p>
-            {{ guide.description }} aaaaaaaaaaaaa
+            {{ guide.description }}
           </p>
         </mat-card-content>
         <mat-card-actions>

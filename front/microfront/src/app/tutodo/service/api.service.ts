@@ -1,7 +1,7 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../environment/environment';
-import { CreateGuideRequest, FindByFilterRequest, Guide, InsertUserRequest, LoginUserRequest, SaveGuideInfoRequest, SaveGuideStepsRequest } from '../model/data';
+import { CreateGuideRequest, FindByFilterRequest, Guide, InsertUserRequest, LoginUserRequest, SaveGuideInfoRequest, SaveGuideStepsRequest, UploadImage } from '../model/data';
 import { Observable, map, share, shareReplay } from 'rxjs';
 import { UserData } from '../model/user-data';
 
@@ -42,7 +42,7 @@ export class ApiService {
     );
   }
 
-  createGuide$(createGuideRequest: CreateGuideRequest): Observable<string> {
+  createGuide$(createGuideRequest: FormData): Observable<string> {
     return this._http.post(`${this._guideEndpoint}/create`, createGuideRequest, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
@@ -68,6 +68,10 @@ export class ApiService {
 
   findOwnGuides$(): Observable<Guide[]> {
     return this._http.get<Guide[]>(`${this._guideEndpoint}/find-own-guides`, { withCredentials: true }).pipe(shareReplay(1));
+  }
+
+  uploadImage$(formData: FormData): Observable<any> {
+    return this._http.post(`${this._guideEndpoint}/upload-image`, formData).pipe(shareReplay(1));
   }
 
 }

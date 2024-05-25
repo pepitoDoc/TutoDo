@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 public class LoginUserRequest {
 
-    private String userIdentifier;
+    private String email;
     private String password;
 
 }

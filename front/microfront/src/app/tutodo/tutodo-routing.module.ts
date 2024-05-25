@@ -15,6 +15,8 @@ import { Observable } from 'rxjs';
 import { MyGuidesComponent } from './components/my-guides/my-guides.component';
 import { GuideSearchComponent } from './components/guide-search/guide-search.component';
 import { GuideSeeComponent } from './components/guide-see/guide-see.component';
+import { UserData } from './model/user-data';
+import { UserService } from './service/user.service';
 
 const routes: Routes = [
   {
@@ -32,7 +34,10 @@ const routes: Routes = [
       },
       {
         path: TutodoRoutes.TUTODO,
-        component: HomePageComponent, 
+        component: HomePageComponent,
+        canActivate: [(): Observable<MaybeAsync<GuardResult>> => inject(AuthService).canActivate()],
+        canActivateChild: [(): Observable<MaybeAsync<GuardResult>> => inject(AuthService).canActivateChild()],
+        resolve: [(): Observable<UserData> => inject(UserService).getUserData$()],
         children: [
           {
             path: TutodoRoutes.HOME,

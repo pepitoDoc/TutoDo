@@ -8,12 +8,10 @@ import edu.dam.rest.microservice.persistence.model.User;
 import edu.dam.rest.microservice.persistence.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
@@ -56,7 +54,7 @@ public class UserService {
     }
 
     public UserSession login(LoginUserRequest loginUserRequest) {
-        var foundUser = this.findByNameOrEmail(loginUserRequest.getUserIdentifier());
+        var foundUser = this.userRepository.findByEmail(loginUserRequest.getEmail());
         if (foundUser != null) {
             if (foundUser.getPassword().equals(loginUserRequest.getPassword())) {
                 return new UserSession(foundUser);
@@ -85,17 +83,18 @@ public class UserService {
                 sb.append("email_taken");
             }
         });
-        if (sb.toString().length() == 0) {
+        if (sb.toString().isEmpty()) {
             sb.append("user_valid");
         }
         return sb.toString();
     }
 
-    public User findByNameOrEmail(String userIdentifier) {
-        if (userIdentifier.contains("@")) {
-            return userRepository.findByEmail(userIdentifier);
+    public User findById(String userId) {
+        var foundUser = this.userRepository.findById(userId);
+        if (foundUser.isPresent()) {
+            return foundUser.orElseThrow();
         } else {
-            return userRepository.findByUsername(userIdentifier);
+            return null;
         }
     }
 
@@ -113,5 +112,13 @@ public class UserService {
     /*public User findAllUserInfo(String userId) {
 
     }*/
+
+//    public User findByNameOrEmail(String userIdentifier) {
+//        if (userIdentifier.contains("@")) {
+//            return userRepository.findByEmail(userIdentifier);
+//        } else {
+//            return userRepository.findByUsername(userIdentifier);
+//        }
+//    }
 
 }
