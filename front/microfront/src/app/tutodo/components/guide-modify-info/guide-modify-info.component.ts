@@ -1,4 +1,4 @@
-import { Component, ElementRef, NgZone, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, NgZone, OnInit, ViewChild, inject } from '@angular/core';
 import { NonNullableFormBuilder, FormBuilder, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -10,8 +10,7 @@ import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { ENTER, COMMA } from '@angular/cdk/keycodes';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MatChipEditedEvent, MatChipGrid, MatChipInputEvent } from '@angular/material/chips';
-import { MatPaginator } from '@angular/material/paginator';
-import { StepImageFile, LoadedImage, StepSnapshot, Guide, SaveGuideInfoRequest } from '../../model/data';
+import { Guide, SaveGuideInfoRequest, GuideInfoSnapshot } from '../../model/data';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 
 @Component({
@@ -26,14 +25,10 @@ export class GuideModifyInfoComponent implements OnInit {
     description: ['', { validators: [Validators.required, Validators.minLength(40), Validators.maxLength(100)] }],
     guideTypes: [''],
     ingredients: [''],
-    imageFile: this._fb.control<File | null>(null),
-    imageBase64: ['']
+    imageFile: this._fb.control<File | null>(null)
   });
   @ViewChild('autosize') autosize!: CdkTextareaAutosize;
   @ViewChild('chipGrid') chipGrid!: MatChipGrid;
-  @ViewChild('paginator') paginator!: MatPaginator;
-  @ViewChild('guideTypeInput') guideTypeInput!: ElementRef<HTMLInputElement>;
-  @ViewChild('ingredientsInput') ingredientsInput!: ElementRef<HTMLInputElement>;
   filteredTypes!: Observable<string[]>;
   addOnBlur = true;
   readonly separatorKeysCodesTypes = [] as const; // NO ESTÁ ASIGNADO
@@ -43,19 +38,12 @@ export class GuideModifyInfoComponent implements OnInit {
   ingredients: string[] = [];
   announcer = inject(LiveAnnouncer);
   guideId!: string;
-
-  guideThumbnailBase64!: File;
+  guideThumbnailFile!: File | null;
   guideThumbnailLoaded!: string | ArrayBuffer | null;
-  stepImagesBase64: StepImageFile[] = [];
-  stepImagesLoaded: LoadedImage[] = [];
-
-  stepSnapshots: StepSnapshot[] = [];
-
+  guideInfoSnapshot!: GuideInfoSnapshot; 
   restoredGuide!: Guide;
   isPublished = false;
-  showGuideInfo = false;
   isModifyGuideInfo = false;
-  enableInfoInputs = false;
 
   constructor(
     private _ngZone: NgZone,
@@ -70,9 +58,7 @@ export class GuideModifyInfoComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this._sharedService
-      .getPersistedData$('guideIdModifying')
-      .subscribe((response) => {
+    this._sharedService.getPersistedData$('guideIdModifying').subscribe((response) => {
         if (
           response === null ||
           response === undefined ||
@@ -93,12 +79,10 @@ export class GuideModifyInfoComponent implements OnInit {
               description: this.restoredGuide.description,
               guideTypes: '',
               ingredients: '',
-              imageBase64: this.restoredGuide.thumbnail,
               imageFile: null
             });
             this.chosenTypes = this.restoredGuide.guideTypes;
             this.ingredients = this.restoredGuide.ingredients === null ? [] : this.restoredGuide.ingredients;
-            this.saveGuideInfo(false);
             this._toast.success(
               `Se ha restaurado el progreso de edición de la guía: ${this.restoredGuide.title}`,
               'Progreso de guía restaurado'
@@ -109,86 +93,56 @@ export class GuideModifyInfoComponent implements OnInit {
     this._service.findAllGuideTypes$().subscribe({
       next: (response) => {
         this.guideTypes = response;
-        this.filteredTypes =
-          this.guideInfo.controls.guideTypes.valueChanges.pipe(
+        this.filteredTypes = this.guideInfo.controls.guideTypes.valueChanges.pipe(
             map((guideType: string) =>
-              guideType !== ''
-                ? this._filter(guideType)
-                : this.guideTypes.slice()
+              guideType !== '' ? this._filter(guideType) : this.guideTypes.slice()
             )
           );
+      },
+      error: (error) => {
+        // TODO
       }
     });
   }
 
-  saveGuideInfo(save: boolean): void {
-    if (save) {
-      const payload: SaveGuideInfoRequest = {
-        guideId: this.guideId,
-        title: this.guideInfo.controls.title.value,
-        description: this.guideInfo.controls.description.value,
-        guideTypes: this.chosenTypes,
-        ingredients: this.ingredients,
-        thumbnail: this.restoredGuide.thumbnail
-      };
-      const formData = new FormData();
-      if (this.guideThumbnailBase64 !== undefined) formData.append('guideThumbnail', this.guideThumbnailBase64);
-      formData.append('saveGuideInfoRequest', new Blob([JSON.stringify(payload)], {
-        type: 'application/json',
-      }));
-      this._service.saveGuideInfo$(formData).subscribe({
-        next: (response) => {
-          if (response === 'guide_updated') {
-            this.disableGuideInfo();
-            this._toast.success(
-              'Se ha guardado la información básica de la guía introducida.',
-              'Información guardada'
-            );
-          }
-        },
-        error: () => {
-          this._toast.error(
-            'Ha habido un error guardando la información básica de la guía.',
-            'Operación fallida'
+  saveGuideInfo(): void {
+    const payload: SaveGuideInfoRequest = {
+      guideId: this.guideId,
+      title: this.guideInfo.controls.title.value,
+      description: this.guideInfo.controls.description.value,
+      guideTypes: this.chosenTypes,
+      ingredients: this.ingredients,
+      thumbnail: this.restoredGuide.thumbnail
+    };
+    const formData = new FormData();
+    if (this.guideThumbnailFile !== null) formData.append('guideThumbnail', this.guideThumbnailFile);
+    formData.append('saveGuideInfoRequest', new Blob([JSON.stringify(payload)], {
+      type: 'application/json',
+    }));
+    this._service.saveGuideInfo$(formData).subscribe({
+      next: (response) => {
+        if (response === 'guide_updated') {
+          this.isModifyGuideInfo = false;
+          this._toast.success(
+            'Se ha guardado la información básica de la guía introducida.',
+            'Información guardada'
           );
         }
-      });
-    }
-  }
-
-  enableGuideInfo(): void {
-    this.guideInfo.controls.description.enable();
-    this.guideInfo.controls.title.enable();
-    this.guideInfo.controls.guideTypes.enable();
-    this.guideInfo.controls.imageFile.enable();
-    this.isModifyGuideInfo = true;
-    this.enableInfoInputs = false;
-    if (this.guideTypeInput !== undefined)
-      this.guideTypeInput.nativeElement.disabled = false;
-    if (this.ingredientsInput !== undefined)
-      this.ingredientsInput.nativeElement.disabled = false;
-    if (this.chipGrid !== undefined) this.chipGrid.disabled = false;
-  }
-
-  disableGuideInfo(): void {
-    this.guideInfo.controls.description.disable();
-    this.guideInfo.controls.title.disable();
-    this.guideInfo.controls.guideTypes.disable();
-    this.guideInfo.controls.imageFile.disable();
-    this.isModifyGuideInfo = false;
-    this.enableInfoInputs = true;
-    if (this.guideTypeInput !== undefined)
-      this.guideTypeInput.nativeElement.disabled = true;
-    if (this.ingredientsInput !== undefined)
-      this.ingredientsInput.nativeElement.disabled = true;
-    if (this.chipGrid !== undefined) this.chipGrid.disabled = true;
+      },
+      error: () => {
+        this._toast.error(
+          'Ha habido un error guardando la información básica de la guía.',
+          'Operación fallida'
+        );
+      }
+    });
   }
 
   updateGuideThumbnail(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
-      this.guideThumbnailBase64 = file;
+      this.guideThumbnailFile = file;
       const reader = new FileReader();
       reader.onload = () => {
         this.guideThumbnailLoaded = reader.result;
@@ -216,6 +170,42 @@ export class GuideModifyInfoComponent implements OnInit {
     );
   }
 
+  deleteImage(): void {
+    this.restoredGuide.thumbnail = '';
+    this.guideThumbnailFile = null;
+    this.guideThumbnailLoaded = null;
+  }
+
+  cancelChanges(): void {
+    this.isModifyGuideInfo = false;
+    this.guideInfo.setValue(
+      {
+        title: this.guideInfoSnapshot.title,
+        description: this.guideInfoSnapshot.description,
+        guideTypes: '',
+        ingredients: '',
+        imageFile: null
+      }
+    );
+    this.chosenTypes = this.guideInfoSnapshot.guideTypes;
+    this.ingredients = this.guideInfoSnapshot.ingredients;
+    this.restoredGuide.thumbnail = this.guideInfoSnapshot.imageBase64;
+    this.guideThumbnailFile = this.guideInfoSnapshot.imageFile;
+    this.guideThumbnailLoaded = this.guideInfoSnapshot.loadedImage;
+  }
+
+  modifyGuideInfo(): void {
+    this.isModifyGuideInfo = true;
+    this.guideInfoSnapshot = {
+      title: this.guideInfo.controls.title.getRawValue(),
+      description: this.guideInfo.controls.title.getRawValue(),
+      guideTypes: this.chosenTypes,
+      ingredients: this.ingredients,
+      imageBase64: this.restoredGuide.thumbnail,
+      imageFile: this.guideThumbnailFile,
+      loadedImage: this.guideThumbnailLoaded
+    };
+  }
 
   triggerResize() {
     this._ngZone.onStable
@@ -231,7 +221,6 @@ export class GuideModifyInfoComponent implements OnInit {
     }
     if (this.chosenTypes.length === 4) {
       this.guideInfo.controls.guideTypes.enable();
-      this.guideTypeInput.nativeElement.disabled = false;
     }
     this.guideInfo.controls.guideTypes.reset();
   }
@@ -240,9 +229,7 @@ export class GuideModifyInfoComponent implements OnInit {
     this.chosenTypes.push(event.option.viewValue);
     if (this.chosenTypes.length === 5) {
       this.guideInfo.controls.guideTypes.disable();
-      this.guideTypeInput.nativeElement.disabled = true;
     }
-    this.guideTypeInput.nativeElement.value = '';
     this.guideInfo.controls.guideTypes.reset();
   }
 
@@ -272,6 +259,15 @@ export class GuideModifyInfoComponent implements OnInit {
     if (index >= 0) {
       this.ingredients[index] = value;
     }
+  }
+
+  listToString(list: string[]): string {
+    if (list.length > 0) {
+      let formattedList = '';
+      list.forEach(string => formattedList = formattedList + `${string}, `);
+      return formattedList.substring(0, formattedList.length - 2);
+    }
+    return '';
   }
 
   private _filter(value: string): string[] {

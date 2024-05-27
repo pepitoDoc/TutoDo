@@ -1,0 +1,242 @@
+.alignFlexRow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+}
+
+.alignFlexColumn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+.whiteCard-check {
+    width: 20%;
+    height: fit-content;
+    padding: 18px 15px;
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: whitesmoke;
+    border-radius: 20px;
+    border: 1px solid black;
+
+    @media (max-width: 767px) {
+        width: 90%;
+    }
+}
+
+.whiteCard-guideInfo {
+    padding: 50px 20px;
+    margin-bottom: 100px;
+    margin-top: 100px;
+    width: 75%;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: white;
+    border-radius: 20px;
+    border: 1px solid black;
+
+    @media (max-width: 768px) {
+        margin-top: 10px;
+        padding: 0px;
+        width: 95%;
+    }
+}
+
+mat-paginator {
+    border-radius: 20px;
+    border: 1px solid black;
+    margin-bottom: 10px;
+}
+
+#stepInput {
+    width: 100%;
+
+    @media (max-width: 768px) {
+        width: 95%;
+    }
+}
+
+.nextStepContainer {
+    width: 75%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 20px;
+}
+
+h1, h2, h3, mat-label, p {
+    text-align: center;
+}
+
+h2, h3, mat-label, p, input {
+    font-size: 20px;
+
+    @media (max-width: 768px) {
+        font-size: 12px;
+    }
+}
+
+mat-hint,
+strong {
+    font-size: 14px;
+
+    @media (max-width: 768px) {
+        font-size: 10px;
+    }
+}
+
+button {
+    font-size: 20px;
+
+    @media (max-width: 1000px) {
+        font-size: 16px;
+    }
+
+    @media (max-width: 768px) {
+        font-size: 14px;
+    }
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+mat-form-field {
+    width: 90%;
+    margin: 10px 5px;
+
+    @media (max-width: 768px) {
+        margin: 0px 0px;
+    }
+}
+
+.buttonSpace {
+    margin-top: 10px;
+    margin-bottom: 20px;
+
+    @media (max-width: 768px) {
+        margin: 5px 5px;
+    }
+}
+
+.page {
+    height: auto;
+
+    @media (max-width: 768px) {
+        height: fit-content;
+        padding-bottom: 20px;
+    }
+}
+
+.optionsDivTop {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    width: 80%;
+    height: auto;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        padding-bottom: 20px;
+    }
+}
+
+.optionsDivDown {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 95%;
+    padding-top: 20px;
+    height: auto;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        padding-bottom: 20px;
+    }
+}
+
+.mat-mdc-unelevated-button>.mat-icon {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+
+.btn-group {
+    width: 15%;
+    border: 1px solid black;
+
+    @media (max-width: 768px) {
+        width: 50%
+    }
+}
+
+.divider {
+    width: 100%;
+    border-top: 1px solid gray;
+    border-radius: 5px;
+}
+
+.title {
+    margin-top: 20px;
+    margin-bottom: 50px;
+    background: #12c2e9;
+    /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #f64f59, #c471ed, #12c2e9);
+    /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #f64f59, #c471ed, #12c2e9);
+    /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    width: fit-content;
+    height: fit-content;
+    border-radius: 25px;
+}
+
+h1 {
+    width: fit-content;
+    height: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    margin: 4px 4px;
+    padding: 10px 10px;
+    border-radius: 20px;
+}
+
+.imageInput {
+    width: 90%;
+    margin: 10px 5px;
+    border: 0.5px solid black;
+    border-radius: 5px;
+}
+
+.imageInput:disabled {
+    border: 0.5px solid rgb(170, 170, 170);
+}
+
+img {
+    margin: 0px 0px;
+    width: auto;
+
+    @media(max-width: 768px) {
+        width: 75%;
+        height: 75%;
+    }
+}

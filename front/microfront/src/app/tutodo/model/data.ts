@@ -31,8 +31,10 @@ export interface Step {
 export interface FormStep {
     title: string;
     description: string;
-    imageFile: File | null;
+    imageFileInput: File | null;
     imageBase64: string;
+    loadedImage: string | ArrayBuffer | null;
+    imageFile: File | null;
     saved: boolean;
     modifying: boolean;
 }
@@ -97,11 +99,6 @@ export interface SaveGuideInfoRequest {
     thumbnail: string;
 }
 
-export interface StepImageFile {
-    index: number;
-    image: File;
-}
-
 export interface LoadedImage {
     index: number;
     image: string | ArrayBuffer | null;
@@ -111,7 +108,17 @@ export interface StepSnapshot {
     title: string;
     description: string;
     imageBase64: string;
-    loadedImage: string | ArrayBuffer | null | undefined;
-    imageFile: File | undefined;
+    loadedImage: string | ArrayBuffer | null;
+    imageFile: File | null;
     index: number;
+}
+
+export interface GuideInfoSnapshot {
+    title: string;
+    description: string;
+    guideTypes: string[];
+    ingredients: string[];
+    imageBase64: string;
+    imageFile: File | null;
+    loadedImage: string | ArrayBuffer | null;
 }

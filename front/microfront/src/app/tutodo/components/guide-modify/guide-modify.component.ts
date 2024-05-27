@@ -1,6 +1,5 @@
 import {
   Component,
-  ElementRef,
   NgZone,
   OnInit,
   ViewChild,
@@ -11,10 +10,7 @@ import { ApiService } from '../../service/api.service';
 import {
   FormStep,
   Guide,
-  LoadedImage,
-  SaveGuideInfoRequest,
   SaveGuideStepRequest,
-  StepImageFile,
   StepSnapshot,
 } from '../../model/data';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
@@ -23,12 +19,9 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { InfoDialogComponent } from '../info-dialog/info-dialog.component';
 import { SharedService } from '../../shared/shared.service';
-import { Observable, Subject, map, take } from 'rxjs';
+import { take } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
-import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { MatChipEditedEvent, MatChipGrid, MatChipInputEvent } from '@angular/material/chips';
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { OptionDialogComponent } from '../option-dialog/option-dialog.component';
 
 @Component({
@@ -43,48 +36,21 @@ export class GuideModifyComponent implements OnInit {
       this._nnfb.group({
         title:  ['', { validators: [Validators.required, Validators.minLength(10), Validators.maxLength(50)] }],
         description: ['', { validators: [Validators.required, Validators.minLength(50), Validators.maxLength(400)] }],
-        imageFile: this._fb.control<File | null>(null),
+        imageFileInput: this._fb.control<File | null>(null),
         imageBase64: [''],
+        loadedImage: this._fb.control<string | ArrayBuffer | null>(null),
+        imageFile: this._fb.control<File | null>(null),
         saved: [false],
         modifying: [false]
       })
     ])
   });
-  guideInfo = this._nnfb.group({
-    title: ['', { validators: [Validators.required, Validators.minLength(10), Validators.maxLength(50)] }],
-    description: ['', { validators: [Validators.required, Validators.minLength(40), Validators.maxLength(100)] }],
-    guideTypes: [''],
-    ingredients: [''],
-    imageFile: this._fb.control<File | null>(null),
-    imageBase64: ['']
-  });
   @ViewChild('autosize') autosize!: CdkTextareaAutosize;
-  @ViewChild('chipGrid') chipGrid!: MatChipGrid;
   @ViewChild('paginator') paginator!: MatPaginator;
-  @ViewChild('guideTypeInput') guideTypeInput!: ElementRef<HTMLInputElement>;
-  @ViewChild('ingredientsInput') ingredientsInput!: ElementRef<HTMLInputElement>;
-  filteredTypes!: Observable<string[]>;
-  addOnBlur = true;
-  readonly separatorKeysCodesTypes = [] as const; // NO ESTÁ ASIGNADO
-  readonly separatorKeysCodesIngredients = [ENTER, COMMA] as const;
-  guideTypes!: string[];
-  chosenTypes: string[] = [];
-  ingredients: string[] = [];
   announcer = inject(LiveAnnouncer);
   guideId!: string;
-
-  guideThumbnailBase64!: File;
-  guideThumbnailLoaded!: string | ArrayBuffer | null;
-  stepImagesBase64: StepImageFile[] = [];
-  stepImagesLoaded: LoadedImage[] = [];
-
   stepSnapshots: StepSnapshot[] = [];
-
   restoredGuide!: Guide;
-  isPublished = false;
-  showGuideInfo = false;
-  isModifyGuideInfo = false;
-  enableInfoInputs = false;
 
   constructor(
     private _ngZone: NgZone,
@@ -99,9 +65,8 @@ export class GuideModifyComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this._sharedService
-      .getPersistedData$('guideIdModifying')
-      .subscribe((response) => {
+    this._sharedService.getPersistedData$('guideIdModifying').subscribe({
+      next: (response) => {
         if (
           response === null ||
           response === undefined ||
@@ -114,55 +79,48 @@ export class GuideModifyComponent implements OnInit {
           this._router.navigate([`../`], { relativeTo: this._route });
         } else {
           this.guideId = response.guideIdModifying;
-          this._service.findGuideById$(this.guideId).subscribe((response) => {
-            this.restoredGuide = response;
-            const steps: FormStep[] = [];
-            this.restoredGuide.steps.forEach((step) => {
-              steps.push(
-                { title: step.title, description: step.description, imageBase64: step.image, imageFile: null, saved: true, modifying: false });
-            });
-            // Añado pasos
-            for (let i = 0; i < steps.length - 1; i++)
-              this.stepsForm.controls.steps.controls.push(
-                this._createNewStep()
+          this._service.findGuideById$(this.guideId).subscribe({
+            next: (response) => {
+              this.restoredGuide = response;
+              const steps: FormStep[] = [];
+              this.restoredGuide.steps.forEach((step) => {
+                steps.push(
+                  {
+                    title: step.title,
+                    description: step.description,
+                    imageBase64: step.image,
+                    imageFileInput: null,
+                    loadedImage: null,
+                    imageFile: null,
+                    saved: true,
+                    modifying: false
+                  });
+              });
+              // Añado pasos en el form por cado paso recibido
+              for (let i = 0; i < steps.length - 1; i++)
+                this.stepsForm.controls.steps.controls.push(
+                  this._createNewStep()
+                );
+              // Asigno valor a cada paso en el form
+              for (let i = 0; i < steps.length; i++) this.disableStep(i);
+              this.stepsForm.controls.steps.setValue(
+                steps.length > 0
+                  ? steps
+                  : this.stepsForm.controls.steps.getRawValue()
               );
-            // Asigno valor
-            for (let i = 0; i < steps.length; i++) this.disableStep(i);
-            this.stepsForm.controls.steps.setValue(
-              steps.length > 0
-                ? steps
-                : this.stepsForm.controls.steps.getRawValue()
-            );
-            this.isPublished = this.restoredGuide.published;
-            this.guideInfo.setValue({
-              title: this.restoredGuide.title,
-              description: this.restoredGuide.description,
-              guideTypes: '',
-              ingredients: '',
-              imageBase64: this.restoredGuide.thumbnail,
-              imageFile: null
-            });
-            this.chosenTypes = this.restoredGuide.guideTypes;
-            this.ingredients = this.restoredGuide.ingredients === null ? [] : this.restoredGuide.ingredients;
-            this.saveGuideInfo(false);
-            this._toast.success(
-              `Se ha restaurado el progreso de edición de la guía: ${this.restoredGuide.title}`,
-              'Progreso de guía restaurado'
-            );
+              this._toast.success(
+                `Se ha restaurado el progreso de edición de la guía: ${this.restoredGuide.title}`,
+                'Progreso de guía restaurado'
+              );
+            },
+            error: (response) => {
+              // TODO
+            }
           });
         }
-      });
-    this._service.findAllGuideTypes$().subscribe({
-      next: (response) => {
-        this.guideTypes = response;
-        this.filteredTypes =
-          this.guideInfo.controls.guideTypes.valueChanges.pipe(
-            map((guideType: string) =>
-              guideType !== ''
-                ? this._filter(guideType)
-                : this.guideTypes.slice()
-            )
-          );
+      },
+      error: (error) => {
+        // TODO
       }
     });
   }
@@ -190,9 +148,9 @@ export class GuideModifyComponent implements OnInit {
       stepIndex: index,
       saved: step.saved
     };
-    const stepImage = this.stepImagesBase64.find(step => step.index === index)?.image;
+    const stepImage = this.stepsForm.controls.steps.controls[index].controls.imageFile.getRawValue();
     const formData = new FormData();
-    if (stepImage !== undefined) formData.append('stepImage', stepImage);
+    if (stepImage !== null) formData.append('stepImage', stepImage);
     formData.append('saveGuideStepRequest', new Blob([JSON.stringify(payload)], {
       type: 'application/json',
     }));
@@ -200,6 +158,7 @@ export class GuideModifyComponent implements OnInit {
       next: (response) => {
         if (response === 'guide_updated') {
           this.disableStep(index);
+          this.stepSnapshots.splice(index, 1);
           this.stepsForm.controls.steps.controls[index].controls.saved.setValue(true);
           this._toast.success(
             `Se ha guardado la información sobre el paso ${index + 1}.`,
@@ -219,7 +178,7 @@ export class GuideModifyComponent implements OnInit {
   disableStep(index: number) {
     this.stepsForm.controls.steps.controls[index].controls.title.disable();
     this.stepsForm.controls.steps.controls[index].controls.description.disable();
-    this.stepsForm.controls.steps.controls[index].controls.imageFile.disable();
+    this.stepsForm.controls.steps.controls[index].controls.imageFileInput.disable();
     this.stepsForm.controls.steps.controls[index].controls.modifying.setValue(false);
   }
 
@@ -255,6 +214,9 @@ export class GuideModifyComponent implements OnInit {
             this.stepsForm.controls.steps.controls.splice(index, 1);
           }
         }
+      },
+      error: (error) => {
+        // TODO
       }
     });
   }
@@ -262,7 +224,7 @@ export class GuideModifyComponent implements OnInit {
   enableStep(index: number): void {
     this.stepsForm.controls.steps.controls[index].controls.title.enable();
     this.stepsForm.controls.steps.controls[index].controls.description.enable();
-    this.stepsForm.controls.steps.controls[index].controls.imageFile.enable();
+    this.stepsForm.controls.steps.controls[index].controls.imageFileInput.enable();
     this.stepsForm.controls.steps.controls[index].controls.modifying.setValue(true);
   }
 
@@ -273,8 +235,8 @@ export class GuideModifyComponent implements OnInit {
         title: this.stepsForm.controls.steps.controls[index].controls.title.getRawValue(),
         description: this.stepsForm.controls.steps.controls[index].controls.description.getRawValue(),
         imageBase64: this.stepsForm.controls.steps.controls[index].controls.imageBase64.getRawValue(),
-        loadedImage: this.findLoadedImage(index)?.image,
-        imageFile: this.stepImagesBase64.find(stepImage => stepImage.index === index)?.image,
+        loadedImage: this.stepsForm.controls.steps.controls[index].controls.loadedImage.getRawValue(),
+        imageFile: this.stepsForm.controls.steps.controls[index].controls.imageFile.getRawValue(),
         index: index
       }
     );
@@ -286,19 +248,13 @@ export class GuideModifyComponent implements OnInit {
       this.stepsForm.controls.steps.controls[index].setValue({
         title: stepSnapshot.title,
         description: stepSnapshot.description,
+        imageFile: stepSnapshot.imageFile,
         imageBase64: stepSnapshot.imageBase64,
-        imageFile: null,
+        imageFileInput: null,
+        loadedImage: stepSnapshot.loadedImage,
         modifying: false,
         saved: true
       });
-      if (stepSnapshot.loadedImage !== undefined) {
-        const loadedImageIndex = this.stepImagesLoaded.findIndex(stepImage => stepImage.index === index);
-        const imageBase64Index = this.stepImagesBase64.findIndex(stepImage => stepImage.index === index);
-        this.stepImagesLoaded.splice(loadedImageIndex, 1, { index: index, image: stepSnapshot.loadedImage });
-        stepSnapshot.imageFile === undefined
-          ? this.stepImagesBase64.splice(imageBase64Index, 1)
-          : this.stepImagesBase64.splice(imageBase64Index, 1, { index: index, image: stepSnapshot.imageFile });
-      }
       this.stepSnapshots.splice(index, 1);
       this.disableStep(index);
     } else {
@@ -307,86 +263,7 @@ export class GuideModifyComponent implements OnInit {
     }
   }
 
-  saveGuideInfo(save: boolean): void {
-    if (save) {
-      const payload: SaveGuideInfoRequest = {
-        guideId: this.guideId,
-        title: this.guideInfo.controls.title.value,
-        description: this.guideInfo.controls.description.value,
-        guideTypes: this.chosenTypes,
-        ingredients: this.ingredients,
-        thumbnail: this.restoredGuide.thumbnail
-      };
-      const formData = new FormData();
-      if (this.guideThumbnailBase64 !== undefined) formData.append('guideThumbnail', this.guideThumbnailBase64);
-      formData.append('saveGuideInfoRequest', new Blob([JSON.stringify(payload)], {
-        type: 'application/json',
-      }));
-      this._service.saveGuideInfo$(formData).subscribe({
-        next: (response) => {
-          if (response === 'guide_updated') {
-            this.disableGuideInfo();
-            this._toast.success(
-              'Se ha guardado la información básica de la guía introducida.',
-              'Información guardada'
-            );
-          }
-        },
-        error: () => {
-          this._toast.error(
-            'Ha habido un error guardando la información básica de la guía.',
-            'Operación fallida'
-          );
-        }
-      });
-    }
-  }
-
-  enableGuideInfo(): void {
-    this.guideInfo.controls.description.enable();
-    this.guideInfo.controls.title.enable();
-    this.guideInfo.controls.guideTypes.enable();
-    this.guideInfo.controls.imageFile.enable();
-    this.isModifyGuideInfo = true;
-    this.enableInfoInputs = false;
-    if (this.guideTypeInput !== undefined)
-      this.guideTypeInput.nativeElement.disabled = false;
-    if (this.ingredientsInput !== undefined)
-      this.ingredientsInput.nativeElement.disabled = false;
-    if (this.chipGrid !== undefined) this.chipGrid.disabled = false;
-  }
-
-  disableGuideInfo(): void {
-    this.guideInfo.controls.description.disable();
-    this.guideInfo.controls.title.disable();
-    this.guideInfo.controls.guideTypes.disable();
-    this.guideInfo.controls.imageFile.disable();
-    this.isModifyGuideInfo = false;
-    this.enableInfoInputs = true;
-    if (this.guideTypeInput !== undefined)
-      this.guideTypeInput.nativeElement.disabled = true;
-    if (this.ingredientsInput !== undefined)
-      this.ingredientsInput.nativeElement.disabled = true;
-    if (this.chipGrid !== undefined) this.chipGrid.disabled = true;
-  }
-
-  showModifyGuideInfo(mode: boolean): void {
-    this.disableGuideInfo();
-    this.showGuideInfo = mode;
-  }
-
-  changePublished(): void {
-    this._toast.clear();
-    this.isPublished = !this.isPublished;
-    this._toast.info(
-      'Para guardar este cambio, haga click en "Guardar cambios".',
-      'Estado de publicación cambiado: ' +
-        (this.isPublished ? 'publicado' : 'no publicado')
-    );
-  }
-
-  handlePageEvent(e: PageEvent) {}
-
+  
   showSteps(index: number, page: number, pageSize: number): boolean {
     const offset: number = pageSize * (page + 1) - index - 1;
     return offset >= 0 && offset < pageSize;
@@ -407,103 +284,14 @@ export class GuideModifyComponent implements OnInit {
     });
   }
 
-  triggerResize() {
-    this._ngZone.onStable
-      .pipe(take(1))
-      .subscribe(() => this.autosize.resizeToFitContent(true));
-  }
-
-  removeType(guideType: string): void {
-    const index = this.chosenTypes.indexOf(guideType);
-    if (index >= 0) {
-      this.chosenTypes.splice(index, 1);
-      this.announcer.announce(`Removed ${guideType}`);
-    }
-    if (this.chosenTypes.length === 4) {
-      this.guideInfo.controls.guideTypes.enable();
-      this.guideTypeInput.nativeElement.disabled = false;
-    }
-    this.guideInfo.controls.guideTypes.reset();
-  }
-
-  selectedType(event: MatAutocompleteSelectedEvent): void {
-    this.chosenTypes.push(event.option.viewValue);
-    if (this.chosenTypes.length === 5) {
-      this.guideInfo.controls.guideTypes.disable();
-      this.guideTypeInput.nativeElement.disabled = true;
-    }
-    this.guideTypeInput.nativeElement.value = '';
-    this.guideInfo.controls.guideTypes.reset();
-  }
-
-  removeIngredient(ingredient: string): void {
-    const index = this.ingredients.indexOf(ingredient);
-    if (index >= 0) {
-      this.ingredients.splice(index, 1);
-      this.announcer.announce(`Removed ${ingredient}`);
-    }
-  }
-
-  addIngredient(ingredient: MatChipInputEvent): void {
-    const value = (ingredient.value || '').trim();
-    if (value) {
-      this.ingredients.push(value);
-    }
-    ingredient.chipInput!.clear();
-  }
-
-  editIngredient(ingredient: string, event: MatChipEditedEvent) {
-    const value = event.value.trim();
-    if (!value) {
-      this.removeIngredient(ingredient);
-      return;
-    }
-    const index = this.ingredients.indexOf(ingredient);
-    if (index >= 0) {
-      this.ingredients[index] = value;
-    }
-  }
-
-  updateGuideThumbnail(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      this.guideThumbnailBase64 = file;
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.guideThumbnailLoaded = reader.result;
-        this._toast.success(
-          'Imagen cargada correctamente.',
-          'Operación exitosa'
-        );
-      };
-      reader.readAsDataURL(file);
-    } else {
-      this._toast.error(
-        'No se ha podido cargar la imagen seleccionada.',
-        'Operación fallida'
-      );
-    }
-  }
-
-  findLoadedImage(index: number): LoadedImage | undefined {
-    return this.stepImagesLoaded.find(step => step.index === index);
-  }
-
   updateStepImage(index: number, event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
-      const imageStepIndex = this.stepImagesBase64.findIndex(stepImage => stepImage.index === index);
-      imageStepIndex !== -1 
-        ? this.stepImagesBase64[imageStepIndex].image = file 
-        : this.stepImagesBase64.push({ index: index, image: file });
+      this.stepsForm.controls.steps.controls[index].controls.imageFile.setValue(file);
       const reader = new FileReader();
       reader.onload = () => {
-        const imageLoadedIndex = this.stepImagesLoaded.findIndex(loadedImage => loadedImage.index === index);
-        imageLoadedIndex !== -1
-          ? this.stepImagesLoaded[imageLoadedIndex].image = reader.result
-          : this.stepImagesLoaded.push({ index: index, image: reader.result });
+        this.stepsForm.controls.steps.controls[index].controls.loadedImage.setValue(reader.result);
         this._toast.success(
           'Imagen cargada correctamente.',
           'Operación exitosa'
@@ -520,7 +308,7 @@ export class GuideModifyComponent implements OnInit {
 
   nextStepValid(index: number): boolean {
     if (this.stepsForm.controls.steps.controls[index].controls.modifying.getRawValue() === true 
-      || (!!this.stepsForm.controls.steps.controls[index + 1] 
+      || (this.stepsForm.controls.steps.controls[index + 1] 
       && this.stepsForm.controls.steps.controls[index + 1].controls.modifying.getRawValue() === true)) {
       return true;
     } else {
@@ -528,42 +316,31 @@ export class GuideModifyComponent implements OnInit {
     }
   }
 
-  // deleteImage(index: number, source: boolean, type: boolean): void {
-  //   // Image base 64
-  //   if (source === true) {
-  //     if (type === true) {
-  //       this.stepsForm.controls.steps.controls[index].controls.imageBase64.setValue('');
-  //     } else {
-  //       const imageStepIndex = this.stepImagesBase64.findIndex(stepImage => stepImage.index === index);
-  //       if (imageStepIndex !== -1) {
-  //         this.stepImagesBase64.splice(imageStepIndex, 1);
-  //       }
-  //     }
-  //   // Image loaded
-  //   } else {
-  //     if (type === true) {
-  //       this.restoredGuide.thumbnail = '';
-  //     } else {
-  //       this.guideThumbnailLoaded = null;
-  //     }
-  //   }
-  // }
-
-  private _filter(value: string): string[] {
-    const filterValue = value.toLowerCase();
-    return this.guideTypes.filter((guideType) =>
-      guideType.toLowerCase().includes(filterValue)
-    );
+  deleteImage(index: number): void {
+    this.stepsForm.controls.steps.controls[index].controls.imageBase64.setValue('');
+    this.stepsForm.controls.steps.controls[index].controls.imageFile.setValue(null);
+    this.stepsForm.controls.steps.controls[index].controls.loadedImage.setValue(null);
   }
   
   private _createNewStep(): FormGroup {
     return new FormGroup({
       title: this._nnfb.control('', { validators: [Validators.required, Validators.minLength(10), Validators.maxLength(50)] }),
       description: this._nnfb.control('', { validators: [Validators.required, Validators.minLength(50), Validators.maxLength(400)] }),
-      imageFile: new FormControl<File | null>(null),
+      imageFileInput: new FormControl<File | null>(null),
       imageBase64: this._nnfb.control(''),
+      loadedImage: this._fb.control<string | ArrayBuffer | null>(null),
+      imageFile: this._fb.control<File | null>(null),
       saved: this._nnfb.control(false),
       modifying: this._nnfb.control(true)
     });
   }
+  
+  triggerResize() {
+    this._ngZone.onStable
+      .pipe(take(1))
+      .subscribe(() => this.autosize.resizeToFitContent(true));
+  }
+  
+  handlePageEvent(e: PageEvent) {}
+
 }

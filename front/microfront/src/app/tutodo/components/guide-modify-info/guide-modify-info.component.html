@@ -1,31 +1,32 @@
 <div class="page">
-    <div class="alignFlexColumn mt-4" *ngIf="showGuideInfo">
+    <div class="alignFlexColumn mt-4" *ngIf="restoredGuide">
         <div class="whiteCard-guideInfo">
             <h1>Modificar información básica sobre la guía</h1>
-            <form class="example-form" [formGroup]="guideInfo">
+            <form class="example-form" [formGroup]="guideInfo" *ngIf="isModifyGuideInfo">
                 <mat-form-field class="example-full-width" appareance="fill">
                     <mat-label>Título</mat-label>
                     <input type="text" matInput #inputTitle minlength="10" maxlength="50" formControlName="title"
                         placeholder="Título de la guía">
                     <mat-hint align="start">{{inputTitle.value.length}}/50 (mínimo 10 caracteres)</mat-hint>
-                    <mat-error *ngIf="guideInfo.get('title')?.hasError('required')">
+                    <mat-error *ngIf="guideInfo.controls.title.hasError('required')">
                         <strong>Es necesario el título de la guía</strong>
                     </mat-error>
                 </mat-form-field>
                 <mat-form-field class="example-full-width" appareance="fill">
                     <mat-label>Descripción</mat-label>
-                    <textarea type="text" matInput formControlName="description" placeholder="Breve descripción de la guía"
-                        cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5"
-                        #inputDescription minlength="40" maxlength="100"></textarea>
+                    <textarea type="text" matInput formControlName="description"
+                        placeholder="Breve descripción de la guía" cdkTextareaAutosize #autosize="cdkTextareaAutosize"
+                        cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5" #inputDescription minlength="40"
+                        maxlength="100"></textarea>
                     <mat-hint align="start">{{inputDescription.value.length}}/100 (mínimo 40 caracteres)</mat-hint>
-                    <mat-error *ngIf="guideInfo.get('description')?.hasError('required')">
+                    <mat-error *ngIf="guideInfo.controls.description.hasError('required')">
                         <strong>Es necesaria una descripción de la guía</strong>
                     </mat-error>
                 </mat-form-field>
                 <mat-form-field class="example-chip-list">
-                    <mat-label>Tipos de la guía</mat-label>
-                    <mat-chip-grid #chipGrid1 [disabled]="enableInfoInputs" aria-label="Guide types">
-                        @for (guideType of chosenTypes; track enableInfoInputs) {
+                    <mat-label>Tipos de la guía *</mat-label>
+                    <mat-chip-grid #chipGrid1 aria-label="Guide types">
+                        @for (guideType of chosenTypes; track guideType) {
                         <mat-chip-row (removed)="removeType(guideType)">
                             {{guideType}}
                             <button matChipRemove [attr.aria-label]="'remove ' + guideType">
@@ -34,19 +35,19 @@
                         </mat-chip-row>
                         }
                     </mat-chip-grid>
-                    <input placeholder="Introduzca los tipos de guía" #guideTypeInput [disabled]="enableInfoInputs"
-                        formControlName="guideTypes" [matChipInputFor]="chipGrid1" [matAutocomplete]="auto" />
+                    <input placeholder="Introduzca los tipos de guía" #guideTypeInput formControlName="guideTypes"
+                        [matChipInputFor]="chipGrid1" [matAutocomplete]="auto" />
                     <mat-hint align="start">{{chosenTypes.length}}/5 (mínimo 1 tipo de guía)</mat-hint>
                     <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectedType($event)">
                         @for (guideType of filteredTypes | async; track guideType) {
-                        <mat-option [value]="guideType" *ngIf="!chosenTypes.includes(guideType | titlecase)">{{guideType |
-                            titlecase}}</mat-option>
+                        <mat-option [value]="guideType" *ngIf="!chosenTypes.includes(guideType | titlecase)">
+                            {{guideType | titlecase}}</mat-option>
                         }
                     </mat-autocomplete>
                 </mat-form-field>
                 <mat-form-field class="example-chip-list">
                     <mat-label>Ingredientes / materiales</mat-label>
-                    <mat-chip-grid [disabled]="enableInfoInputs" #chipGrid2 aria-label="Enter ingredients">
+                    <mat-chip-grid #chipGrid2 aria-label="Enter ingredients">
                         @for (ingredient of ingredients; track ingredient) {
                         <mat-chip-row #chipRow2 (removed)="removeIngredient(ingredient)" [editable]="true"
                             (edited)="editIngredient(ingredient, $event)"
@@ -57,8 +58,7 @@
                             </button>
                         </mat-chip-row>
                         }
-                        <input [disabled]="enableInfoInputs"
-                            placeholder="Introduzca ingredientes o materiales necesarios para la guía"
+                        <input placeholder="Introduzca ingredientes o materiales necesarios para la guía"
                             formControlName="ingredients" [matChipInputFor]="chipGrid2"
                             [matChipInputSeparatorKeyCodes]="separatorKeysCodesIngredients"
                             [matChipInputAddOnBlur]="addOnBlur" (matChipInputTokenEnd)="addIngredient($event)" />
@@ -66,26 +66,39 @@
                 </mat-form-field>
                 <input type="file" formControlName="imageFile" accept="image/*" class="imageInput"
                     (change)="updateGuideThumbnail($event)">
-                <div class="mt-3 mb-3" *ngIf="restoredGuide.thumbnail">
-                    <p>Imagen actualmente seleccionada:</p>
-                    <img mat-card-image [src]="'data:image/jpeg;base64,' + restoredGuide.thumbnail">
+                <div class="alignFlexColumn mt-3 mb-3" *ngIf="restoredGuide.thumbnail || guideThumbnailLoaded">
+                    <p>Imagen actualmente seleccionada</p>
+                    <button type="button" mat-flat-button class="buttonSpace mx-5" color="warn" *ngIf="isModifyGuideInfo"
+                        (click)="deleteImage()">Eliminar imagen</button>
+                    <img mat-card-image [src]="restoredGuide.thumbnail ?
+                        'data:image/jpeg;base64,' + restoredGuide.thumbnail : guideThumbnailLoaded">
                 </div>
-                <div class="mt-3 mb-3" *ngIf="guideThumbnailLoaded">
+                <!-- <div class="mt-3 mb-3" *ngIf="guideThumbnailLoaded">
                     <p>Imagen actualmente seleccionada:</p>
-                    <img mat-card-image [src]="guideThumbnailLoaded">
-                </div>
+                    <img mat-card-image [src]="guideThumbnailLoaded ? guideThumbnailLoaded : ''">
+                </div> -->
                 <mat-slide-toggle class="whiteCard-check mx-2" [checked]="isPublished" (change)="changePublished()">
                     Estado de la guía:
                     {{ isPublished ? 'publicado' : 'no publicado' }}</mat-slide-toggle>
-                <div class="optionsDivDown">
-                    <button mat-flat-button class="buttonSpace mx-4" color="warn">
-                        Volver a modificar pasos</button>
-                    <button mat-flat-button [disabled]="!guideInfo.valid || chosenTypes.length < 1" class="buttonSpace mx-4"
-                        color="primary" (click)="saveGuideInfo(true)" *ngIf="isModifyGuideInfo">Guardar información</button>
-                    <button mat-flat-button *ngIf="!isModifyGuideInfo" class="buttonSpace mx-4" color="primary"
-                        color="accent" (click)="enableGuideInfo()">Modificar información</button>
-                </div>
             </form>
+            <div *ngIf="!isModifyGuideInfo">
+                <h2>{{ guideInfo.controls.title.getRawValue() }}</h2>
+                <p>{{ guideInfo.controls.description.getRawValue() }}</p>
+                <p>Tipos de la guía: {{ listToString(chosenTypes) | titlecase }}</p>
+                <p>Ingredientes/materiales: {{ listToString(ingredients) | titlecase }}</p>
+                <p>Estado de la guía: {{ isPublished ? 'Publicada' : 'No publicada' }}</p>
+            </div>
+            <div class="optionsDivDown">
+                <button mat-flat-button class="buttonSpace mx-4" color="warn" 
+                    routerLink="/tutodo/guide-modify" routerLinkActive="active">
+                    Volver a modificar pasos</button>
+                <button mat-flat-button class="buttonSpace mx-4" color="warn"
+                    (click)="cancelChanges()" *ngIf="isModifyGuideInfo">Cancelar cambios</button>
+                <button mat-flat-button [disabled]="!guideInfo.valid || chosenTypes.length < 1" class="buttonSpace mx-4"
+                    color="primary" (click)="saveGuideInfo()" *ngIf="isModifyGuideInfo">Guardar información</button>
+                <button mat-flat-button *ngIf="!isModifyGuideInfo" class="buttonSpace mx-4" color="primary"
+                    color="accent" (click)="modifyGuideInfo()">Modificar información</button>
+            </div>
         </div>
     </div>
 </div>

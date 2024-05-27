@@ -17,6 +17,7 @@ import { GuideSearchComponent } from './components/guide-search/guide-search.com
 import { GuideSeeComponent } from './components/guide-see/guide-see.component';
 import { UserData } from './model/user-data';
 import { UserService } from './service/user.service';
+import { GuideModifyInfoComponent } from './components/guide-modify-info/guide-modify-info.component';
 
 const routes: Routes = [
   {
@@ -50,6 +51,10 @@ const routes: Routes = [
           {
             path: `${TutodoRoutes.MODIFY}`,
             component: GuideModifyComponent
+          },
+          {
+            path: `${TutodoRoutes.MODIFY_INFO}`,
+            component: GuideModifyInfoComponent
           },
           {
             path: `${TutodoRoutes.MY_GUIDES}`,
