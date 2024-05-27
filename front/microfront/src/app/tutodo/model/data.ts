@@ -25,18 +25,36 @@ export interface CreateGuideRequest {
 export interface Step {
     title: string;
     description: string;
+    image: string;
 }
 
 export interface FormStep {
     title: string;
     description: string;
+    imageFile: File | null;
+    imageBase64: string;
     saved: boolean;
+    modifying: boolean;
 }
 
 export interface SaveGuideStepsRequest {
     guideId: string;
     steps: Step[];
     published: boolean;
+}
+
+export interface SaveGuideStepRequest {
+    guideId: string;
+    title: string;
+    description: string;
+    image?: string;
+    stepIndex: number;
+    saved: boolean;
+}
+
+export interface DeleteGuideStepRequest {
+    guideId: string;
+    stepIndex: number;
 }
 
 export interface SharedData {
@@ -75,11 +93,25 @@ export interface SaveGuideInfoRequest {
     title: string;
     description: string;
     guideTypes: string[];
+    ingredients: string[];
+    thumbnail: string;
 }
 
-export interface UploadImage {
+export interface StepImageFile {
+    index: number;
+    image: File;
+}
+
+export interface LoadedImage {
+    index: number;
+    image: string | ArrayBuffer | null;
+}
+
+export interface StepSnapshot {
     title: string;
     description: string;
-    guideTypes: string[];
-    ingredients: string[];
+    imageBase64: string;
+    loadedImage: string | ArrayBuffer | null | undefined;
+    imageFile: File | undefined;
+    index: number;
 }

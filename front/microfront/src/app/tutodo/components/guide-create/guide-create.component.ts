@@ -26,7 +26,7 @@ import {
   MatAutocompleteSelectedEvent,
   MatAutocompleteModule,
 } from '@angular/material/autocomplete';
-import { CreateGuideRequest, UploadImage } from '../../model/data';
+import { CreateGuideRequest } from '../../model/data';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TutodoRoutes } from '../../tutodo.routes';
 import { SharedService } from '../../shared/shared.service';
@@ -38,31 +38,15 @@ import { SharedService } from '../../shared/shared.service';
 })
 export class GuideCreateComponent implements OnInit {
   guideInfo = this._nnfb.group({
-    title: [
-      '',
-      [
-        Validators.required,
-        Validators.minLength(10),
-        Validators.maxLength(100),
-      ],
-    ],
-    description: [
-      '',
-      [
-        Validators.required,
-        Validators.minLength(40),
-        Validators.maxLength(200),
-      ],
-    ],
+    title: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(100)]],
+    description: ['', [Validators.required, Validators.minLength(40), Validators.maxLength(200)]],
     guideTypes: [''],
-    ingredients: [''],
+    ingredients: ['']
   });
   @ViewChild('autosize') autosize!: CdkTextareaAutosize;
   @ViewChild('guideTypeInput') guideTypeInput!: ElementRef<HTMLInputElement>;
-  @ViewChild('ingredientsInput')
-  ingredientsInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('ingredientsInput') ingredientsInput!: ElementRef<HTMLInputElement>;
   filteredTypes!: Observable<string[]>;
-  addOnBlur = true;
   readonly separatorKeysCodesTypes = [] as const;
   readonly separatorKeysCodesIngredients = [ENTER, COMMA] as const;
   guideTypes!: string[];
@@ -78,7 +62,7 @@ export class GuideCreateComponent implements OnInit {
     private readonly _router: Router,
     private readonly _route: ActivatedRoute,
     private readonly _sharedService: SharedService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this._service.findAllGuideTypes$().subscribe({
@@ -155,15 +139,15 @@ export class GuideCreateComponent implements OnInit {
 
   guideCreate(): void {
     const { title, description } = { ...this.guideInfo.getRawValue() };
-    const formData = new FormData();
-    formData.append('guideThumbnail', this.selectedFile);
-    const createGuideRequest: CreateGuideRequest = {
+    const payload: CreateGuideRequest = {
       title: title,
       description: description,
       guideTypes: this.chosenTypes,
       ingredients: this.ingredients
     };
-    formData.append('createGuideRequest', new Blob([JSON.stringify(createGuideRequest)], {
+    const formData = new FormData();
+    formData.append('guideThumbnail', this.selectedFile);
+    formData.append('createGuideRequest', new Blob([JSON.stringify(payload)], {
       type: 'application/json',
     }));
     this._service.createGuide$(formData).subscribe({
@@ -172,11 +156,16 @@ export class GuideCreateComponent implements OnInit {
           const guideIdModifying: string = response.slice(
             response.indexOf('?id=') + 4
           );
-          this._sharedService.setData({ guideIdModifying });
-          this._router.navigate([`../${TutodoRoutes.MODIFY}`], {
-            relativeTo: this._route,
+          this._sharedService.setPersistedData$({ guideIdModifying }).subscribe({
+            next: (response) => {
+              this._router.navigate([`../${TutodoRoutes.MODIFY}`], {
+                relativeTo: this._route,
+              });
+            }
           });
+
         } else {
+
         }
       },
       error: (err) => {
@@ -187,29 +176,6 @@ export class GuideCreateComponent implements OnInit {
 
   onFileChanged(event: any): void {
     this.selectedFile = event.target?.files.item(0);
-  }
-
-  uploadFile(): void {
-    const { title, description } = { ...this.guideInfo.getRawValue() };
-    const formData = new FormData();
-    formData.append('image', this.selectedFile);
-    const payload: UploadImage = {
-      title: title,
-      description: description,
-      guideTypes: this.chosenTypes,
-      ingredients: this.ingredients,
-    };
-    formData.append(
-      'uploadImage',
-      new Blob([JSON.stringify(payload)], {
-        type: 'application/json',
-      })
-    );
-    this._service.uploadImage$(formData).subscribe({
-      next: (response) => {
-        console.log(response);
-      },
-    });
   }
 
   private _filter(value: string): string[] {

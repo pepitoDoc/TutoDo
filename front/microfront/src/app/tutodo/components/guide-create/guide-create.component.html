@@ -8,8 +8,8 @@
       <form class="example-form" [formGroup]="guideInfo">
         <mat-form-field class="example-full-width" appareance="fill">
           <mat-label>Título</mat-label>
-          <input type="text" matInput #inputTitle minlength="10" maxlength="100" [formControl]="guideInfo.controls.title"
-            placeholder="Título de la guía">
+          <input type="text" matInput #inputTitle minlength="10" maxlength="100"
+            [formControl]="guideInfo.controls.title" placeholder="Título de la guía">
           <mat-hint align="start">{{inputTitle.value.length}}/100 (mínimo 10 caracteres)</mat-hint>
           <mat-error *ngIf="guideInfo.get('title')?.hasError('required')">
             <strong>Es necesario el título de la guía</strong>
@@ -17,9 +17,9 @@
         </mat-form-field>
         <mat-form-field class="example-full-width" appareance="fill">
           <mat-label>Descripción</mat-label>
-          <textarea type="text" matInput [formControl]="guideInfo.controls.description" placeholder="Breve descripción de la guía"
-            cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5"
-            #inputDescription minlength="40" maxlength="200"></textarea>
+          <textarea type="text" matInput [formControl]="guideInfo.controls.description"
+            placeholder="Breve descripción de la guía" cdkTextareaAutosize #autosize="cdkTextareaAutosize"
+            cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5" #inputDescription minlength="40" maxlength="200"></textarea>
           <mat-hint align="start">{{inputDescription.value.length}}/200 (mínimo 40 caracteres)</mat-hint>
           <mat-error *ngIf="guideInfo.get('description')?.hasError('required')">
             <strong>Es necesaria una descripción de la guía</strong>
@@ -38,7 +38,7 @@
             }
           </mat-chip-grid>
           <input placeholder="Introduzca los tipos de guía" #guideTypeInput formControlName="guideTypes"
-            [matChipInputFor]="chipGrid1" [matAutocomplete]="auto" [matChipInputSeparatorKeyCodes]="separatorKeysCodesTypes"/>
+            [matChipInputFor]="chipGrid1" [matAutocomplete]="auto"/>
           <mat-hint align="start">{{chosenTypes.length}}/5 (mínimo 1 tipo de guía)</mat-hint>
           <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectedType($event)">
             @for (guideType of filteredTypes | async; track guideType) {
@@ -49,50 +49,26 @@
         </mat-form-field>
         <mat-form-field class="example-chip-list">
           <mat-label>Ingredientes / materiales</mat-label>
-          <mat-chip-grid #chipGrid aria-label="Enter ingredients">
+          <mat-chip-grid #chipGrid2 aria-label="Enter ingredients">
             @for (ingredient of ingredients; track ingredient) {
-              <mat-chip-row #chipRow2
-                (removed)="removeIngredient(ingredient)"
-                [editable]="true"
-                (edited)="editIngredient(ingredient, $event)"
-                [aria-description]="'press enter to edit ' + ingredient">
-                {{ingredient}}
-                <button matChipRemove [attr.aria-label]="'remove ' + ingredient">
-                  <mat-icon>cancel</mat-icon>
-                </button>
-              </mat-chip-row>
+            <mat-chip-row #chipRow2 (removed)="removeIngredient(ingredient)" [editable]="true"
+              (edited)="editIngredient(ingredient, $event)" [aria-description]="'press enter to edit ' + ingredient">
+              {{ingredient}}
+              <button matChipRemove [attr.aria-label]="'remove ' + ingredient">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </mat-chip-row>
             }
             <input placeholder="Introduzca ingredientes o materiales necesarios para la guía"
-                   [matChipInputFor]="chipGrid"
-                   [matChipInputSeparatorKeyCodes]="separatorKeysCodesIngredients"
-                   [matChipInputAddOnBlur]="addOnBlur"
-                   (matChipInputTokenEnd)="addIngredient($event)"/>
+              [matChipInputFor]="chipGrid2" [matChipInputSeparatorKeyCodes]="separatorKeysCodesIngredients"
+              [matChipInputAddOnBlur]="true" (matChipInputTokenEnd)="addIngredient($event)" />
           </mat-chip-grid>
         </mat-form-field>
-        <!-- <mat-form-field class="example-form-field">
-          <mat-label>Ingredientes / materiales</mat-label>
-          <mat-chip-grid #chipGrid2 aria-label="ingredients" [formControl]="guideInfo.controls.ingredients" >
-            @for (ingredient of ingredients; track ingredient) {
-              <mat-chip-row (removed)="removeIngredient(ingredient)">
-                {{ingredient}}
-                <button matChipRemove aria-label="'remove ' + keyword">
-                  <mat-icon>cancel</mat-icon>
-                </button>
-              </mat-chip-row>
-            }
-          </mat-chip-grid>
-          <input placeholder="Introduzca un ingrediente"
-                  [matChipInputFor]="chipGrid2"
-                  (matChipInputTokenEnd)="addIngredient($event)"/>
-          <mat-hint align="start">{{ingredients.length}}/50 (este apartado es opcional)</mat-hint>
-        </mat-form-field> -->
-        <div class="input-group mb-3">
-          <input type="file" class="form-control" id="inputGroupFile02" (change)="onFileChanged($event)">
-          <label class="input-group-text" for="inputGroupFile02" (click)="uploadFile()">Upload</label>
-        </div>
+        <input type="file" accept="image/*" (change)="onFileChanged($event)">
+        <!-- <label class="input-group-text" for="inputGroupFile02" (click)="uploadFile()">Upload</label> -->
         <div class="alignFlex">
-          <button mat-flat-button class="buttonSpace mx-5" routerLink="/home"
-          routerLinkActive="active" color="warn">Cancelar</button>
+          <button mat-flat-button class="buttonSpace mx-5" routerLink="/home" routerLinkActive="active"
+            color="warn">Cancelar</button>
           <button mat-flat-button [disabled]="!guideInfo.valid || chosenTypes.length < 1" class="buttonSpace"
             color="primary" (click)="guideCreate()">Crear guía</button>
         </div>

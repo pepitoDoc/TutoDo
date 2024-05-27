@@ -31,7 +31,7 @@ public class GuideController {
     @PostMapping("create")
     public ResponseEntity<String> createGuide(
             @RequestPart CreateGuideRequest createGuideRequest,
-            @RequestPart MultipartFile guideThumbnail, HttpSession httpSession) {
+            @RequestPart(required = false) MultipartFile guideThumbnail, HttpSession httpSession) {
         var userLogged = (UserSession) httpSession.getAttribute("user");
         var result = this.guideService.guideCreate(createGuideRequest, userLogged.getId(), guideThumbnail);
         return ResponseEntity.status(result.contains("creating_updated")
@@ -40,25 +40,43 @@ public class GuideController {
                 .body(result);
     }
 
-    @PostMapping("save-steps")
-    public ResponseEntity<String> saveGuideSteps(
-            @RequestBody SaveGuideStepsRequest saveGuideStepsRequest) {
-        var result = this.guideService.saveGuideSteps(saveGuideStepsRequest);
+    @PatchMapping("save-step")
+    public ResponseEntity<String> saveGuideStep(
+            @RequestPart SaveGuideStepRequest saveGuideStepRequest,
+            @RequestPart(required = false) MultipartFile stepImage) {
+        var result = this.guideService.saveGuideStep(saveGuideStepRequest, stepImage);
         return ResponseEntity.status(result.contains("guide_updated")
                         ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR)
                 .contentType(MediaType.TEXT_PLAIN)
                 .body(result);
     }
 
-    @PostMapping("save-info")
-    public ResponseEntity<String> saveGuideInfo(
-            @RequestBody SaveGuideInfoRequest saveGuideInfoRequest) {
-        var result = this.guideService.saveGuideInfo(saveGuideInfoRequest);
+    @PatchMapping("delete-step")
+    public ResponseEntity<String> deleteGuideStep(
+            @RequestBody DeleteGuideStepRequest deleteGuideStepRequest) {
+        var result = this.guideService.deleteGuideStep(deleteGuideStepRequest);
         return ResponseEntity.status(result.contains("guide_updated")
                         ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR)
                 .contentType(MediaType.TEXT_PLAIN)
                 .body(result);
     }
+
+    @PatchMapping("save-info")
+    public ResponseEntity<String> saveGuideInfo(
+            @RequestPart SaveGuideInfoRequest saveGuideInfoRequest,
+            @RequestPart(required = false) MultipartFile guideThumbnail) {
+        var result = this.guideService.saveGuideInfo(saveGuideInfoRequest, guideThumbnail);
+        return ResponseEntity.status(result.contains("guide_updated")
+                        ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR)
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(result);
+    }
+
+//    @PatchMapping("update-published")
+//    public ResponseEntity<String> updateGuidePublished(
+//            @RequestBody UpdatePublishedRequest updatePublishedRequest) {
+//
+//    }
 
     @GetMapping("find-by-id")
     public ResponseEntity<Guide> findGuide(@PathParam("guideId") String guideId) {

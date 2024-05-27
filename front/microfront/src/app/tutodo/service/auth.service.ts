@@ -3,8 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../environment/environment';
 import { Injectable } from '@angular/core';
 import { Router, MaybeAsync, GuardResult } from '@angular/router';
-import { tap, Observable, shareReplay, switchMap, of } from 'rxjs';
+import { tap, Observable, shareReplay, switchMap, of, catchError } from 'rxjs';
 import { TutodoRoutes } from '../tutodo.routes';
+import { ToastrService } from 'ngx-toastr';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +18,8 @@ export class AuthService {
 
   constructor(
     private readonly _http: HttpClient,
-    private readonly _router: Router
+    private readonly _router: Router,
+    private readonly _toast: ToastrService
   ) { 
     this.checkSession$().pipe(
       tap(response => this.isAuthenticated = response === 'session_confirmed')
@@ -28,6 +30,10 @@ export class AuthService {
     return this.checkSession$().pipe(
       switchMap(response => {
         return response === 'session_confirmed' ? of(true) : of(this._router.parseUrl(TutodoRoutes.LOGIN));
+      }),
+      catchError(() => {
+        this._toast.error('El servidor no se encuentra disponible.', 'Error del servidor')
+        return of(this._router.parseUrl(TutodoRoutes.LOGIN));
       })
     );
   }
@@ -36,6 +42,10 @@ export class AuthService {
     return this.checkSession$().pipe(
       switchMap(response => {
         return response === 'session_confirmed' ? of(true) : of(this._router.parseUrl(TutodoRoutes.LOGIN));
+      }),
+      catchError(() => {
+        this._toast.error('El servidor no se encuentra disponible.', 'Error del servidor')
+        return of(this._router.parseUrl(TutodoRoutes.LOGIN));
       })
     );
   }

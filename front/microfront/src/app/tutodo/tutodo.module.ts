@@ -37,6 +37,7 @@ import { MyGuidesComponent } from './components/my-guides/my-guides.component';
 import { GuideSearchComponent } from './components/guide-search/guide-search.component';
 import { GuideSeeComponent } from './components/guide-see/guide-see.component';
 import { GuideCreateComponent } from './components/guide-create/guide-create.component';
+import { GuideModifyInfoComponent } from './components/guide-modify-info/guide-modify-info.component';
 
 
 @NgModule({
@@ -55,7 +56,8 @@ import { GuideCreateComponent } from './components/guide-create/guide-create.com
     MainComponent,
     InfoDialogComponent,
     OptionDialogComponent,
-    MyGuidesComponent
+    MyGuidesComponent,
+    GuideModifyInfoComponent
   ],
   imports: [
     CommonModule,

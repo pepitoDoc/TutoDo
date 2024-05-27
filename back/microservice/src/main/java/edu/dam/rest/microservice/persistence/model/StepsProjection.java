@@ -2,15 +2,15 @@ package edu.dam.rest.microservice.persistence.model;
 
 import lombok.*;
 
+import java.util.List;
+
 @Builder
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Step {
+public class StepsProjection {
 
-    private String title;
-    private String description;
-    private String image;
+    private List<Step> steps;
 
 }

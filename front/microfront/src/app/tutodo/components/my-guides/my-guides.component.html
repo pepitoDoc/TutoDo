@@ -14,8 +14,9 @@
             <p>Puntuación media: {{ ratingMean(guide.ratings) }}</p>
           </div>
           <div class="guideInfo">
-            <img mat-card-image [src]="'data:image/jpeg;base64,' + guide.thumbnail"
-              alt="Photo of a Shiba Inu">
+            <img mat-card-image [src]="guide.thumbnail 
+              ? 'data:image/jpeg;base64,' + guide.thumbnail 
+              : '/assets/images/_11707f36-6180-48c1-b259-16214f3e3e34-logo.jpeg'">
           </div>
         </mat-card-content>
         <mat-divider></mat-divider>
@@ -30,9 +31,5 @@
         </mat-card-actions>
       </mat-card>
     </div>
-  </div>
-  <div class="optionsDivBottom sticky-bottom">
-    <button mat-flat-button routerLink="/tutodo/guide-search" routerLinkActive="active" color="warn">Volver a la página
-      principal</button>
   </div>
 </div>

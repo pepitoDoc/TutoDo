@@ -1,7 +1,7 @@
 import { HttpClient, HttpEvent, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../environment/environment';
-import { CreateGuideRequest, FindByFilterRequest, Guide, InsertUserRequest, LoginUserRequest, SaveGuideInfoRequest, SaveGuideStepsRequest, UploadImage } from '../model/data';
+import { CreateGuideRequest, DeleteGuideStepRequest, FindByFilterRequest, Guide, InsertUserRequest, LoginUserRequest, SaveGuideInfoRequest, SaveGuideStepsRequest } from '../model/data';
 import { Observable, map, share, shareReplay } from 'rxjs';
 import { UserData } from '../model/user-data';
 
@@ -46,12 +46,16 @@ export class ApiService {
     return this._http.post(`${this._guideEndpoint}/create`, createGuideRequest, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
-  saveGuideSteps$(saveGuideStepsRequest: SaveGuideStepsRequest): Observable<string> {
-    return this._http.post(`${this._guideEndpoint}/save-steps`, saveGuideStepsRequest, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
+  saveGuideStep$(saveGuideStepRequest: FormData): Observable<string> {
+    return this._http.patch(`${this._guideEndpoint}/save-step`, saveGuideStepRequest, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
-  saveGuideInfo$(saveGuideInfoRequest: SaveGuideInfoRequest): Observable<string> {
-    return this._http.post(`${this._guideEndpoint}/save-info`, saveGuideInfoRequest, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
+  deleteGuideStep$(deleteGuideStepRequest: DeleteGuideStepRequest): Observable<string> {
+    return this._http.patch(`${this._guideEndpoint}/delete-step`, deleteGuideStepRequest, { responseType: 'text' }).pipe(shareReplay(1));
+  }
+
+  saveGuideInfo$(saveGuideInfoRequest: FormData): Observable<string> {
+    return this._http.patch(`${this._guideEndpoint}/save-info`, saveGuideInfoRequest, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
   findGuideById$(guideId: string): Observable<Guide> {
@@ -73,5 +77,6 @@ export class ApiService {
   uploadImage$(formData: FormData): Observable<any> {
     return this._http.post(`${this._guideEndpoint}/upload-image`, formData).pipe(shareReplay(1));
   }
+
 
 }

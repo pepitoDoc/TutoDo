@@ -1,1 +1,10 @@
-<p>option-dialog works!</p>
+<h2 mat-dialog-title class="dialog-text">{{ data.title }}</h2>
+<div *ngFor="let text of data.text">
+    <mat-dialog-content class="dialog-text">
+        {{ text }}
+    </mat-dialog-content>
+</div>
+<mat-dialog-actions class="dialog-buttons">
+    <button mat-button color="primary" [mat-dialog-close]="true">Aceptar</button>
+    <button mat-button color="warn" [mat-dialog-close]="false">Cancelar</button>
+</mat-dialog-actions>

@@ -1,6 +1,6 @@
 <nav class="navbar navBorder sticky-top navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand" routerLink="/tutodo/home" routerLinkActive="active">
             <img src="\assets\images\_11707f36-6180-48c1-b259-16214f3e3e34-logo.jpeg" alt="Bootstrap" width="40" height="40">
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
@@ -10,18 +10,14 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item alignFlex">
-                    <a class="nav-link active alignElements" routerLink="/home" routerLinkActive="active"
-                        aria-current="page">Página
-                        principal
+                    <a class="nav-link alignElements" routerLink="/tutodo/home" routerLinkActive="active"
+                        aria-current="page">Página principal
                     </a>
-                    <mat-icon class="mx-1 alignIcon" routerLink="/home" routerLinkActive="active" aria-hidden="false"
+                    <mat-icon class="mx-1 alignIcon" routerLink="/tutodo/home" routerLinkActive="active" aria-hidden="false"
                         aria-label="home">home</mat-icon>
                 </li>
-                <!-- <li class="nav-item">
-                    <a class="nav-link" href="#">Link</a>
-                </li> -->
                 <li class="nav-item alignFlex dropdown">
-                    <a class="nav-link active alignElements dropdown-toggle" href="#" role="button"
+                    <a class="nav-link active alignElements dropdown-toggle" role="button"
                         data-bs-toggle="dropdown" aria-expanded="false">
                         Guías
                     </a>
@@ -41,9 +37,6 @@
                                 guías guardadas</a></li>
                     </ul>
                 </li>
-                <!-- <li class="nav-item">
-                    <a class="nav-link disabled" aria-disabled="true">Disabled</a>
-                </li> -->
                 <form class="d-flex alignFlex" role="search">
                     <input class="form-control me-2" type="search" placeholder="Buscar usuarios" aria-label="Search">
                     <button class="btn btn-outline-success alignIcon" type="submit">

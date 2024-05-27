@@ -4,16 +4,14 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.client.result.UpdateResult;
 import edu.dam.rest.microservice.bean.guide.*;
 import edu.dam.rest.microservice.constants.Constants;
-import edu.dam.rest.microservice.persistence.model.Comment;
-import edu.dam.rest.microservice.persistence.model.Guide;
-import edu.dam.rest.microservice.persistence.model.Rating;
-import edu.dam.rest.microservice.persistence.model.User;
+import edu.dam.rest.microservice.persistence.model.*;
 import edu.dam.rest.microservice.persistence.repository.GuideRepository;
 import edu.dam.rest.microservice.persistence.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -46,8 +44,28 @@ public class GuideService {
     }
 
     public String guideCreate(CreateGuideRequest createGuideRequest, String userId, MultipartFile guideThumbnail) {
-        var encodedThumbnail = this.encodeImageAsBase64(guideThumbnail);
-        if (!encodedThumbnail.equals("error_encoding")) {
+        if (guideThumbnail != null && Constants.VALID_IMAGE_TYPES.contains(guideThumbnail.getContentType())) {
+            var encodedThumbnail = this.encodeImageAsBase64(guideThumbnail);
+            if (!encodedThumbnail.equals("error_encoding")) {
+                var guide = Guide.builder()
+                        .userId(userId)
+                        .title(createGuideRequest.getTitle())
+                        .description(createGuideRequest.getDescription())
+                        .published(false)
+                        .creationDate(LocalDate.now())
+                        .steps(new ArrayList<>())
+                        .guideTypes(createGuideRequest.getGuideTypes())
+                        .ingredients(createGuideRequest.getIngredients().isEmpty()
+                                ? new ArrayList<>() : createGuideRequest.getIngredients())
+                        .comments(new ArrayList<>())
+                        .ratings(new ArrayList<>())
+                        .thumbnail(encodedThumbnail)
+                        .build();
+                return insertGuide(userId, guide);
+            } else {
+                return "error_creating_guide";
+            }
+        } else {
             var guide = Guide.builder()
                     .userId(userId)
                     .title(createGuideRequest.getTitle())
@@ -60,46 +78,89 @@ public class GuideService {
                             ? new ArrayList<>() : createGuideRequest.getIngredients())
                     .comments(new ArrayList<>())
                     .ratings(new ArrayList<>())
-                    .thumbnail(encodedThumbnail)
                     .build();
-            var dbCheck = this.guideRepository.save(guide);
-            if (this.guideRepository.existsById(dbCheck.getId())) {
-                String result = this.userService.updateCreating(userId, dbCheck.getId());
-                return result.equals("creating_updated")
-                        ? result + "?id=" + dbCheck.getId()
-                        : result;
+            return insertGuide(userId, guide);
+        }
+    }
+
+    public String saveGuideStep(SaveGuideStepRequest saveGuideStepRequest, MultipartFile stepImage) {
+        try {
+            var step = new Step();
+            if (stepImage != null && Constants.VALID_IMAGE_TYPES.contains(stepImage.getContentType())) {
+                var encodedImage = this.encodeImageAsBase64(stepImage);
+                if (!encodedImage.equals("error_encoding")) {
+                    step.setImage(encodedImage);
+                } else {
+                    return "error_updating_step";
+                }
             } else {
-                return "error_creating_guide";
+                step.setImage(saveGuideStepRequest.getImage());
+            }
+            step.setTitle(saveGuideStepRequest.getTitle());
+            step.setDescription(saveGuideStepRequest.getDescription());
+            var query = new Query().addCriteria(where(Constants.ID).is(saveGuideStepRequest.getGuideId()));
+            query.fields().include(Constants.STEPS);
+            var queryResult = this.mongoTemplate.findOne(query, StepsProjection.class, Constants.GUIDE_COLLECTION);
+            if (queryResult != null) {
+                if (saveGuideStepRequest.isSaved()) {
+                    queryResult.getSteps().set(saveGuideStepRequest.getStepIndex(), step);
+                } else {
+                    queryResult.getSteps().add(saveGuideStepRequest.getStepIndex(), step);
+                }
+                var updateResult = this.mongoTemplate.updateFirst(
+                        query(where(Constants.ID).is(saveGuideStepRequest.getGuideId())),
+                        new Update().set(Constants.STEPS, queryResult.getSteps()),
+                        Constants.GUIDE_COLLECTION);
+                if (updateResult.wasAcknowledged()) {
+                    return "guide_updated";
+                } else {
+                    return "guide_not_found";
+                }
+            } else {
+                return "guide_not_found";
+            }
+        } catch (Exception e) {
+            return "internal_server_error";
+        }
+    }
+
+    public String deleteGuideStep(DeleteGuideStepRequest deleteGuideStepRequest) {
+        var query = new Query().addCriteria(where(Constants.ID).is(deleteGuideStepRequest.getGuideId()));
+        query.fields().include(Constants.STEPS);
+        var queryResult = this.mongoTemplate.findOne(query, StepsProjection.class, Constants.GUIDE_COLLECTION);
+        if (queryResult != null) {
+            queryResult.getSteps().remove(deleteGuideStepRequest.getStepIndex());
+            var updateResult = this.mongoTemplate.updateFirst(
+                    query(where(Constants.ID).is(deleteGuideStepRequest.getGuideId())),
+                    new Update().set(Constants.STEPS, queryResult.getSteps()),
+                    Constants.GUIDE_COLLECTION);
+            if (updateResult.wasAcknowledged()) {
+                return "guide_updated";
+            } else {
+                return "guide_not_found";
             }
         } else {
-            return "error_creating_guide";
+            return "guide_not_found";
         }
     }
 
-    public String saveGuideSteps(SaveGuideStepsRequest saveGuideStepsRequest) {
+    public String saveGuideInfo(SaveGuideInfoRequest saveGuideInfoRequest, MultipartFile guideThumbnail) {
         try {
-            UpdateResult result = this.mongoTemplate.updateFirst(
-                    query(where(Constants.ID).is(saveGuideStepsRequest.getGuideId())),
-                    new Update().set(Constants.STEPS, saveGuideStepsRequest.getSteps())
-                            .set(Constants.PUBLISHED, saveGuideStepsRequest.isPublished()),
-                    Constants.GUIDE_COLLECTION);
-            if (result.wasAcknowledged()) {
-                return "guide_updated";
-            } else {
-                return "guide_not_found";
+            var updates = new Update();
+            if (guideThumbnail != null && Constants.VALID_IMAGE_TYPES.contains(guideThumbnail.getContentType())) {
+                var encodedThumbnail = this.encodeImageAsBase64(guideThumbnail);
+                if (!encodedThumbnail.equals("error_encoding")) {
+                    updates.set(Constants.THUMBNAIL, encodedThumbnail);
+                } else {
+                    return "error_saving_thumbnail";
+                }
             }
-        } catch (Exception e) {
-            return "internal_server_error";
-        }
-    }
-
-    public String saveGuideInfo(SaveGuideInfoRequest saveGuideInfoRequest) {
-        try {
-            UpdateResult result = this.mongoTemplate.updateFirst(
+            var result = this.mongoTemplate.updateFirst(
                     query(where(Constants.ID).is(saveGuideInfoRequest.getGuideId())),
-                    new Update().set(Constants.TITLE, saveGuideInfoRequest.getTitle())
+                    updates.set(Constants.TITLE, saveGuideInfoRequest.getTitle())
                             .set(Constants.DESCRIPTION, saveGuideInfoRequest.getDescription())
-                            .set(Constants.GUIDE_TYPES, saveGuideInfoRequest.getGuideTypes()),
+                            .set(Constants.GUIDE_TYPES, saveGuideInfoRequest.getGuideTypes())
+                            .set(Constants.INGREDIENTS, saveGuideInfoRequest.getIngredients()),
                     Constants.GUIDE_COLLECTION);
             if (result.wasAcknowledged()) {
                 return "guide_updated";
@@ -108,17 +169,25 @@ public class GuideService {
             }
         } catch (Exception e) {
             return "internal_server_error";
+        }
+    }
+
+    public String updateGuidePublished(UpdatePublishedRequest updatePublishedRequest) {
+        var result = this.mongoTemplate.updateFirst(
+                query(where(Constants.ID).is(updatePublishedRequest.getGuideId())),
+                new Update().set(Constants.PUBLISHED, updatePublishedRequest.isPublished()),
+                Constants.GUIDE_COLLECTION);
+        if (result.wasAcknowledged()) {
+            return "guide_updated";
+        } else {
+            return "guide_not_found";
         }
     }
 
     public Guide findGuide(String guideId) {
         var foundGuide = this.guideRepository.findById(guideId);
         if (foundGuide.isPresent()) {
-            try {
-                return foundGuide.orElseThrow();
-            } catch (NoSuchElementException e) {
-                return null;
-            }
+            return foundGuide.orElseThrow();
         } else {
             return null;
         }
@@ -138,28 +207,28 @@ public class GuideService {
     }
 
     public List<Guide> findByFilter(FindByFilterRequest findByFilterRequest) {
-        List<AggregationOperation> operations = new ArrayList<>();
+        var operations = new ArrayList<AggregationOperation>();
         if (!findByFilterRequest.getTitle().isEmpty()) {
-            operations.add(match(new Criteria("title").regex(findByFilterRequest.getTitle(), "i")));
+            operations.add(match(new Criteria(Constants.TITLE).regex(findByFilterRequest.getTitle(), "i")));
         }
         if (!findByFilterRequest.getGuideTypes().isEmpty()) {
-            operations.add(match(new Criteria("guideTypes").in(findByFilterRequest.getGuideTypes())));
+            operations.add(match(new Criteria(Constants.GUIDE_TYPES).in(findByFilterRequest.getGuideTypes())));
         }
         if (findByFilterRequest.getRating() != null && findByFilterRequest.getRating() >= 0) {
-            operations.add(unwind("ratings"));
-            operations.add(group("_id").avg("$ratings.punctuation").as("averagePunctuation"));
+            operations.add(unwind(Constants.RATINGS));
+            operations.add(group(Constants.ID).avg("$ratings.punctuation")
+                    .as("averagePunctuation"));
             operations.add(match(new Criteria("averagePunctuation").gt(findByFilterRequest.getRating())));
         }
-        Aggregation aggregation = newAggregation(operations);
-        AggregationResults<BasicDBObject> results = this.mongoTemplate.aggregate(
-                aggregation, "guide", BasicDBObject.class);
+        var results = this.mongoTemplate.aggregate(
+                newAggregation(operations), Constants.GUIDE_COLLECTION, BasicDBObject.class);
         return results.getMappedResults().stream()
-                .map(result -> this.guideRepository.findById(result.getObjectId("_id").toString()))
+                .map(result -> this.guideRepository.findById(result.getObjectId(Constants.ID).toString()))
                 .filter(result -> {
                     if (result.isPresent() && !findByFilterRequest.getUsername().isEmpty()) {
-                        Pattern userPattern = Pattern.compile(
+                        var userPattern = Pattern.compile(
                                 findByFilterRequest.getUsername(), Pattern.CASE_INSENSITIVE);
-                        User foundUser = this.userRepository.findByUsernameRegex(userPattern.toString());
+                        var foundUser = this.userRepository.findByUsernameRegex(userPattern.toString());
                         return result.orElseThrow().getUserId().equals(foundUser.getId());
                     } else {
                         return true;
@@ -228,6 +297,18 @@ public class GuideService {
             return Base64.getEncoder().encodeToString(image.getBytes());
         } catch (IOException e) {
             return "error_encoding";
+        }
+    }
+
+    private String insertGuide(String userId, Guide guide) {
+        var dbCheck = this.guideRepository.save(guide);
+        if (this.guideRepository.existsById(dbCheck.getId())) {
+            String result = this.userService.updateCreating(userId, dbCheck.getId());
+            return result.equals("creating_updated")
+                    ? result + "?id=" + dbCheck.getId()
+                    : result;
+        } else {
+            return "error_creating_guide";
         }
     }
 }
