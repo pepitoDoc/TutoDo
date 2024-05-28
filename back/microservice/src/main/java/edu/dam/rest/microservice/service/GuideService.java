@@ -160,7 +160,8 @@ public class GuideService {
                     updates.set(Constants.TITLE, saveGuideInfoRequest.getTitle())
                             .set(Constants.DESCRIPTION, saveGuideInfoRequest.getDescription())
                             .set(Constants.GUIDE_TYPES, saveGuideInfoRequest.getGuideTypes())
-                            .set(Constants.INGREDIENTS, saveGuideInfoRequest.getIngredients()),
+                            .set(Constants.INGREDIENTS, saveGuideInfoRequest.getIngredients())
+                            .set(Constants.PUBLISHED, saveGuideInfoRequest.isPublished()),
                     Constants.GUIDE_COLLECTION);
             if (result.wasAcknowledged()) {
                 return "guide_updated";
@@ -209,17 +210,18 @@ public class GuideService {
     public List<Guide> findByFilter(FindByFilterRequest findByFilterRequest) {
         var operations = new ArrayList<AggregationOperation>();
         if (!findByFilterRequest.getTitle().isEmpty()) {
-            operations.add(match(new Criteria(Constants.TITLE).regex(findByFilterRequest.getTitle(), "i")));
+            operations.add(match(where(Constants.TITLE).regex(findByFilterRequest.getTitle(), "i")));
         }
         if (!findByFilterRequest.getGuideTypes().isEmpty()) {
-            operations.add(match(new Criteria(Constants.GUIDE_TYPES).in(findByFilterRequest.getGuideTypes())));
+            operations.add(match(where(Constants.GUIDE_TYPES).in(findByFilterRequest.getGuideTypes())));
         }
         if (findByFilterRequest.getRating() != null && findByFilterRequest.getRating() >= 0) {
             operations.add(unwind(Constants.RATINGS));
             operations.add(group(Constants.ID).avg("$ratings.punctuation")
                     .as("averagePunctuation"));
-            operations.add(match(new Criteria("averagePunctuation").gt(findByFilterRequest.getRating())));
+            operations.add(match(where("averagePunctuation").gt(findByFilterRequest.getRating())));
         }
+        operations.add(match(where(Constants.PUBLISHED).is(true)));
         var results = this.mongoTemplate.aggregate(
                 newAggregation(operations), Constants.GUIDE_COLLECTION, BasicDBObject.class);
         return results.getMappedResults().stream()

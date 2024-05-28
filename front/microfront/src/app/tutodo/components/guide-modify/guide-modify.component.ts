@@ -309,7 +309,8 @@ export class GuideModifyComponent implements OnInit {
   nextStepValid(index: number): boolean {
     if (this.stepsForm.controls.steps.controls[index].controls.modifying.getRawValue() === true 
       || (this.stepsForm.controls.steps.controls[index + 1] 
-      && this.stepsForm.controls.steps.controls[index + 1].controls.modifying.getRawValue() === true)) {
+        && this.stepsForm.controls.steps.controls[index + 1].controls.modifying.getRawValue() === true)
+      || this.stepsForm.controls.steps.length === 20) {
       return true;
     } else {
       return false;
@@ -320,6 +321,14 @@ export class GuideModifyComponent implements OnInit {
     this.stepsForm.controls.steps.controls[index].controls.imageBase64.setValue('');
     this.stepsForm.controls.steps.controls[index].controls.imageFile.setValue(null);
     this.stepsForm.controls.steps.controls[index].controls.loadedImage.setValue(null);
+  }
+
+  getCreateButtonText(index: number): string {
+    if (this.stepsForm.controls.steps.length < 20) {
+      return index % 4 === 3 ? 'Insertar paso en la siguiente página' : 'Insertar paso'
+    } else {
+      return 'Límite de pasos alcanzado'
+    }
   }
   
   private _createNewStep(): FormGroup {

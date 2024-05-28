@@ -46,6 +46,9 @@ export class GuideSeeComponent implements OnInit {
 
   nextStep(): void {
     this.currentStep++;
+    if (this.currentStep === this.guideWatching.steps.length) {
+      this._toast.success('Ahora puede añadir una puntuación a la guía.');
+    }
   }
 
   previousStep(): void {

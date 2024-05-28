@@ -58,8 +58,9 @@
             </div>
             <div *ngIf="showSteps(i, paginator.pageIndex, paginator.pageSize)" class="nextStepContainer">
               <hr class="divider">
-              <button type="button" mat-flat-button color="primary" (click)="addStep(i)" [disabled]="nextStepValid(i)">
-                {{ i % 4 === 3 ? 'Insertar paso en la siguiente página' : 'Insertar paso' }}</button>
+              <button type="button"
+                mat-flat-button color="primary" (click)="addStep(i)" [disabled]="nextStepValid(i)">
+                {{ getCreateButtonText(i) }}</button>
             </div>
           </div>
         </div>

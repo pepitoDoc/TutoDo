@@ -14,22 +14,32 @@ export class AuthService {
 
   private readonly _endpoint = environment.ENDPOINT;
   private readonly _userEndpoint = `${this._endpoint}/user`;
-  private isAuthenticated = false;
+  //private isAuthenticated = false;
 
   constructor(
     private readonly _http: HttpClient,
     private readonly _router: Router,
     private readonly _toast: ToastrService
-  ) { 
-    this.checkSession$().pipe(
-      tap(response => this.isAuthenticated = response === 'session_confirmed')
-    ).subscribe();
+  ) {
+    // this.checkSession$().subscribe({
+    //   next: (response) => {
+    //     this.isAuthenticated = response === 'session_confirmed';
+    //   },
+    //   error: (error) => {
+
+    //   }
+    // });
   }
 
   canActivate(): Observable<MaybeAsync<GuardResult>> {
     return this.checkSession$().pipe(
       switchMap(response => {
-        return response === 'session_confirmed' ? of(true) : of(this._router.parseUrl(TutodoRoutes.LOGIN));
+        if (response === 'session_confirmed') {
+          return of(true);
+        } else {
+          this._toast.error('Su sesión ha caducado tras cierto tiempo de inactividad.', 'Sesión caducada');
+          return of(this._router.parseUrl(TutodoRoutes.LOGIN));
+        }
       }),
       catchError(() => {
         this._toast.error('El servidor no se encuentra disponible.', 'Error del servidor')
@@ -41,10 +51,15 @@ export class AuthService {
   canActivateChild(): Observable<MaybeAsync<GuardResult>> {
     return this.checkSession$().pipe(
       switchMap(response => {
-        return response === 'session_confirmed' ? of(true) : of(this._router.parseUrl(TutodoRoutes.LOGIN));
+        if (response === 'session_confirmed') {
+          return of(true);
+        } else {
+          this._toast.error('Su sesión ha caducado tras cierto tiempo de inactividad.', 'Sesión caducada');
+          return of(this._router.parseUrl(TutodoRoutes.LOGIN));
+        }
       }),
       catchError(() => {
-        this._toast.error('El servidor no se encuentra disponible.', 'Error del servidor')
+        this._toast.error('El servidor no se encuentra disponible.', 'Error del servidor');
         return of(this._router.parseUrl(TutodoRoutes.LOGIN));
       })
     );

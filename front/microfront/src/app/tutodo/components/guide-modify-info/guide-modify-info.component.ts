@@ -30,7 +30,6 @@ export class GuideModifyInfoComponent implements OnInit {
   @ViewChild('autosize') autosize!: CdkTextareaAutosize;
   @ViewChild('chipGrid') chipGrid!: MatChipGrid;
   filteredTypes!: Observable<string[]>;
-  addOnBlur = true;
   readonly separatorKeysCodesTypes = [] as const; // NO ESTÁ ASIGNADO
   readonly separatorKeysCodesIngredients = [ENTER, COMMA] as const;
   guideTypes!: string[];
@@ -44,6 +43,7 @@ export class GuideModifyInfoComponent implements OnInit {
   restoredGuide!: Guide;
   isPublished = false;
   isModifyGuideInfo = false;
+  ingredientsFlag = false;
 
   constructor(
     private _ngZone: NgZone,
@@ -73,7 +73,8 @@ export class GuideModifyInfoComponent implements OnInit {
           this.guideId = response.guideIdModifying;
           this._service.findGuideById$(this.guideId).subscribe((response) => {
             this.restoredGuide = response;
-            this.isPublished = this.restoredGuide.published;
+            this.isPublished = this.restoredGuide.steps.length > 5 
+              ? this.restoredGuide.published : false;
             this.guideInfo.setValue({
               title: this.restoredGuide.title,
               description: this.restoredGuide.description,
@@ -112,6 +113,7 @@ export class GuideModifyInfoComponent implements OnInit {
       description: this.guideInfo.controls.description.value,
       guideTypes: this.chosenTypes,
       ingredients: this.ingredients,
+      published: this.isPublished,
       thumbnail: this.restoredGuide.thumbnail
     };
     const formData = new FormData();
@@ -187,6 +189,7 @@ export class GuideModifyInfoComponent implements OnInit {
         imageFile: null
       }
     );
+    this.isPublished = this.guideInfoSnapshot.isPublished;
     this.chosenTypes = this.guideInfoSnapshot.guideTypes;
     this.ingredients = this.guideInfoSnapshot.ingredients;
     this.restoredGuide.thumbnail = this.guideInfoSnapshot.imageBase64;
@@ -198,11 +201,12 @@ export class GuideModifyInfoComponent implements OnInit {
     this.isModifyGuideInfo = true;
     this.guideInfoSnapshot = {
       title: this.guideInfo.controls.title.getRawValue(),
-      description: this.guideInfo.controls.title.getRawValue(),
+      description: this.guideInfo.controls.description.getRawValue(),
       guideTypes: this.chosenTypes,
       ingredients: this.ingredients,
       imageBase64: this.restoredGuide.thumbnail,
       imageFile: this.guideThumbnailFile,
+      isPublished: this.isPublished,
       loadedImage: this.guideThumbnailLoaded
     };
   }
@@ -243,7 +247,7 @@ export class GuideModifyInfoComponent implements OnInit {
 
   addIngredient(ingredient: MatChipInputEvent): void {
     const value = (ingredient.value || '').trim();
-    if (value) {
+    if (value && this.guideInfoSnapshot) {
       this.ingredients.push(value);
     }
     ingredient.chipInput!.clear();

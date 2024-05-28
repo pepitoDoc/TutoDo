@@ -24,29 +24,29 @@
 
 <div class="fixed">
   <div class="sideAction">
-    <a class="sideButton sideAction" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button"
-      aria-controls="offcanvasExample">
+    <a class="sideButton sideAction" data-bs-toggle="offcanvas" href="#offcanvasSteps" role="button"
+      aria-controls="offcanvasSteps">
       <div class="buttonDiv bg-b-blue">
         Pasos de la guía
       </div>
     </a>
-    <a class="sideButton sideAction" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button">
+    <a class="sideButton sideAction" data-bs-toggle="offcanvas" href="#offcanvasIngredients" role="button">
       <div class="buttonDiv bg-b-orange">
         Ingredientes/materiales
       </div>
     </a>
   </div>
-  <div class="sideHelp">
+  <!-- <div class="sideHelp">
     <a class="sideButton sideHelp" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button">
       <div class="buttonDiv bg-b-purple">
         Ayuda
       </div>
     </a>
-  </div>
+  </div> -->
 </div>
-<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasSteps" aria-labelledby="offcanvasStepsLabel">
   <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="offcanvasExampleLabel">Pasos de la guía</h5>
+    <h5 class="offcanvas-title" id="offcanvasStepsLabel">Pasos de la guía</h5>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
   <div class="offcanvas-body">
@@ -60,5 +60,18 @@
         </button>
       </mat-step>
     </mat-stepper>
+  </div>
+</div>
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasIngredients" aria-labelledby="offcanvasIngredientsLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="offcanvasIngredientsLabel">Ingredientes / materiales</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body" *ngIf="guideWatching">
+    <p>Listado de los materiales o ingredientes necesarios para llevar a cabo la guía</p>
+    <mat-list *ngFor="let ingredient of guideWatching.ingredients">
+      <mat-list-item>{{ ingredient }}</mat-list-item>
+    </mat-list>
+    <h3 *ngIf="guideWatching.ingredients.length === 0">No hay ingredientes o materiales asociados a esta guía</h3>
   </div>
 </div>

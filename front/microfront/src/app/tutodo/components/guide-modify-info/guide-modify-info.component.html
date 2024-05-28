@@ -61,7 +61,7 @@
                         <input placeholder="Introduzca ingredientes o materiales necesarios para la guía"
                             formControlName="ingredients" [matChipInputFor]="chipGrid2"
                             [matChipInputSeparatorKeyCodes]="separatorKeysCodesIngredients"
-                            [matChipInputAddOnBlur]="addOnBlur" (matChipInputTokenEnd)="addIngredient($event)" />
+                            [matChipInputAddOnBlur]="false" (matChipInputTokenEnd)="addIngredient($event)" />
                     </mat-chip-grid>
                 </mat-form-field>
                 <input type="file" formControlName="imageFile" accept="image/*" class="imageInput"
@@ -77,9 +77,10 @@
                     <p>Imagen actualmente seleccionada:</p>
                     <img mat-card-image [src]="guideThumbnailLoaded ? guideThumbnailLoaded : ''">
                 </div> -->
-                <mat-slide-toggle class="whiteCard-check mx-2" [checked]="isPublished" (change)="changePublished()">
-                    Estado de la guía:
-                    {{ isPublished ? 'publicado' : 'no publicado' }}</mat-slide-toggle>
+                <mat-slide-toggle class="whiteCard-check mx-2" [checked]="isPublished" (change)="changePublished()" 
+                    [disabled]="this.restoredGuide.steps.length < 5">
+                    Estado de la guía: {{ isPublished ? 'publicado' : 'no publicado' }}</mat-slide-toggle>
+                <p *ngIf="this.restoredGuide.steps.length < 5">La guía debe tener 5 o más pasos para ser publicada</p>
             </form>
             <div *ngIf="!isModifyGuideInfo">
                 <h2>{{ guideInfo.controls.title.getRawValue() }}</h2>

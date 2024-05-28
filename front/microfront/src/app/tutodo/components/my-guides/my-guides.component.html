@@ -12,6 +12,7 @@
             <p>Guía sobre:{{ formatGuideTypes(guide.guideTypes) }}</p>
             <p>Comentarios: {{ guide.comments.length }}</p>
             <p>Puntuación media: {{ ratingMean(guide.ratings) }}</p>
+            <p>Estado de publicación: {{ guide.published ? 'publicado' : 'no publicado' }}</p>
           </div>
           <div class="guideInfo">
             <img mat-card-image [src]="guide.thumbnail 

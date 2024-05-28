@@ -9,7 +9,7 @@
 .alignGrid {
   display: grid;
   grid-template-rows: auto auto;
-  grid-template-columns: 33% 33% 33%;
+  grid-template-columns: 50% 50%;
   gap: 10px;
   @media(max-width: 768px) {
     grid-template-columns: 100%;

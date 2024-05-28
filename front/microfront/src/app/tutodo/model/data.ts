@@ -96,6 +96,7 @@ export interface SaveGuideInfoRequest {
     description: string;
     guideTypes: string[];
     ingredients: string[];
+    published: boolean;
     thumbnail: string;
 }
 
@@ -120,5 +121,6 @@ export interface GuideInfoSnapshot {
     ingredients: string[];
     imageBase64: string;
     imageFile: File | null;
+    isPublished: boolean;
     loadedImage: string | ArrayBuffer | null;
 }

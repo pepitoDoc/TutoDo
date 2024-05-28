@@ -76,7 +76,7 @@ public class GuideController {
 //    public ResponseEntity<String> updateGuidePublished(
 //            @RequestBody UpdatePublishedRequest updatePublishedRequest) {
 //
-//    }
+//    } TODO
 
     @GetMapping("find-by-id")
     public ResponseEntity<Guide> findGuide(@PathParam("guideId") String guideId) {

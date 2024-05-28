@@ -16,5 +16,6 @@ public class SaveGuideInfoRequest {
     private String description;
     private List<String> guideTypes;
     private List<String> ingredients;
+    private boolean published;
 
 }
