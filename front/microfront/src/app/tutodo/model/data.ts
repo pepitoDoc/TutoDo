@@ -124,3 +124,8 @@ export interface GuideInfoSnapshot {
     isPublished: boolean;
     loadedImage: string | ArrayBuffer | null;
 }
+
+export interface AddRatingRequest {
+    guideId: string;
+    punctuation: number;
+}

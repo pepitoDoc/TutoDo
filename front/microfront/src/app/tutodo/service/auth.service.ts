@@ -29,19 +29,21 @@ export class AuthService {
 
     //   }
     // });
+    // TODO quitar esto si no lo uso
   }
 
   canActivate(): Observable<MaybeAsync<GuardResult>> {
-    return this.checkSession$().pipe(
+    return this._checkSession$().pipe(
       switchMap(response => {
         if (response === 'session_confirmed') {
           return of(true);
         } else {
+          // TODO muestra el mensaje también cuando no se ha iniciado sesión
           this._toast.error('Su sesión ha caducado tras cierto tiempo de inactividad.', 'Sesión caducada');
           return of(this._router.parseUrl(TutodoRoutes.LOGIN));
         }
       }),
-      catchError(() => {
+      catchError((error) => {
         this._toast.error('El servidor no se encuentra disponible.', 'Error del servidor')
         return of(this._router.parseUrl(TutodoRoutes.LOGIN));
       })
@@ -49,7 +51,7 @@ export class AuthService {
   }
 
   canActivateChild(): Observable<MaybeAsync<GuardResult>> {
-    return this.checkSession$().pipe(
+    return this._checkSession$().pipe(
       switchMap(response => {
         if (response === 'session_confirmed') {
           return of(true);
@@ -58,14 +60,14 @@ export class AuthService {
           return of(this._router.parseUrl(TutodoRoutes.LOGIN));
         }
       }),
-      catchError(() => {
+      catchError((error) => {
         this._toast.error('El servidor no se encuentra disponible.', 'Error del servidor');
         return of(this._router.parseUrl(TutodoRoutes.LOGIN));
       })
     );
   }
 
-  checkSession$(): Observable<string> {
+  private _checkSession$(): Observable<string> {
     return this._http.get(`${this._userEndpoint}/check-session`, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 }

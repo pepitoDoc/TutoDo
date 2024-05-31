@@ -10,7 +10,6 @@ import edu.dam.rest.microservice.persistence.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
@@ -173,18 +172,6 @@ public class GuideService {
         }
     }
 
-    public String updateGuidePublished(UpdatePublishedRequest updatePublishedRequest) {
-        var result = this.mongoTemplate.updateFirst(
-                query(where(Constants.ID).is(updatePublishedRequest.getGuideId())),
-                new Update().set(Constants.PUBLISHED, updatePublishedRequest.isPublished()),
-                Constants.GUIDE_COLLECTION);
-        if (result.wasAcknowledged()) {
-            return "guide_updated";
-        } else {
-            return "guide_not_found";
-        }
-    }
-
     public Guide findGuide(String guideId) {
         var foundGuide = this.guideRepository.findById(guideId);
         if (foundGuide.isPresent()) {
@@ -241,9 +228,11 @@ public class GuideService {
     }
 
     public List<Guide> findOwnGuides(String userId) {
-        var result = this.guideRepository.findByUserId(userId);
-        if (!result.isEmpty()) {
-            return result;
+        var userQuery = new Query().addCriteria(where(Constants.ID).is(userId));
+        userQuery.fields().include(Constants.CREATED);
+        var userQueryResult = this.mongoTemplate.findOne(userQuery, CreatedProjection.class, Constants.USER_COLLECTION);
+        if (userQueryResult != null) {
+            return this.guideRepository.findAllById(userQueryResult.getCreated());
         } else {
             return null;
         }
@@ -257,9 +246,9 @@ public class GuideService {
                             .userId(userId).comment(addCommentRequest.getComment())),
                     Constants.GUIDE_COLLECTION);
             if (result.wasAcknowledged() && result.getModifiedCount() > 0) {
-                return "guide_updated";
+                return "operation_successful";
             } else {
-                return "guide_not_found";
+                return "operation_unsuccessful";
             }
         } catch (Exception e) {
             return "internal_server_error";
@@ -272,7 +261,7 @@ public class GuideService {
                     query(where(Constants.ID).is(addRatingRequest.getGuideId())
                             .and(Constants.RATINGS + "." + Constants.USERID).is(userId)),
                     new Update().set(Constants.RATINGS + ".$." + Constants.PUNCTUATION,
-                            addRatingRequest.getRating()),
+                            addRatingRequest.getPunctuation()),
                     Constants.GUIDE_COLLECTION);
             if (setResult.wasAcknowledged() && setResult.getModifiedCount() > 0) {
                 return "guide_updated";
@@ -281,7 +270,7 @@ public class GuideService {
                         query(where(Constants.ID).is(addRatingRequest.getGuideId())
                                 .and(Constants.RATINGS + "." + Constants.USERID).ne(userId)),
                         new Update().push(Constants.RATINGS, Rating.builder().userId(userId)
-                                .punctuation(addRatingRequest.getRating()).build()),
+                                .punctuation(addRatingRequest.getPunctuation()).build()),
                         Constants.GUIDE_COLLECTION);
                 if (pushResult.wasAcknowledged() && pushResult.getModifiedCount() > 0) {
                     return "guide_updated";
@@ -291,6 +280,43 @@ public class GuideService {
             }
         } catch (Exception e) {
             return "internal_server_error";
+        }
+    }
+
+    public boolean getPublishedPermission(String guideId, String userId) {
+        var foundGuide = this.guideRepository.findById(guideId);
+        if (foundGuide.isPresent()) {
+            var result = foundGuide.orElseThrow();
+            return result.isPublished() || result.getUserId().equals(userId);
+        } else {
+            return false;
+        }
+    }
+
+    public String updateGuidePublished(UpdatePublishedRequest updatePublishedRequest) {
+        var result = this.mongoTemplate.updateFirst(
+                query(where(Constants.ID).is(updatePublishedRequest.getGuideId())),
+                new Update().set(Constants.PUBLISHED, updatePublishedRequest.isPublished()),
+                Constants.GUIDE_COLLECTION);
+        if (result.wasAcknowledged()) {
+            return "guide_updated";
+        } else {
+            return "guide_not_found";
+        }
+    }
+
+    public String deleteGuide(String guideId, String userId) {
+        var deleteResult = this.mongoTemplate.remove(
+                query(where(Constants.ID).is(guideId)), Constants.GUIDE_COLLECTION);
+        if (deleteResult.wasAcknowledged() && deleteResult.getDeletedCount() > 0) {
+            var userUpdate = this.userService.deleteCreated(userId, guideId);
+            if (userUpdate.equals("operation_successful")) {
+                return "operation_successful";
+            } else {
+                return "operation_unsuccessful";
+            }
+        } else {
+            return "operation_unsuccessful";
         }
     }
 
@@ -305,12 +331,12 @@ public class GuideService {
     private String insertGuide(String userId, Guide guide) {
         var dbCheck = this.guideRepository.save(guide);
         if (this.guideRepository.existsById(dbCheck.getId())) {
-            String result = this.userService.updateCreating(userId, dbCheck.getId());
-            return result.equals("creating_updated")
+            String result = this.userService.addCreated(userId, dbCheck.getId());
+            return result.equals("operation_successful")
                     ? result + "?id=" + dbCheck.getId()
                     : result;
         } else {
-            return "error_creating_guide";
+            return "operation_unsuccessful";
         }
     }
 }

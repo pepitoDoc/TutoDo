@@ -1,5 +1,6 @@
-package edu.dam.rest.microservice.persistence.model;
+package edu.dam.rest.microservice.bean.guide;
 
+import edu.dam.rest.microservice.persistence.model.Step;
 import lombok.*;
 
 import java.util.List;

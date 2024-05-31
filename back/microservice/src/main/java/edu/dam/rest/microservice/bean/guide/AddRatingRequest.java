@@ -10,6 +10,6 @@ import lombok.*;
 public class AddRatingRequest {
 
     private String guideId;
-    private int rating;
+    private int punctuation;
 
 }

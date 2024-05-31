@@ -4,14 +4,17 @@ import edu.dam.rest.microservice.bean.user.InsertUserRequest;
 import edu.dam.rest.microservice.bean.user.LoginUserRequest;
 import edu.dam.rest.microservice.bean.user.UserSession;
 import edu.dam.rest.microservice.constants.Constants;
+import edu.dam.rest.microservice.bean.guide.CreatedProjection;
 import edu.dam.rest.microservice.persistence.model.User;
 import edu.dam.rest.microservice.persistence.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
@@ -36,8 +39,8 @@ public class UserService {
                 .password(insertUserRequest.getPassword())
                 .confirmed(false)
                 .completed(new ArrayList<>())
-                .progress(new ArrayList<>())
-                .creating(new ArrayList<>())
+                .saved(new ArrayList<>())
+                .created(new ArrayList<>())
                 .build();
         String checkUser = this.findByNameAndEmail(createUser);
         if (!checkUser.equals("user_valid")) {
@@ -98,27 +101,37 @@ public class UserService {
         }
     }
 
-    public String updateCreating(String userId, String guideId) {
+    public String addCreated(String userId, String guideId) {
         var result = this.mongoTemplate.updateFirst(
                 query(where(Constants.ID).is(userId)),
-                new Update().push("creating", guideId), Constants.USER_COLLECTION);
+                new Update().push(Constants.CREATED, guideId), Constants.USER_COLLECTION);
         if (result.wasAcknowledged() && result.getModifiedCount() == 1) {
-            return "creating_updated";
+            return "operation_successful";
         } else {
-            return "user_not_found";
+            return "operation_unsuccessful";
         }
     }
 
-    /*public User findAllUserInfo(String userId) {
-
-    }*/
-
-//    public User findByNameOrEmail(String userIdentifier) {
-//        if (userIdentifier.contains("@")) {
-//            return userRepository.findByEmail(userIdentifier);
-//        } else {
-//            return userRepository.findByUsername(userIdentifier);
-//        }
-//    }
+    public String deleteCreated(String userId, String guideId) {
+        var query = new Query().addCriteria(where(Constants.ID).is(userId));
+        query.fields().include(Constants.CREATED);
+        var queryResult = this.mongoTemplate.findOne(query, CreatedProjection.class, Constants.USER_COLLECTION);
+        if (queryResult != null) {
+            queryResult.setCreated(queryResult.getCreated().stream().filter(
+                    created -> !created.equals(guideId)).collect(Collectors.toList())
+            );
+            var updateResult = this.mongoTemplate.updateFirst(
+                    query(where(Constants.ID).is(userId)),
+                    new Update().set(Constants.CREATED, queryResult.getCreated()),
+                    Constants.USER_COLLECTION);
+            if (updateResult.wasAcknowledged() && updateResult.getModifiedCount() > 0) {
+                return "operation_successful";
+            } else {
+                return "operation_unsuccessful";
+            }
+        } else {
+            return "operation_unsuccessful";
+        }
+    }
 
 }

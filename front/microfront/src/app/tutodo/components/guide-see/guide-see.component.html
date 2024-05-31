@@ -1,27 +1,66 @@
+<!-- Página -->
 <div class="page">
-  <div class="alignFlexColumn" *ngIf="guideWatching !== undefined">
-    <div class="title">
-      <h1>{{ guideWatching.title }}</h1>
+  <div class="align-flex-column" *ngIf="guideWatching !== undefined">
+    <div class="gradient-border info-spacing">
+      <div class="gradient-content title-content">
+        <h1>{{ guideWatching.title }}</h1>
+        <h2>{{ guideWatching.description }}</h2>
+        <h2>Guía sobre {{ formatGuideTypes() }}</h2>
+        <h3 *ngIf="userData">Usuario creador: {{ userData.username }}</h3>
+      </div>
     </div>
-    <div class="stepContainer">
-      <div *ngFor="let step of guideWatching.steps; let i = index;" [class.stepLayout]="true"
-        [ngClass]="{ 'stepCompleted': i < currentStep, 'currentStep': i === currentStep, 'stepUncompleted': i > currentStep }">
+    <div class="step-container">
+      <div *ngFor="let step of guideWatching.steps; let i = index;" [class.step-layout]="true"
+        [ngClass]="{ 'step-completed': i < currentStep, 'current-step': i === currentStep, 'step-uncompleted': i > currentStep }">
         <h2 [id]="'step' + i">Paso {{ i + 1 }}</h2>
         <h3>{{ step.title }}</h3>
         <h4>{{ step.description }}</h4>
-        <div class="alignFlexRow">
-          <button type="button" *ngIf="i === currentStep" (click)="nextStep()" mat-flat-button class="buttonSpace"
+        <div class="align-flex-column mt-3 mb-3" *ngIf="step.image !== ''">
+          <img mat-card-image [src]="'data:image/jpeg;base64,' + step.image"
+            alt="No se ha podido cargar la imagen correctamente">
+        </div>
+        <div class="align-flex-row">
+          <button type="button" *ngIf="i === currentStep" (click)="nextStep()" mat-flat-button class="button-space"
             color="primary">Marcar paso como completado</button>
           <button type="button" *ngIf="i === currentStep && i !== 0" (click)="previousStep()" mat-flat-button
-            class="buttonSpace" color="accent">Volver al paso anterior</button>
+            class="button-space" color="accent">Volver al paso anterior</button>
         </div>
       </div>
+      <!-- // TODO no dejar votar si es guía propia -->
+      <form [formGroup]="rating" class="gradient-border bottom-controls"
+        *ngIf="currentStep === guideWatching.steps.length">
+        <div class="align-flex-row gradient-content pt-4">
+          <mat-form-field class="example-full-width rating" appareance="fill" name="rating">
+            <mat-label>Puntuar la guía</mat-label>
+            <mat-select formControlName="punctuation">
+              @for (rating of ratings; track rating) {
+              <mat-option [value]="rating.value">{{rating.description}}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <button type="submit" mat-flat-button class="button-space" color="primary" (click)="submitRating()">Puntuar</button>
+        </div>
+        <div class="align-flex-row">
+          <p class="gradient-content" *ngIf="findUserRating()">
+            Usted ha puntuado la guía con un {{ rating.controls.punctuation.getRawValue() }}</p>
+        </div>
+      </form>
+      <div class="comments">
+
+      </div>
+      <div class="align-flex-row options sticky-bottom">
+        <button type="button" mat-flat-button data-bs-toggle="offcanvas" href="#offcanvasSteps" class="button-space"
+          color="primary" aria-controls="offcanvasSteps">Pasos de la guía</button>
+        <button type="button" mat-flat-button data-bs-toggle="offcanvas" href="#offcanvasIngredients"
+          class="button-space" color="primary" aria-controls="offcanvasIngredients">Ingredientes/materiales</button>
+      </div>
     </div>
+
     <mat-progress-bar mode="determinate" class="sticky-bottom"
       [value]="(100 / guideWatching.steps.length) * currentStep"></mat-progress-bar>
   </div>
 </div>
-
+<!-- Botones laterales -->
 <div class="fixed">
   <div class="sideAction">
     <a class="sideButton sideAction" data-bs-toggle="offcanvas" href="#offcanvasSteps" role="button"
@@ -36,14 +75,8 @@
       </div>
     </a>
   </div>
-  <!-- <div class="sideHelp">
-    <a class="sideButton sideHelp" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button">
-      <div class="buttonDiv bg-b-purple">
-        Ayuda
-      </div>
-    </a>
-  </div> -->
 </div>
+<!-- Offcanvas pasos -->
 <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasSteps" aria-labelledby="offcanvasStepsLabel">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title" id="offcanvasStepsLabel">Pasos de la guía</h5>
@@ -55,14 +88,16 @@
       <mat-step *ngFor="let step of guideWatching.steps; let i = index;" [completed]="i < currentStep">
         <ng-template matStepLabel>{{ step.title }}</ng-template>
         <button mat-button data-bs-dismiss="offcanvas">
-          <a [href]="'/tutodo/see-guides/' + guideWatching.id + '#step' + i" target="_self"
+          <a [href]="'/tutodo/guide-see/' + guideWatching.id + '#step' + i" target="_self"
             style="text-decoration: none;">Ir al paso</a>
         </button>
       </mat-step>
     </mat-stepper>
   </div>
 </div>
-<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasIngredients" aria-labelledby="offcanvasIngredientsLabel">
+<!-- Offcanvas ingredientes -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasIngredients"
+  aria-labelledby="offcanvasIngredientsLabel">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title" id="offcanvasIngredientsLabel">Ingredientes / materiales</h5>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>

@@ -1,10 +1,8 @@
 import { NgModule, inject } from '@angular/core';
-import { GuardResult, MaybeAsync, RouterModule, Routes } from '@angular/router';
-import { LoginComponent } from './components/login/login.component';
+import { ActivatedRouteSnapshot, CanActivateFn, GuardResult, MaybeAsync, RouterModule, RouterStateSnapshot, Routes } from '@angular/router';
 import { TutodoComponent } from './tutodo.component';
 import { TutodoRoutes } from './tutodo.routes';
 import { HomeComponent } from './components/home/home.component';
-import { AuthGuardService } from './shared/auth.guard.service';
 import { FrontPageComponent } from './pages/front-page/front-page.component';
 import { HomePageComponent } from './pages/home-page/home-page.component';
 import { MainComponent } from './components/main/main.component';
@@ -18,6 +16,11 @@ import { GuideSeeComponent } from './components/guide-see/guide-see.component';
 import { UserData } from './model/user-data';
 import { UserService } from './service/user.service';
 import { GuideModifyInfoComponent } from './components/guide-modify-info/guide-modify-info.component';
+import { PublishedService } from './service/published.service';
+
+const canActivateGuide: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot,) => {
+  return inject(PublishedService).canActivate(route.params['id']);
+}
 
 const routes: Routes = [
   {
@@ -38,7 +41,6 @@ const routes: Routes = [
         component: HomePageComponent,
         canActivate: [(): Observable<MaybeAsync<GuardResult>> => inject(AuthService).canActivate()],
         canActivateChild: [(): Observable<MaybeAsync<GuardResult>> => inject(AuthService).canActivateChild()],
-        resolve: [(): Observable<UserData> => inject(UserService).getUserData$()],
         children: [
           {
             path: TutodoRoutes.HOME,
@@ -66,6 +68,8 @@ const routes: Routes = [
           },
           {
             path: `${TutodoRoutes.SEE}/:id`,
+            canActivate: [canActivateGuide],
+            resolve: { userData: () => inject(UserService).getUserData$() },
             component: GuideSeeComponent
           },
           {

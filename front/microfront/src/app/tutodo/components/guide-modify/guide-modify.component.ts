@@ -41,7 +41,7 @@ export class GuideModifyComponent implements OnInit {
         loadedImage: this._fb.control<string | ArrayBuffer | null>(null),
         imageFile: this._fb.control<File | null>(null),
         saved: [false],
-        modifying: [false]
+        modifying: [true]
       })
     ])
   });
@@ -109,8 +109,8 @@ export class GuideModifyComponent implements OnInit {
                   : this.stepsForm.controls.steps.getRawValue()
               );
               this._toast.success(
-                `Se ha restaurado el progreso de edición de la guía: ${this.restoredGuide.title}`,
-                'Progreso de guía restaurado'
+                `Editando guía: ${this.restoredGuide.title}`,
+                'Guía cargada'
               );
             },
             error: (response) => {
@@ -158,7 +158,9 @@ export class GuideModifyComponent implements OnInit {
       next: (response) => {
         if (response === 'guide_updated') {
           this.disableStep(index);
-          this.stepSnapshots.splice(index, 1);
+          const stepIndex = this.stepSnapshots.findIndex(step => step.index === index);
+          this.stepSnapshots.splice(stepIndex, 1);
+          // TODO controlar index -1
           this.stepsForm.controls.steps.controls[index].controls.saved.setValue(true);
           this._toast.success(
             `Se ha guardado la información sobre el paso ${index + 1}.`,
@@ -243,8 +245,9 @@ export class GuideModifyComponent implements OnInit {
   }
 
   cancelChanges(index: number): void {
-    const stepSnapshot = this.stepSnapshots.find(step => step.index === index);
-    if (stepSnapshot !== undefined) {
+    const stepIndex = this.stepSnapshots.findIndex(step => step.index === index);
+    if (stepIndex !== -1) {
+      const stepSnapshot = this.stepSnapshots[stepIndex];
       this.stepsForm.controls.steps.controls[index].setValue({
         title: stepSnapshot.title,
         description: stepSnapshot.description,
@@ -255,7 +258,7 @@ export class GuideModifyComponent implements OnInit {
         modifying: false,
         saved: true
       });
-      this.stepSnapshots.splice(index, 1);
+      this.stepSnapshots.splice(stepIndex, 1);
       this.disableStep(index);
     } else {
       this._toast.error(
@@ -298,7 +301,7 @@ export class GuideModifyComponent implements OnInit {
         );
       };
       reader.readAsDataURL(file);
-    } else {
+    } else if (input.value !== '') {
       this._toast.error(
         'No se ha podido cargar la imagen seleccionada.',
         'Operación fallida'

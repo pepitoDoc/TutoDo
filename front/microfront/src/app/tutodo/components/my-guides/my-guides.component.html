@@ -28,7 +28,9 @@
         </mat-card-content>
         <mat-card-actions>
           <button mat-button (click)="visualizeGuide(guide.id)">Visualizar guía</button>
-          <button mat-button (click)="editGuide(guide.id)">Editar guía</button>
+          <button mat-button color="accent" (click)="editGuideSteps(guide.id)">Editar pasos</button>
+          <button mat-button color="accent" (click)="editGuideInfo(guide.id)">Editar información</button>
+          <button mat-button color="warn" (click)="deleteGuide(guide.id)">Borrar guía</button>
         </mat-card-actions>
       </mat-card>
     </div>

@@ -1,4 +1,4 @@
-.alignFlexColumn {
+.align-flex-column {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -7,7 +7,7 @@
   width: 100%;
 }
 
-.alignFlexRow {
+.align-flex-row {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -16,9 +16,16 @@
   width: 100%;
 }
 
-.title {
-  margin-top: 20px;
+.info-spacing {
+  margin: 50px 0px;
+}
+
+.bottom-controls {
+  margin-top: 100px;
   margin-bottom: 50px;
+}
+
+.gradient-border {
   background: #12c2e9;
   /* fallback for old browsers */
   background: -webkit-linear-gradient(to right, #f64f59, #c471ed, #12c2e9);
@@ -30,67 +37,7 @@
   border-radius: 25px;
 }
 
-.stepContainer {
-  width: 70%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding-bottom: 40px;
-}
-
-.stepLayout {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  height: 100%;
-  border: 1px solid black;
-  border-radius: 20px;
-  margin-top: 20px;
-  height: auto;
-}
-
-.currentStep {
-  transition: background 500ms;
-  background: white;
-  transition: width 500ms;
-  width: 100%;
-}
-
-.stepCompleted {
-  transition: background 500ms;
-  background: #12c2e9;
-  /* fallback for old browsers */
-  background: -webkit-linear-gradient(to right, #f64f59, #c471ed, #12c2e9);
-  /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(to right, #f64f59, #c471ed, #12c2e9);
-  transition: width 500ms;
-  width: 75%;
-}
-
-.stepCompleted:hover {
-  transition: background 500ms;
-  background: rgb(93, 209, 255);
-  transition: width 500ms;
-  width: 90%;
-}
-
-.stepUncompleted {
-  transition: background 500ms;
-  background: rgb(179, 179, 179);
-  transition: width 500ms;
-  width: 75%;
-}
-
-.stepUncompleted:hover {
-  transition: background 500ms;
-  background: rgb(219, 219, 219);
-  transition: width 500ms;
-  width: 90%;
-}
-
-h1 {
+.gradient-content {
   width: fit-content;
   height: fit-content;
   display: flex;
@@ -102,7 +49,83 @@ h1 {
   border-radius: 20px;
 }
 
-.buttonSpace {
+.title-content {
+  flex-direction: column;
+}
+
+.step-container {
+  width: 70%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 40px;
+  @media(max-width: 768px) {
+    width: 95%;
+  }
+}
+
+.step-layout {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid black;
+  border-radius: 20px;
+  margin-top: 20px;
+  padding: 0px 50px;
+  height: auto;
+  @media(max-width: 768px) {
+    padding: 0px 5px;
+  }
+}
+
+.current-step {
+  transition: background 500ms;
+  background: white;
+  transition: width 500ms;
+  width: 100%;
+}
+
+.step-completed {
+  transition: background 500ms;
+  color: white;
+  background: #12c2e9;
+  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #f64f59, #c471ed, #12c2e9);
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #f64f59, #c471ed, #12c2e9);
+  transition: width 500ms;
+  width: 75%;
+}
+
+.step-completed:hover {
+  transition: background 500ms;
+  background: #12c2e9;
+  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #f64f59, #c471ed, #12c2e9);
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #f64f59, #c471ed, #12c2e9);
+  transition: width 500ms;
+  width: 90%;
+}
+
+.step-uncompleted {
+  transition: background 500ms;
+  background: rgb(179, 179, 179);
+  transition: width 500ms;
+  width: 75%;
+}
+
+.step-uncompleted:hover {
+  transition: background 500ms;
+  background: rgb(219, 219, 219);
+  transition: width 500ms;
+  width: 90%;
+}
+
+.button-space {
   margin-top: 10px;
   margin-bottom: 20px;
   margin-left: 20px;
@@ -113,10 +136,32 @@ mat-progress-bar {
   position: fixed;
 }
 
+.options {
+  margin-top: 20px;
+  display: none;
+  visibility: collapse;
+  @media(max-width: 768px) {
+    display: inherit;
+    visibility: visible;
+  }
+}
+
 h1, h2, h3, h4 {
   width: auto;
   text-align: center;
-  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+img {
+  margin: 0px 0px;
+  width: auto;
+  border-radius: 10px;
+  border: 1px solid black;
+
+  @media(max-width: 768px) {
+    width: 75%;
+    height: 75%;
+  }
 }
 
 
@@ -133,6 +178,9 @@ h1, h2, h3, h4 {
   right: 0;
   width: 12%;
   z-index: 999;
+  @media(max-width: 768px) {
+      visibility: hidden;
+    }
 }
 
 .sideButton {

@@ -26,8 +26,8 @@ public class Constants {
     public static final String PASSWORD = "password";
     public static final String CONFIRMED = "confirmed";
     public static final String COMPLETED = "completed";
-    public static final String PROGRESS = "progress";
-    public static final String CREATING = "creating";
+    public static final String SAVED = "saved";
+    public static final String CREATED = "created";
 
     public static final String GUIDE_TYPE_COLLECTION = "guideType";
     public static final List<String> VALID_IMAGE_TYPES = List.of("image/jpeg", "image/png", "image/gif");

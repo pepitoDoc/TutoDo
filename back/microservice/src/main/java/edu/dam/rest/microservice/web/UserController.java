@@ -75,17 +75,8 @@ public class UserController {
     @GetMapping("check-session")
     public ResponseEntity<String> checkSession(HttpSession httpSession) {
         var userLogged = (UserSession) httpSession.getAttribute("user");
-        if (userLogged != null) {
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .contentType(MediaType.TEXT_PLAIN)
-                    .body("session_confirmed");
-        } else {
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .contentType(MediaType.TEXT_PLAIN)
-                    .body("session_expired");
-        }
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN)
+                .body(userLogged != null ? "session_confirmed" : "session_expired");
     }
 
     @DeleteMapping("delete")
@@ -98,13 +89,15 @@ public class UserController {
     public ResponseEntity<User> getUser(HttpSession httpSession) {
         var userLogged = (UserSession) httpSession.getAttribute("user");
         var userInfo = this.userService.findById(userLogged.getId());
-        return ResponseEntity.status(userInfo != null ? HttpStatus.OK : HttpStatus.EXPECTATION_FAILED)
+        return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON).body(userInfo);
     }
 
-    /*@GetMapping("find-all-user-info")
-    public ResponseEntity<User> findAllUserInfo(HttpSession httpSession) {
-
-    }*/
+    @PatchMapping("add-saved")
+    public ResponseEntity<String> addGuideToSaved(HttpSession httpSession, @RequestBody String guideId) {
+        var userLogged = (UserSession) httpSession.getAttribute("user");
+        var result = this.userService.addCreated(userLogged.getId(), guideId);
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(result);
+    }
 
 }

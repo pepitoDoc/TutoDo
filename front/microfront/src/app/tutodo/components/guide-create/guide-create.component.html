@@ -61,13 +61,20 @@
             }
             <input placeholder="Introduzca ingredientes o materiales necesarios para la guía"
               [matChipInputFor]="chipGrid2" [matChipInputSeparatorKeyCodes]="separatorKeysCodesIngredients"
-              [matChipInputAddOnBlur]="true" (matChipInputTokenEnd)="addIngredient($event)" />
+              [matChipInputAddOnBlur]="false" (matChipInputTokenEnd)="addIngredient($event)" />
           </mat-chip-grid>
+          <mat-hint align="start">{{ingredients.length}}/25 (máximo 25 ingredientes)</mat-hint>
         </mat-form-field>
         <input type="file" accept="image/*" (change)="onFileChanged($event)">
-        <!-- <label class="input-group-text" for="inputGroupFile02" (click)="uploadFile()">Upload</label> -->
+        <div class="alignFlexColumn mt-4" *ngIf="loadedImage">
+          <p>Imagen actualmente seleccionada</p>
+          <button type="button" mat-flat-button class="mt-2 mb-2" color="warn"
+            (click)="deleteImage()">Eliminar imagen</button>
+          <img mat-card-image [src]="loadedImage"
+            alt="No se ha podido cargar la imagen correctamente">
+        </div>
         <div class="alignFlex">
-          <button mat-flat-button class="buttonSpace mx-5" routerLink="/home" routerLinkActive="active"
+          <button mat-flat-button class="buttonSpace" routerLink="/home" routerLinkActive="active"
             color="warn">Cancelar</button>
           <button mat-flat-button [disabled]="!guideInfo.valid || chosenTypes.length < 1" class="buttonSpace"
             color="primary" (click)="guideCreate()">Crear guía</button>

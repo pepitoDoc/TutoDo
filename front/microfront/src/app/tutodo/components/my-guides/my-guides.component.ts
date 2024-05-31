@@ -9,6 +9,7 @@ import { Guide, Rating } from '../../model/data';
 import { InfoDialogComponent } from '../info-dialog/info-dialog.component';
 import { TutodoRoutes } from '../../tutodo.routes';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { OptionDialogComponent } from '../option-dialog/option-dialog.component';
 
 @Component({
   selector: 'tutodo-my-guides',
@@ -30,18 +31,24 @@ export class MyGuidesComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this._service.findOwnGuides$().subscribe(response => {
-      if (response.length === 0) {
-        this._dialog.open(InfoDialogComponent, {
-          width: '400px',
-          height: 'auto',
-          data: {
-            title: 'No se han encontrado resultados',
-            text: ['El usuario no tiene ninguna guía registrada.']
-          }
-        }).afterClosed().subscribe( () => this._router.navigate([`../`], { relativeTo: this._route }));
-      } else {
-        this.guidesFound = response;
+    this._service.findOwnGuides$().subscribe({
+      next: (response) => {
+        if (response.length === 0) {
+          this._dialog.open(InfoDialogComponent, {
+            width: '400px',
+            height: 'auto',
+            data: {
+              title: 'No se han encontrado resultados',
+              text: ['El usuario no tiene ninguna guía registrada.']
+            }
+          }).afterClosed().subscribe(() => this._router.navigate([`../`], { relativeTo: this._route }));
+          // TODO sustituir por la página vacia y un botón diciendo crear guia?
+        } else {
+          this.guidesFound = response;
+        }
+      },
+      error: (error) => {
+        // TODO
       }
     });
   }
@@ -50,9 +57,57 @@ export class MyGuidesComponent implements OnInit {
     this._router.navigate([`../${TutodoRoutes.SEE}/${guideId}`], { relativeTo: this._route });
   }
 
-  editGuide(guideId: string): void {
-    this._sharedService.setPersistedData$({ guideIdModifying: guideId }).subscribe( 
-      () => this._router.navigate([`../${TutodoRoutes.MODIFY}`], { relativeTo: this._route }));
+  editGuideSteps(guideId: string): void {
+    this._sharedService.setPersistedData$({ guideIdModifying: guideId }).subscribe({
+      next: () => {
+        this._router.navigate([`../${TutodoRoutes.MODIFY}`], { relativeTo: this._route });
+      },
+      error: (error) => {
+        // TODO
+      }
+    });
+  }
+
+  editGuideInfo(guideId: string): void {
+    this._sharedService.setPersistedData$({ guideIdModifying: guideId }).subscribe({
+      next: () => {
+        this._router.navigate([`../${TutodoRoutes.MODIFY_INFO}`], { relativeTo: this._route });
+      },
+      error: (error) => {
+        // TODO
+      }
+    });
+  }
+
+  deleteGuide(guideId: string): void {
+    this._dialog.open(OptionDialogComponent, {
+      width: '400px',
+            height: 'auto',
+            data: {
+              title: '¿Desea eliminar la guía?',
+            }
+    }).afterClosed().subscribe({
+      next: (response) => {
+        if (response === true) {
+          this._service.deleteGuide$(guideId).subscribe({
+            next: (response) => {
+              if (response === 'operation_successful') {
+                this.guidesFound = this.guidesFound.filter(guide => guide.id !== guideId);
+                this._toast.success('Guía borrada correctamente', 'Operación exitosa')
+              } else {
+                // TODO
+              }
+            },
+            error: (error) => {
+              // TODO
+            }
+          })
+        }
+      },
+      error: (error) => {
+        // TODO
+      }
+    })
   }
 
   formatGuideTypes(guideTypes: string[]): string {

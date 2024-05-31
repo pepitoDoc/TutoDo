@@ -6,30 +6,26 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { COMMA, ENTER, T } from '@angular/cdk/keycodes';
+import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
   NonNullableFormBuilder,
   Validators,
 } from '@angular/forms';
-import { MatChipEditedEvent, MatChipGrid, MatChipInputEvent, MatChipRow } from '@angular/material/chips';
+import { MatChipEditedEvent, MatChipInputEvent } from '@angular/material/chips';
 import { ApiService } from '../../service/api.service';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { take } from 'rxjs';
-import { AsyncPipe } from '@angular/common';
-import { map, startWith, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import {
   MatAutocompleteSelectedEvent,
-  MatAutocompleteModule,
 } from '@angular/material/autocomplete';
 import { CreateGuideRequest } from '../../model/data';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TutodoRoutes } from '../../tutodo.routes';
 import { SharedService } from '../../shared/shared.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'tutodo-guide-create',
@@ -53,7 +49,8 @@ export class GuideCreateComponent implements OnInit {
   ingredients: string[] = [];
   chosenTypes: string[] = [];
   announcer = inject(LiveAnnouncer);
-  selectedFile!: File;
+  selectedImage!: File | null;
+  loadedImage!: string | ArrayBuffer | null;
 
   constructor(
     private _ngZone: NgZone,
@@ -61,12 +58,14 @@ export class GuideCreateComponent implements OnInit {
     private readonly _nnfb: NonNullableFormBuilder,
     private readonly _router: Router,
     private readonly _route: ActivatedRoute,
-    private readonly _sharedService: SharedService
+    private readonly _sharedService: SharedService,
+    private readonly _toast: ToastrService
   ) { }
 
   ngOnInit(): void {
     this._service.findAllGuideTypes$().subscribe({
       next: (response) => {
+        // TODO tipos empty
         this.guideTypes = response;
         this.filteredTypes =
           this.guideInfo.controls.guideTypes.valueChanges.pipe(
@@ -77,6 +76,9 @@ export class GuideCreateComponent implements OnInit {
             )
           );
       },
+      error: (error) => {
+        // TODO
+      }
     });
   }
 
@@ -114,6 +116,9 @@ export class GuideCreateComponent implements OnInit {
     if (index >= 0) {
       this.ingredients.splice(index, 1);
       this.announcer.announce(`Removed ${ingredient}`);
+      if (this.ingredients.length === 24) {
+        this.ingredientsInput.nativeElement.disabled = false;
+      }
     }
   }
 
@@ -121,6 +126,9 @@ export class GuideCreateComponent implements OnInit {
     const value = (ingredient.value || '').trim();
     if (value) {
       this.ingredients.push(value);
+      if (this.ingredients.length === 25) {
+        this.ingredientsInput.nativeElement.disabled = true;
+      }
     }
     ingredient.chipInput!.clear();
   }
@@ -146,36 +154,61 @@ export class GuideCreateComponent implements OnInit {
       ingredients: this.ingredients
     };
     const formData = new FormData();
-    formData.append('guideThumbnail', this.selectedFile);
+    if (this.selectedImage !== null) formData.append('guideThumbnail', this.selectedImage);
     formData.append('createGuideRequest', new Blob([JSON.stringify(payload)], {
       type: 'application/json',
     }));
     this._service.createGuide$(formData).subscribe({
       next: (response) => {
-        if (response.includes('creating_updated')) {
+        if (response.includes('operation_successful')) {
           const guideIdModifying: string = response.slice(
             response.indexOf('?id=') + 4
           );
           this._sharedService.setPersistedData$({ guideIdModifying }).subscribe({
-            next: (response) => {
+            next: () => {
               this._router.navigate([`../${TutodoRoutes.MODIFY}`], {
                 relativeTo: this._route,
               });
+            },
+            error: (error) => {
+              // TODO
             }
           });
-
         } else {
-
+          // TODO
         }
       },
       error: (err) => {
-        console.log('ABRIR DIALOG ERROR' + err);
+        // TODO
       },
     });
   }
 
-  onFileChanged(event: any): void {
-    this.selectedFile = event.target?.files.item(0);
+  deleteImage(): void {
+    this.loadedImage = null;
+    this.selectedImage = null;
+  }
+
+  onFileChanged(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      this.selectedImage = file;
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.loadedImage = reader.result;
+        this._toast.success(
+          'Imagen cargada correctamente.',
+          'Operación exitosa'
+        );
+      };
+      reader.readAsDataURL(file);
+    } else {
+      this._toast.error(
+        'No se ha podido cargar la imagen seleccionada.',
+        'Operación fallida'
+      );
+    }
   }
 
   private _filter(value: string): string[] {

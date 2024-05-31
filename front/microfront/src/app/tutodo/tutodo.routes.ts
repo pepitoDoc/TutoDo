@@ -9,6 +9,6 @@ export enum TutodoRoutes {
   MODIFY_INFO = 'guide-modify-info',
   MY_GUIDES = 'my-guides',
   SAVED = 'saved-guides',
-  SEE = 'see-guides',
+  SEE = 'guide-see',
   SEARCH = 'guide-search'
 }

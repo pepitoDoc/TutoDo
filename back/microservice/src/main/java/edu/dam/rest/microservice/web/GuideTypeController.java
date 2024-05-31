@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(ApiConstants.GUIDE_TYPE_ENDPOINT)
 public class GuideTypeController {
@@ -24,17 +26,11 @@ public class GuideTypeController {
     }
 
     @GetMapping("findAll")
-    public ResponseEntity<FindAllGuideTypesResponse> findAll() {
+    public ResponseEntity<List<String>> findAll() {
         var response = this.guideTypeService.findAllGuideTypes();
-        if (response == null) {
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
-                    .contentType(MediaType.TEXT_PLAIN)
-                    .body(response);
-        } else {
-            return ResponseEntity.status(HttpStatus.OK)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(response);
-        }
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
     }
 
 

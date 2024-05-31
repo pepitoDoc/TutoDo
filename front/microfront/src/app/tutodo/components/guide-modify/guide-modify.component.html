@@ -75,10 +75,12 @@
       <mat-menu #menu="matMenu">
         <button mat-menu-item routerLink="/tutodo/guide-modify-info"
            routerLinkActive="active">Modificar información básica</button>
+        <button mat-menu-item [routerLink]="'/tutodo/guide-see/' + guideId" routerLinkActive="active">
+          Visualizar guía</button>
         <mat-divider></mat-divider>
-        <button mat-menu-item (click)="showInfo()">Mostrar información sobre esta página</button>
+        <button mat-menu-item class="mt-2 mb-2" (click)="showInfo()">Mostrar información sobre esta página</button>
         <mat-divider></mat-divider>
-        <a mat-menu-item routerLink="/tutodo/home" routerLinkActive="active">Volver a la página principal</a>
+        <button mat-menu-item routerLink="/tutodo/home" routerLinkActive="active">Volver a la página principal</button>
       </mat-menu>
     </div>
   </div>

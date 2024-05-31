@@ -1,7 +1,6 @@
 package edu.dam.rest.microservice.persistence.model;
 
 import lombok.*;
-import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -22,7 +21,7 @@ public class User {
     private String password;
     private boolean confirmed;
     private List<String> completed;
-    private List<Progress> progress;
-    private List<String> creating;
+    private List<String> saved;
+    private List<String> created;
 
 }
