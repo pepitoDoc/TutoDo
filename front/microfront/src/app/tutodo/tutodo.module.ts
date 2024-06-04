@@ -33,12 +33,14 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { ToastrModule } from 'ngx-toastr';
 import { MyGuidesComponent } from './components/my-guides/my-guides.component';
 import { GuideSearchComponent } from './components/guide-search/guide-search.component';
 import { GuideSeeComponent } from './components/guide-see/guide-see.component';
 import { GuideCreateComponent } from './components/guide-create/guide-create.component';
 import { GuideModifyInfoComponent } from './components/guide-modify-info/guide-modify-info.component';
+import { VerifyEmailComponent } from './components/verify-email/verify-email.component';
 
 
 @NgModule({
@@ -58,7 +60,8 @@ import { GuideModifyInfoComponent } from './components/guide-modify-info/guide-m
     InfoDialogComponent,
     OptionDialogComponent,
     MyGuidesComponent,
-    GuideModifyInfoComponent
+    GuideModifyInfoComponent,
+    VerifyEmailComponent
   ],
   imports: [
     CommonModule,
@@ -84,6 +87,7 @@ import { GuideModifyInfoComponent } from './components/guide-modify-info/guide-m
     MatSnackBarModule,
     MatProgressBarModule,
     MatListModule,
+    MatButtonToggleModule,
     ToastrModule.forRoot({
       timeOut: 4000,
       positionClass: 'toast-bottom-right'

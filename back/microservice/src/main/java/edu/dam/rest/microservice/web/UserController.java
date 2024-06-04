@@ -4,6 +4,7 @@ import edu.dam.rest.microservice.bean.user.InsertUserRequest;
 import edu.dam.rest.microservice.bean.user.LoginUserRequest;
 import edu.dam.rest.microservice.bean.user.UserSession;
 import edu.dam.rest.microservice.constants.ApiConstants;
+import edu.dam.rest.microservice.constants.Constants;
 import edu.dam.rest.microservice.persistence.model.User;
 import edu.dam.rest.microservice.service.UserService;
 import jakarta.servlet.http.HttpSession;
@@ -27,20 +28,10 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("insert")
-    public ResponseEntity<String> create(@RequestBody InsertUserRequest insertUserRequest) {
-        var insertResult = userService.create(insertUserRequest);
-        if (!insertResult.equals("user_registered")) {
-            return ResponseEntity
-                    .status(HttpStatus.EXPECTATION_FAILED)
-                    .contentType(MediaType.TEXT_PLAIN)
-                    .body(insertResult);
-        } else {
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .contentType(MediaType.TEXT_PLAIN)
-                    .body(insertResult);
-        }
+    @PostMapping("create")
+    public ResponseEntity<String> create(@RequestBody InsertUserRequest insertUserRequest, HttpSession httpSession) {
+        var insertResult = this.userService.create(insertUserRequest);
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(insertResult);
     }
 
     @PostMapping("login")
@@ -56,7 +47,7 @@ public class UserController {
                     .contentType(MediaType.TEXT_PLAIN)
                     .body("already_logged");
         } else {
-            var loginResult = userService.login(loginUserRequest);
+            var loginResult = this.userService.login(loginUserRequest);
             if (loginResult != null) {
                 httpSession.setAttribute("user", loginResult);
                 return ResponseEntity
@@ -70,6 +61,11 @@ public class UserController {
                         .body("credentials_wrong");
             }
         }
+    }
+
+    @PostMapping("logout")
+    public void logout(HttpSession httpSession) {
+        httpSession.invalidate();
     }
 
     @GetMapping("check-session")
@@ -93,10 +89,38 @@ public class UserController {
                 .contentType(MediaType.APPLICATION_JSON).body(userInfo);
     }
 
-    @PatchMapping("add-saved")
-    public ResponseEntity<String> addGuideToSaved(HttpSession httpSession, @RequestBody String guideId) {
+    @PatchMapping("add-saved/{guideId}")
+    public ResponseEntity<String> addGuideToSaved(HttpSession httpSession, @PathVariable String guideId) {
         var userLogged = (UserSession) httpSession.getAttribute("user");
-        var result = this.userService.addCreated(userLogged.getId(), guideId);
+        var result = this.userService.addToUserStringArray(userLogged.getId(), guideId, Constants.SAVED);
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(result);
+    }
+
+    @PatchMapping("remove-saved/{guideId}")
+    public ResponseEntity<String> deleteGuideFromSaved(HttpSession httpSession, @PathVariable String guideId) {
+        var userLogged = (UserSession) httpSession.getAttribute("user");
+        var result = this.userService.deleteFromUserStringArray(userLogged.getId(), guideId, Constants.SAVED);
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(result);
+    }
+
+    @GetMapping("check-valid")
+    public ResponseEntity<String> checkConfirmed(HttpSession httpSession) {
+        var userLogged = (UserSession) httpSession.getAttribute("user");
+        if (userLogged != null) {
+            var result = this.userService.checkUserConfirmed(userLogged.getId());
+            return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON)
+                    .body(result);
+        } else {
+            return ResponseEntity.status(HttpStatus.OK).contentType(
+                    MediaType.APPLICATION_JSON).body("session_expired");
+        }
+    }
+
+    @PatchMapping("update-confirmed/{status}")
+    public ResponseEntity<String> updateConfirmed(
+            @PathVariable("status") boolean status, HttpSession httpSession) {
+        var userLogged = (UserSession) httpSession.getAttribute("user");
+        var result = this.userService.updateUserConfirmed(userLogged.getId(), status);
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(result);
     }
 

@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Document("guide")
@@ -21,11 +22,11 @@ public class Guide {
     private String title;
     private String description;
     private boolean published;
-    private LocalDate creationDate;
+    private LocalDateTime creationDate;
     private List<Step> steps;
     private List<String> guideTypes;
     private List<String> ingredients;
-    private List<String> comments;
+    private List<Comment> comments;
     private List<Rating> ratings;
     private String thumbnail;
 

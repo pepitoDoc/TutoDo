@@ -23,7 +23,7 @@
                 <mat-label>Descripción</mat-label>
                 <textarea type="text" matInput formControlName="description" placeholder="Breve descripción de la guía"
                   cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5"
-                  #inputDescription [minLength]="50" [maxLength]="200"></textarea>
+                  #inputDescription [minLength]="50" [maxLength]="400"></textarea>
                 <mat-hint align="start">{{inputDescription.value.length}}/400 (mínimo 50 caracteres)</mat-hint>
                 <mat-error *ngIf="step.controls.description.touched && step.controls.description.hasError('required')">
                   <strong>Es necesaria una descripción del paso</strong>

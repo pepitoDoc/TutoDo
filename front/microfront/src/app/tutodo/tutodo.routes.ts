@@ -1,6 +1,7 @@
 export enum TutodoRoutes {
   ROOT = '',
   LOGIN = 'login',
+  CREDENTIALS = 'credentials',
   TUTODO = 'tutodo',
   HOME = 'home',
   MAIN = 'main',
@@ -10,5 +11,6 @@ export enum TutodoRoutes {
   MY_GUIDES = 'my-guides',
   SAVED = 'saved-guides',
   SEE = 'guide-see',
-  SEARCH = 'guide-search'
+  SEARCH = 'guide-search',
+  VERIFY = 'verify'
 }

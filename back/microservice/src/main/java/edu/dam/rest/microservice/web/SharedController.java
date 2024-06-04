@@ -2,6 +2,7 @@ package edu.dam.rest.microservice.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.dam.rest.microservice.constants.ApiConstants;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,12 +27,16 @@ public class SharedController {
         this.objectMapper = objectMapper;
     }
 
-    @PostMapping("get-data")
-    public ResponseEntity<Map<String, Object>> getData(
-            @RequestBody List<String> sharedData, HttpSession httpSession) {
-        var payload = sharedData.stream()
-                .filter(data -> httpSession.getAttribute(data) != null)
-                .collect(Collectors.toMap(key -> key, httpSession::getAttribute));
+    @GetMapping("get-data")
+    public ResponseEntity<Map<String, Object>> getData(HttpServletRequest httpServletRequest) {
+        Enumeration<String> params = httpServletRequest.getParameterNames();
+        var payload = new HashMap<String, Object>();
+        params.asIterator().forEachRemaining(param -> {
+            var attribute = httpServletRequest.getSession().getAttribute(param);
+            if (attribute != null) {
+                payload.put(param, attribute);
+            }
+        });
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(payload);

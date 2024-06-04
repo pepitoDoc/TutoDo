@@ -3,6 +3,7 @@ package edu.dam.rest.microservice.web;
 import edu.dam.rest.microservice.bean.guide.*;
 import edu.dam.rest.microservice.bean.user.UserSession;
 import edu.dam.rest.microservice.constants.ApiConstants;
+import edu.dam.rest.microservice.persistence.model.Comment;
 import edu.dam.rest.microservice.persistence.model.Guide;
 import edu.dam.rest.microservice.service.GuideService;
 import jakarta.servlet.http.HttpSession;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(ApiConstants.GUIDE_ENDPOINT)
@@ -74,8 +76,8 @@ public class GuideController {
                 .body(result);
     }
 
-    @GetMapping("find-by-id")
-    public ResponseEntity<Guide> findGuide(@PathParam("guideId") String guideId) {
+    @GetMapping("find-by-id/{guideId}")
+    public ResponseEntity<Guide> findGuide(@PathVariable("guideId") String guideId) {
         var guideFound = this.guideService.findGuide(guideId);
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -84,7 +86,7 @@ public class GuideController {
     }
 
     @GetMapping("find-published-by-id")
-    public ResponseEntity<Boolean> findGuideIsPublished(@PathParam("guideId") String guideId) {
+    public ResponseEntity<Boolean> findGuideIsPublished(@RequestParam("guideId") String guideId) {
         var result = this.guideService.findGuidePublished(guideId);
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -102,7 +104,7 @@ public class GuideController {
     }
 
     @PostMapping("find-by-filter")
-    public ResponseEntity<List<Guide>> findByFilter(
+    public ResponseEntity<List<FindByFilterResponse>> findByFilter(
             @RequestBody FindByFilterRequest findByFilterRequest) {
         var result = this.guideService.findByFilter(findByFilterRequest);
         return ResponseEntity.status(HttpStatus.OK).
@@ -120,10 +122,17 @@ public class GuideController {
     }
 
     @PatchMapping("add-comment")
-    public ResponseEntity<String> addComment(
+    public ResponseEntity<AddCommentResponse> addComment(
             @RequestBody AddCommentRequest addCommentRequest, HttpSession httpSession) {
         var userLogged = (UserSession) httpSession.getAttribute("user");
-        var result = this.guideService.addComent(addCommentRequest, userLogged.getId());
+        var result = this.guideService.addComent(addCommentRequest, userLogged);
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(result);
+    }
+
+    @PatchMapping("delete-comment")
+    public ResponseEntity<String> deleteComment(
+            @RequestBody DeleteCommentRequest deleteCommentRequest) {
+        var result = this.guideService.deleteComment(deleteCommentRequest);
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(result);
     }
 

@@ -74,13 +74,21 @@ export interface Guide {
     title: string;
     description: string;
     published: boolean;
-    creationDate: string;
+    creationDate: Date;
     steps: Step[];
     guideTypes: string[];
     ingredients: string[];
-    comments: string[];
+    comments: Comment[];
     ratings: Rating[];
     thumbnail: string;
+}
+
+export interface Comment {
+    userId: string;
+    username: string;
+    text: string;
+    date: Date;
+    formattedDate: Date;
 }
 
 export interface FindByFilterRequest {
@@ -128,4 +136,27 @@ export interface GuideInfoSnapshot {
 export interface AddRatingRequest {
     guideId: string;
     punctuation: number;
+}
+
+export interface AddCommentRequest {
+    guideId: string;
+    comment: string;
+}
+
+export interface AddCommentResponse {
+    result: string;
+    comment: Comment;
+}
+
+export interface DeleteCommentRequest {
+    guideId: string;
+    userId: string;
+    username: string;
+    text: string;
+    date: Date;
+}
+
+export interface FindByFilterResponse {
+    guideFound: Guide;
+    creatorUsername: string;
 }

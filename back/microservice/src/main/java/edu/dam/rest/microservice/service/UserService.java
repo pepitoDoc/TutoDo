@@ -48,9 +48,9 @@ public class UserService {
         } else {
             var dbCheck = this.userRepository.save(createUser);
             if (this.userRepository.existsById(dbCheck.getId())) {
-                return "user_registered";
+                return "operation_successful";
             } else {
-                return "error_registering_user";
+                return "operation_unsuccessful";
             }
         }
 
@@ -96,15 +96,16 @@ public class UserService {
         var foundUser = this.userRepository.findById(userId);
         if (foundUser.isPresent()) {
             return foundUser.orElseThrow();
+            // TODO devolver null si hay isPresent()
         } else {
             return null;
         }
     }
 
-    public String addCreated(String userId, String guideId) {
+    public String addToUserStringArray(String userId, String guideId, String field) {
         var result = this.mongoTemplate.updateFirst(
                 query(where(Constants.ID).is(userId)),
-                new Update().push(Constants.CREATED, guideId), Constants.USER_COLLECTION);
+                new Update().push(field, guideId), Constants.USER_COLLECTION);
         if (result.wasAcknowledged() && result.getModifiedCount() == 1) {
             return "operation_successful";
         } else {
@@ -112,23 +113,39 @@ public class UserService {
         }
     }
 
-    public String deleteCreated(String userId, String guideId) {
-        var query = new Query().addCriteria(where(Constants.ID).is(userId));
-        query.fields().include(Constants.CREATED);
-        var queryResult = this.mongoTemplate.findOne(query, CreatedProjection.class, Constants.USER_COLLECTION);
-        if (queryResult != null) {
-            queryResult.setCreated(queryResult.getCreated().stream().filter(
-                    created -> !created.equals(guideId)).collect(Collectors.toList())
-            );
-            var updateResult = this.mongoTemplate.updateFirst(
-                    query(where(Constants.ID).is(userId)),
-                    new Update().set(Constants.CREATED, queryResult.getCreated()),
-                    Constants.USER_COLLECTION);
-            if (updateResult.wasAcknowledged() && updateResult.getModifiedCount() > 0) {
-                return "operation_successful";
+    public String deleteFromUserStringArray(String userId, String guideId, String field) {
+        var result = this.mongoTemplate.updateFirst(
+                query(where(Constants.ID).is(userId)),
+                new Update().pull(field, guideId), Constants.USER_COLLECTION);
+        if (result.wasAcknowledged() && result.getModifiedCount() == 1) {
+            return "operation_successful";
+        } else {
+            return "operation_unsuccessful";
+        }
+    }
+
+    public String checkUserConfirmed(String userId) {
+        var result = this.userRepository.findById(userId);
+        if (result.isPresent()) {
+            var foundUser = result.orElseThrow();
+            if (foundUser.isConfirmed()) {
+                return "user_confirmed";
             } else {
-                return "operation_unsuccessful";
+                return "user_not_confirmed";
             }
+        } else {
+            return "user_not_found";
+        }
+    }
+
+    public String updateUserConfirmed(String userId, boolean confirmed) {
+        var result = this.mongoTemplate.updateFirst(
+                query(where(Constants.ID).is(userId)),
+                new Update().set(Constants.CONFIRMED, confirmed),
+                Constants.GUIDE_COLLECTION
+        );
+        if (result.wasAcknowledged() && result.getModifiedCount() > 0) {
+            return "operation_successful";
         } else {
             return "operation_unsuccessful";
         }

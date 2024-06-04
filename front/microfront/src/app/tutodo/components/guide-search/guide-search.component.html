@@ -62,36 +62,36 @@
   </div>
   <div *ngIf="!searchMode">
     <div class="alignGrid">
-      <div *ngFor="let guide of guidesFound">
-        <mat-card class="example-card guideCard">
-          <mat-card-header>
-            <mat-card-title>{{ guide.title }}</mat-card-title>
-            <mat-card-subtitle>Usuario creador: johnny poppers</mat-card-subtitle>
-          </mat-card-header>
-          <mat-divider></mat-divider>
-          <mat-card-content class="guideResume">
-            <div class="guideInfo">
-              <p>Guía sobre:{{ formatGuideTypes(guide.guideTypes) }}</p>
-              <p>Comentarios: {{ guide.comments.length }}</p>
-              <p>Puntuación media: {{ ratingMean(guide.ratings) }}</p>
-            </div>
-            <div class="guideInfo">
-              <img mat-card-image src="https://material.angular.io/assets/img/examples/shiba2.jpg"
-                alt="Photo of a Shiba Inu">
-            </div>
-          </mat-card-content>
-          <mat-divider></mat-divider>
-          <mat-card-content>
-            <p>
-              {{ guide.description }} aaaaaaaaaaaaa
-            </p>
-          </mat-card-content>
-          <mat-card-actions>
-            <button mat-button (click)="visualizeGuide(guide.id)">Visualizar guía</button>
-            <button mat-button>Añadir a Guardados</button>
-          </mat-card-actions>
-        </mat-card>
-      </div>
+      <mat-card class="example-card guideCard" *ngFor="let guide of guidesFound">
+        <mat-card-header>
+          <mat-card-title>{{ guide.guideFound.title }}</mat-card-title>
+          <mat-card-subtitle>Usuario creador: {{ guide.creatorUsername }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-divider></mat-divider>
+        <mat-card-content class="guideResume">
+          <div class="guideInfo">
+            <p><strong>Guía sobre:</strong>{{ formatGuideTypes(guide.guideFound.guideTypes) }}</p>
+            <p><strong>Comentarios:</strong> {{ guide.guideFound.comments.length }}</p>
+            <p><strong>Puntuación media:</strong> {{ ratingMean(guide.guideFound.ratings) }}</p>
+            <p><strong>Estado de publicación:</strong> {{ guide.guideFound.published ? 'Publicado' : 'No publicado' }}</p>
+          </div>
+          <div class="guideInfo">
+            <img mat-card-image [src]="guide.guideFound.thumbnail 
+                        ? 'data:image/jpeg;base64,' + guide.guideFound.thumbnail 
+                        : '/assets/images/_11707f36-6180-48c1-b259-16214f3e3e34-logo.jpeg'">
+          </div>
+        </mat-card-content>
+        <mat-divider></mat-divider>
+        <mat-card-content>
+          <p>
+            {{ guide.guideFound.description }}
+          </p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button (click)="visualizeGuide(guide.guideFound.id)">Visualizar guía</button>
+          <button mat-button>Añadir a Guardados</button>
+        </mat-card-actions>
+      </mat-card>
     </div>
     <div class="optionsDivBottom sticky-bottom">
       <button mat-flat-button (click)="resetSearch()" color="warn">Volver al filtro</button>

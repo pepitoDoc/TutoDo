@@ -9,10 +9,10 @@
         <mat-divider></mat-divider>
         <mat-card-content class="guideResume">
           <div class="guideInfo">
-            <p>Guía sobre:{{ formatGuideTypes(guide.guideTypes) }}</p>
-            <p>Comentarios: {{ guide.comments.length }}</p>
-            <p>Puntuación media: {{ ratingMean(guide.ratings) }}</p>
-            <p>Estado de publicación: {{ guide.published ? 'publicado' : 'no publicado' }}</p>
+            <p><strong>Guía sobre:</strong>{{ formatGuideTypes(guide.guideTypes) }}</p>
+            <p><strong>Comentarios:</strong> {{ guide.comments.length }}</p>
+            <p><strong>Puntuación media:</strong> {{ ratingMean(guide.ratings) }}</p>
+            <p><strong>Estado de publicación:</strong> {{ guide.published ? 'Publicado' : 'No publicado' }}</p>
           </div>
           <div class="guideInfo">
             <img mat-card-image [src]="guide.thumbnail 

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, ReplaySubject, Subject, shareReplay } from 'rxjs';
 import { environment } from '../environment/environment';
@@ -30,11 +30,19 @@ export class SharedService {
   }
 
   getPersistedData$(...data: string[]): Observable<any> {
-    return this._http.post(`${this._sharedEndpoint}/get-data`, data, { withCredentials: true }).pipe(shareReplay(1));
+    return this._http.get(`${this._sharedEndpoint}/get-data`, { withCredentials: true, params: this._returnParams(data) }).pipe(shareReplay(1));
   }
 
   setPersistedData$(data: Object): Observable<any> {
     return this._http.post(`${this._sharedEndpoint}/post-data`, data, { withCredentials: true }).pipe(shareReplay(1));
+  }
+
+  private _returnParams(paramsArray: string[]): HttpParams {
+    let params = new HttpParams();
+    paramsArray.forEach(param => {
+      params = params.append(param, param);
+    });
+    return params;
   }
 
 }

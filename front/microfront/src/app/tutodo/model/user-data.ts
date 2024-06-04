@@ -4,8 +4,8 @@ export interface UserData {
   email: string;
   confirmed: boolean;
   completed: string[];
-  progress: Progress[];
-  creating: string[];
+  saved: string[];
+  created: string[];
 }
 
 interface Progress {

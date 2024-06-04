@@ -8,8 +8,8 @@
 
 .alignGrid {
   display: grid;
-  grid-template-rows: auto auto;
-  grid-template-columns: 50% 50%;
+  grid-template-rows: 0.5fr 0.5fr;
+  grid-template-columns: 0.5fr 0.5fr;
   gap: 10px;
   @media(max-width: 768px) {
     grid-template-columns: 100%;
@@ -20,6 +20,7 @@
 // Todas estas son de las guías
 
 .guideCard {
+  height: 100%;
   margin: 20px 20px;
   border: 1px solid black;
   border-radius: 40px;
@@ -152,7 +153,7 @@ h2, h3, mat-label, p, input {
   }
 }
 
-mat-hint, strong {
+mat-hint {
   font-size: 14px;
   @media (max-width: 768px) {
     font-size: 10px;

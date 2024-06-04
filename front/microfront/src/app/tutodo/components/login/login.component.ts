@@ -22,13 +22,14 @@ export class LoginComponent implements OnInit {
   registerForm = this._nnfb.group({
     username: ['', Validators.required],
     email: ['', [Validators.required, Validators.maxLength(100)]],
-    password: ['', [Validators.required, Validators.maxLength(256)]]
+    password: ['', [Validators.required, Validators.maxLength(256)]],
+    passwordConfirm: ['', [Validators.required, Validators.maxLength(256)]],
   });
 
-  inputState: boolean = true;
-  loginResult: boolean = false;
-  hidePassword: boolean = true;
-  loginMessage!: string;
+  inputState = true;
+  hidePassword = true;
+  loginMessage = '';
+  registerMessage = '';
 
   constructor(
     private readonly _apiService: ApiService,
@@ -49,41 +50,55 @@ export class LoginComponent implements OnInit {
         if (response === 'login_succesful' || response === 'already_logged') {
           this._toast.success('Se ha iniciado sesión correctamente');
           this._router.navigate([`../${TutodoRoutes.TUTODO}`], { relativeTo: this._route });
-          this.loginResult = false;
+          this.loginMessage = '';
         } else {
-          this.loginResult = true;
           this.loginMessage = 'Las credenciales introducidas no son correctas';
+          this.loginMessage = '';
           this._toast.warning('Las credenciales introducidas no son válidas.', 'Credenciales incorrectas');
         }
       },
-      error: (err) => {
+      error: (error) => {
         this.loginMessage = 'Error del servidor al iniciar sesión';
         this._toast.error('Error del servidor al iniciar sesión.', 'Error del servidor');
-        console.log(err);
       }
     });
   }
 
   register(): void {
     const data: InsertUserRequest = { ...this.registerForm.getRawValue() };
-    this._apiService.insertUser$(data).subscribe({
-      next: (response) => {
-        if (response === 'user_registered') {
-          this._toast.success('Se ha iniciado sesión correctamente');
-          this._router.navigate([`../${TutodoRoutes.TUTODO}`], { relativeTo: this._route });
-          this.loginResult = false;
-        } else {
-          this.loginResult = true;
-          this._toast.warning('Ya existe un usuario con ese nombre o correo electrónico.', 'Credenciales no disponibles');
-          this.loginMessage = 'Ya existe un usuario con ese nombre o correo electrónico';
+    if (this.registerForm.controls.password.getRawValue()
+      === this.registerForm.controls.passwordConfirm.getRawValue()) {
+      this._apiService.insertUser$(data).subscribe({
+        next: (response) => {
+          if (response === 'operation_successful') {
+            this._toast.success('Se ha creado el usuario correctamente', 'Usuario creado');
+            this.loginMessage = '';
+            this.changeInputState();
+          } else {
+            if (response === 'username_takenemail_taken') {
+              this._toast.warning('El correo electrónico y nombre de usuario introducido ya existen.', 'Credenciales no disponibles');
+              this.loginMessage = 'El correo electrónico y nombre de usuario introducido ya existen.';
+            } else if (response === 'username_taken') {
+              this._toast.warning('El nombre de usuario introducido ya existe.', 'Credenciales no disponibles');
+              this.loginMessage = 'El nombre de usuario introducido ya existe.';
+            } else if (response === 'email_taken') {
+              this._toast.warning('El correo electrónico introducido ya existe.', 'Credenciales no disponibles');
+              this.loginMessage = 'El correo electrónico introducido ya existe.';
+            } else {
+              this._toast.warning('Ha habido un error en el proceso de creación de usuario.', 'Error en el registro');
+              this.loginMessage = 'Ha habido un error en el proceso de creación de usuario; por favor, inténtelo de nuevo.';
+            }
+          }
+        },
+        error: (err) => {
+          this.loginMessage = 'Error del servidor al registrar el usuario';
+          this._toast.error('Error del servidor al iniciar sesión.', 'Error del servidor');
         }
-      },
-      error: (err) => {
-        this.loginMessage = 'Error del servidor al registrar el usuario';
-        this._toast.error('Error del servidor al iniciar sesión.', 'Error del servidor');
-        console.log(err);
-      }
-    });
+      });
+    } else {
+      this.loginMessage = 'Las contraseñas introducidas no coinciden';
+      this._toast.warning('Las contraseñas introducidas no coinciden.', 'Credenciales no válidas');
+    }
   }
 
   changeInputState(): void {

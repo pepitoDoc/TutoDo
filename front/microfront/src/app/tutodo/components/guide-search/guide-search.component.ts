@@ -1,4 +1,4 @@
-import { Component, ElementRef, Inject, LOCALE_ID, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Inject, LOCALE_ID, OnDestroy, OnInit, Output, ViewChild, inject } from '@angular/core';
 import { FormBuilder, FormGroup, NonNullableFormBuilder, ValidatorFn, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -12,8 +12,10 @@ import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { Observable, map, startWith, tap } from 'rxjs';
 import { DecimalPipe } from '@angular/common';
 import { R } from '@angular/cdk/keycodes';
-import { FindByFilterRequest, Guide, Rating } from '../../model/data';
+import { FindByFilterRequest, FindByFilterResponse, Guide, Rating } from '../../model/data';
 import { InfoDialogComponent } from '../info-dialog/info-dialog.component';
+import { TutodoRoutes } from '../../tutodo.routes';
+import { UserData } from '../../model/user-data';
 
 @Component({
   selector: 'tutodo-guide-search',
@@ -39,10 +41,11 @@ export class GuideSearchComponent implements OnInit, OnDestroy {
   {description: '3 (Bueno)', value: '3'}, {description: '4 (Superior)', value: '4'}, {description: '5 (Excelente)', value: '5'}]
   searchMode = true;
   announcer = inject(LiveAnnouncer);
-  guidesFound!: Guide[];
+  guidesFound!: FindByFilterResponse[];
   hasGuides$!: Observable<boolean>;
   formValid = false;
   private unsubscribe = new Subject<void>();
+  userData!: UserData;
 
   constructor(
     private readonly _nnfb: NonNullableFormBuilder,
@@ -52,7 +55,9 @@ export class GuideSearchComponent implements OnInit, OnDestroy {
     private readonly _dialog: MatDialog,
     private readonly _sharedService: SharedService,
     private readonly _toast: ToastrService
-  ) { }
+  ) { 
+    this.userData = this._route.snapshot.data['userData'];
+  }
 
   ngOnDestroy(): void {
     this.unsubscribe.next();
@@ -81,7 +86,7 @@ export class GuideSearchComponent implements OnInit, OnDestroy {
     this._service.findGuideByFilter$(payload).subscribe({
       next: (response) => {
         if (response !== null  && response.length > 0) {
-          this.guidesFound = response;
+          this.guidesFound = response.filter(findByFilter => findByFilter.guideFound !== null);
           this.searchMode = false;
         } else {
           this._dialog.open(InfoDialogComponent, {
@@ -106,10 +111,12 @@ export class GuideSearchComponent implements OnInit, OnDestroy {
   }
 
   visualizeGuide(guideId: string): void {
-    
+    this._router.navigate([`../${TutodoRoutes.SEE}/${guideId}`], { relativeTo: this._route });
   }
 
-  
+  addSaved(guideId: string): void {
+
+  }
 
   remove(guideType: string): void {
     const index = this.chosenTypes.indexOf(guideType);

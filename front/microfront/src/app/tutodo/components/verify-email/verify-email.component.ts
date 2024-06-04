@@ -1,0 +1,12 @@
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'tutodo-verify-email',
+  templateUrl: './verify-email.component.html',
+  styleUrl: './verify-email.component.scss'
+})
+export class VerifyEmailComponent {
+
+  
+
+}

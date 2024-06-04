@@ -1,13 +1,15 @@
-import { AfterViewInit, ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, NgZone, OnInit, ViewChild } from '@angular/core';
 import { Validators, FormBuilder, NonNullableFormBuilder } from '@angular/forms';
 import { ApiService } from '../../service/api.service';
 import { SharedService } from '../../shared/shared.service';
 import { MatDialog } from '@angular/material/dialog';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { AddRatingRequest, Guide } from '../../model/data';
-import { Observable } from 'rxjs';
+import { AddCommentRequest, AddRatingRequest, DeleteCommentRequest, Guide } from '../../model/data';
+import { Observable, take } from 'rxjs';
 import { UserData } from '../../model/user-data';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { OptionDialogComponent } from '../option-dialog/option-dialog.component';
 
 @Component({
   selector: 'tutodo-guide-see',
@@ -18,15 +20,15 @@ export class GuideSeeComponent implements OnInit, AfterViewInit {
 
   guideWatching!: Guide;
   currentStep = 0;
-  ratings: { description: string, value: number }[] = [{ description: '1 (Mala)', value: 1 }, { description: '2 (Mejorable)', value: 2 },
-  { description: '3 (Bueno)', value: 3 }, { description: '4 (Superior)', value: 4 }, { description: '5 (Excelente)', value: 5 }];
-  rating = this._nnfb.group({
-    punctuation: [1, Validators.required]
-  });
+  ratings: { description: string, punctuation: number }[] = [{ description: '1 (Mala)', punctuation: 1 }, { description: '2 (Mejorable)', punctuation: 2 },
+    { description: '3 (Bueno)', punctuation: 3 }, { description: '4 (Superior)', punctuation: 4 }, { description: '5 (Excelente)', punctuation: 5 }];
   comment = this._nnfb.group({
-    text: ['', Validators.required, Validators.minLength(50), Validators.maxLength(500)]
+    text: ['', [Validators.required, Validators.minLength(50), Validators.maxLength(500)]]
   });
+  userPunctuation!: number;
   userData!: UserData;
+
+  @ViewChild('autosize') autosize!: CdkTextareaAutosize;
   
   constructor(
     private readonly _nnfb: NonNullableFormBuilder,
@@ -36,26 +38,13 @@ export class GuideSeeComponent implements OnInit, AfterViewInit {
     private readonly _service: ApiService,
     private readonly _shared: SharedService,
     private readonly _toast: ToastrService,
-    private _zone: NgZone,
+    private _ngZone: NgZone,
     private _cdr: ChangeDetectorRef
   ) {
     this.userData = this._route.snapshot.data['userData'];
   }
 
   ngAfterViewInit(): void {
-    // const guideId = this._route.snapshot.paramMap.get('id');
-    // if (guideId !== null) {
-    //   this._shared.getPersistedData$(guideId).subscribe({
-    //     next: (response) => {
-    //       if (typeof response === 'object' && Object.keys(response).length !== 0) {
-    //         this._zone.run(() => {
-    //           this.currentStep = response;
-    //           this._cdr.detectChanges();  // Ensure change detection runs
-    //         });
-    //       }
-    //     } // TODO mirar si se puede hacer con directiva
-    //   });
-    // }
   }
 
   ngOnInit(): void {
@@ -66,16 +55,11 @@ export class GuideSeeComponent implements OnInit, AfterViewInit {
           if (response !== null && response !== undefined) {
             this.guideWatching = response;
             this.findUserRating();
-            // this._shared.getPersistedData$(guideId).subscribe({
-            //   next: (response) => {
-            //     if (typeof response === 'object' && Object.keys(response).length !== 0) {
-            //       this._zone.run(() => {
-            //         this.currentStep = response;
-            //         this._cdr.detectChanges();
-            //       });
-            //     }
-            //   }
-            // });
+            this.orderCommentsByNew();
+            if (this.findGuideOwnership()) {
+              // TODO deshabilitar estrellitas
+              this.comment.disable();
+            }
           }
         },
         error: (error) => {
@@ -105,21 +89,33 @@ export class GuideSeeComponent implements OnInit, AfterViewInit {
   findUserRating(): boolean {
     const userRating = this.guideWatching.ratings.find(rating => rating.userId === this.userData.id);
     if (userRating !== undefined) {
-      this.rating.controls.punctuation.setValue(userRating.punctuation);
+      if (this.userPunctuation === undefined) {
+        this.userPunctuation = userRating.punctuation;
+      }
       return true;
     } else {
+      this.userPunctuation = 3;
       return false;
     }
   }
 
-  submitRating(): void {
+  findGuideOwnership(): boolean {
+    return this.userData.created.includes(this.guideWatching.id);
+  }
+
+  submitRating(punctuation: number): void {
+    // TODO añadir lógica no puntuar guia propia
     const payload: AddRatingRequest = {
       guideId: this.guideWatching.id,
-      punctuation: this.rating.controls.punctuation.getRawValue()
+      punctuation: punctuation
     }
     this._service.submitRating$(payload).subscribe({
       next: (response) => {
         if (response === 'guide_updated') {
+          // this.guideWatching.ratings.push(
+          //   { userId: this.userData.id, punctuation: punctuation });
+          this.userPunctuation = punctuation;
+          this._toast.clear();
           this._toast.success('¡Gracias por puntuar la guía!', 'Puntuación registrada');
         } else {
           // TODO
@@ -128,13 +124,75 @@ export class GuideSeeComponent implements OnInit, AfterViewInit {
       error: (error) => {
         // TODO
       }
+    });
+  }
+
+  submitComment(): void {
+    const payload: AddCommentRequest = {
+      guideId: this.guideWatching.id,
+      comment: this.comment.controls.text.value
+    }
+    this._service.submitComment$(payload).subscribe({
+      next: (response) => {
+        if (response.result === 'operation_successful') {
+          this.guideWatching.comments.push(response.comment);
+          this.comment.reset();
+          this.comment.controls.text.setErrors(null);
+          this._toast.success('Su comentario se ha publicado correctamente', 'Comentario publicado')
+        }
+      },
+      error: (error) => {
+        // TODO
+      }
     })
+  }
+
+  deleteComment(index: number): void {
+    this._dialog.open(OptionDialogComponent, {
+      width: '400px',
+      height: 'auto',
+      data: {
+        title: '¿Desea eliminar este comentario?',
+      }
+    }).afterClosed().subscribe({
+      next: (response) => {
+        if (response === true) {
+          const { userId, username, text, date } = this.guideWatching.comments[index];
+          const payload: DeleteCommentRequest = { guideId: this.guideWatching.id, userId, username, text, date };
+          this._service.deleteComment$(payload).subscribe({
+            next: (response) => {
+              if (response === 'operation_successful') {
+                this.guideWatching.comments.splice(index, 1);
+                this._toast.info('Comentario eliminado');
+              }
+            }
+          });
+        }
+      },
+      error: (error) => {
+        // TODO
+      }
+    });
   }
 
   formatGuideTypes(): string {
     let formatted = '';
     this.guideWatching.guideTypes.forEach(type => formatted += ` ${type},`);
     return formatted.substring(0, formatted.length - 1);
+  }
+
+  orderCommentsByNew(): void {
+    this.guideWatching.comments = this.guideWatching.comments.sort((a, b) => a.formattedDate.getTime() - b.formattedDate.getTime());
+  }
+
+  orderCommentsByOld(): void {
+    this.guideWatching.comments = this.guideWatching.comments.sort((a, b) => b.formattedDate.getTime() - a.formattedDate.getTime());
+  }
+
+  triggerResize() {
+    this._ngZone.onStable
+      .pipe(take(1))
+      .subscribe(() => this.autosize.resizeToFitContent(true));
   }
 
 }

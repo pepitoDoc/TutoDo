@@ -1,80 +1,93 @@
-<div class="rowAlign">
-  <div class="col pageLogo">
-    <img src="\assets\images\_11707f36-6180-48c1-b259-16214f3e3e34.jpeg">
-  </div>
-  <div class="col">
-    <!-- Login form -->
-    <div class="columnContent" *ngIf="inputState">
-      <h2>Inicio de sesión</h2>
-      <h3>Introduzca sus credenciales de usuario</h3>
-      <form class="example-form" [formGroup]="loginForm">
-        <mat-form-field class="example-full-width" appareance="fill">
-          <mat-label>Correo electrónico</mat-label>
-          <input type="email" [maxLength]="100" matInput formControlName="email"
-            placeholder="Correo electrónico">
-          <mat-icon matSuffix>person</mat-icon>
-          <mat-error *ngIf="loginForm.get('userIdentifier')?.hasError('required')">
-            <strong>Se requiere el usuario</strong>
-          </mat-error>
-        </mat-form-field>
-        <mat-form-field class="example-full-width" appareance="fill">
-          <mat-label>Contraseña</mat-label>
-          <input type="password" [maxLength]="256" matInput formControlName="password" placeholder="Contraseña"
-            [type]="hidePassword ? 'password' : 'text'">
-          <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" [attr.aria-label]="'Hide password'"
-            [attr.aria-pressed]="hidePassword">
-            <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
-          </button>
-          <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
-            <strong>Se requiere la contraseña</strong>
-          </mat-error>
-        </mat-form-field>
-        <button mat-flat-button class="buttonSpace" color="primary" [disabled]="!loginForm.valid"
-          (click)="login()">Iniciar sesión</button>
-        <mat-error *ngIf="loginResult">
-          <strong>{{ loginMessage }}</strong>
-        </mat-error>
-      </form>
-      <div class="rowAlign">
-        <p>¿No tiene cuenta?</p>
-        <button mat-button class="buttonSpace" color="accent" (click)="changeInputState()">Regístrese aquí</button>
-      </div>
+<div class="loginInputs">
+  <div class="rowAlign">
+    <div class="col pageLogo">
+      <img src="\assets\images\_11707f36-6180-48c1-b259-16214f3e3e34.jpeg">
     </div>
-    <!-- Register form -->
-    <div class="columnContent" *ngIf="!inputState">
-      <h2>Registro de usuario</h2>
-      <h3>Introduzca sus datos y pulse el botón de registro</h3>
-      <form class="example-form" [formGroup]="registerForm">
-        <mat-form-field class="example-full-width" appareance="fill">
-          <mat-label>Nombre de usuario</mat-label>
-          <input type="text" [maxLength]="100" matInput formControlName="username" placeholder="AntonioTuto">
-          <mat-error *ngIf="registerForm.get('username')?.hasError('required')">
-            <strong>Se requiere el nombre de usuario</strong>
+    <div class="col">
+      <!-- Login form -->
+      <div class="columnContent" *ngIf="inputState">
+        <h2>Inicio de sesión</h2>
+        <h3>Introduzca sus credenciales de usuario</h3>
+        <form class="example-form" [formGroup]="loginForm">
+          <mat-form-field class="example-full-width" appareance="fill">
+            <mat-label>Correo electrónico</mat-label>
+            <input type="email" [maxLength]="100" matInput formControlName="email" placeholder="Correo electrónico">
+            <mat-icon matSuffix>person</mat-icon>
+            <mat-error *ngIf="loginForm.controls.email.hasError('required')">
+              <strong>Se requiere el usuario</strong>
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field class="example-full-width" appareance="fill">
+            <mat-label>Contraseña</mat-label>
+            <input type="password" [maxLength]="256" matInput formControlName="password" placeholder="Contraseña"
+              [type]="hidePassword ? 'password' : 'text'">
+            <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" [attr.aria-label]="'Hide password'"
+              [attr.aria-pressed]="hidePassword">
+              <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+            <mat-error *ngIf="loginForm.controls.password.hasError('required')">
+              <strong>Se requiere la contraseña</strong>
+            </mat-error>
+          </mat-form-field>
+          <button mat-flat-button class="buttonSpace" color="primary" [disabled]="!loginForm.valid"
+            (click)="login()">Iniciar sesión</button>
+          <mat-error *ngIf="loginMessage !== ''">
+            <strong>{{ loginMessage }}</strong>
           </mat-error>
-        </mat-form-field>
-        <mat-form-field class="example-full-width" appareance="fill">
-          <mat-label>Correo electrónico</mat-label>
-          <input type="email" [maxLength]="256" matInput formControlName="email" placeholder="ejemplo@gmail.com">
-          <mat-error *ngIf="registerForm.get('email')?.hasError('required')">
-            <strong>Se requiere el correo electrónico</strong>
+        </form>
+        <div class="rowAlign">
+          <p>¿No tiene cuenta?</p>
+          <button mat-button class="buttonSpace" color="accent" (click)="changeInputState()">Regístrese aquí</button>
+        </div>
+      </div>
+      <!-- Register form -->
+      <div class="columnContent" *ngIf="!inputState">
+        <h2>Registro de usuario</h2>
+        <h3>Introduzca sus datos y pulse el botón de registro</h3>
+        <form class="example-form" [formGroup]="registerForm">
+          <mat-form-field class="example-full-width" appareance="fill">
+            <mat-label>Nombre de usuario</mat-label>
+            <input type="text" [maxLength]="100" matInput formControlName="username" placeholder="AntonioTuto">
+            <mat-error *ngIf="registerForm.controls.username.hasError('required')">
+              <strong>Se requiere el nombre de usuario</strong>
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field class="example-full-width" appareance="fill">
+            <mat-label>Correo electrónico</mat-label>
+            <input type="email" [maxLength]="256" matInput formControlName="email" placeholder="ejemplo@gmail.com">
+            <mat-error *ngIf="registerForm.controls.email.hasError('required')">
+              <strong>Se requiere el correo electrónico</strong>
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field class="example-full-width" appareance="fill">
+            <mat-label>Contraseña</mat-label>
+            <input type="password" matInput formControlName="password" placeholder="Contraseña">
+            <mat-error *ngIf="registerForm.controls.password.hasError('required')">
+              <strong>Se requiere la contraseña</strong>
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field class="example-full-width" appareance="fill">
+            <mat-label>Confirmar contraseña</mat-label>
+            <input type="password" [maxLength]="256" matInput formControlName="passwordConfirm" placeholder="Contraseña"
+              [type]="hidePassword ? 'password' : 'text'">
+            <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" [attr.aria-label]="'Hide password'"
+              [attr.aria-pressed]="hidePassword">
+              <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+            <mat-error *ngIf="registerForm.controls.passwordConfirm.hasError('required')">
+              <strong>Se requiere la contraseña</strong>
+            </mat-error>
+          </mat-form-field>
+          <button mat-flat-button class="buttonSpace" color="primary" [disabled]="!registerForm.valid"
+            (click)="register()">Registrarse</button>
+          <mat-error *ngIf="registerMessage !== ''">
+            <strong>{{ registerMessage }}</strong>
           </mat-error>
-        </mat-form-field>
-        <mat-form-field class="example-full-width" appareance="fill">
-          <mat-label>Contraseña</mat-label>
-          <input type="password" matInput formControlName="password" placeholder="Contraseña">
-          <mat-error *ngIf="registerForm.get('password')?.hasError('required')">
-            <strong>Se requiere la contraseña</strong>
-          </mat-error>
-        </mat-form-field>
-        <button mat-flat-button class="buttonSpace" color="primary" [disabled]="!registerForm.valid"
-          (click)="register()">Registrarse</button>
-        <mat-error *ngIf="loginResult">
-          <strong>{{ loginMessage }}</strong>
-        </mat-error>
-      </form>
-      <div class="rowAlign">
-        <p>¿Ya tienes cuenta?</p>
-        <button mat-button class="buttonSpace" color="accent" (click)="changeInputState()">Inicia sesión</button>
+        </form>
+        <div class="rowAlign">
+          <p>¿Ya tienes cuenta?</p>
+          <button mat-button class="buttonSpace" color="accent" (click)="changeInputState()">Inicia sesión</button>
+        </div>
       </div>
     </div>
   </div>

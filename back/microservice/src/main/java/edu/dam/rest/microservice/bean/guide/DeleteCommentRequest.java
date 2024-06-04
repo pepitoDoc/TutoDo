@@ -1,8 +1,6 @@
-package edu.dam.rest.microservice.persistence.model;
+package edu.dam.rest.microservice.bean.guide;
 
 import lombok.*;
-import org.springframework.cglib.core.Local;
-import org.springframework.data.annotation.Id;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -12,8 +10,9 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Comment {
+public class DeleteCommentRequest {
 
+    private String guideId;
     private String userId;
     private String username;
     private String text;

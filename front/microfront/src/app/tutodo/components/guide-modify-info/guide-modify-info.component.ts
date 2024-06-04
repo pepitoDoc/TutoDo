@@ -73,7 +73,7 @@ export class GuideModifyInfoComponent implements OnInit {
           this.guideId = response.guideIdModifying;
           this._service.findGuideById$(this.guideId).subscribe((response) => {
             this.restoredGuide = response;
-            this.isPublished = this.restoredGuide.steps.length > 5 
+            this.isPublished = this.restoredGuide.steps.length >= 5 
               ? this.restoredGuide.published : false;
             this.guideInfo.setValue({
               title: this.restoredGuide.title,

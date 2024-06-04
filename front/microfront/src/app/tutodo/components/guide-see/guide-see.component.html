@@ -9,7 +9,7 @@
         <h3 *ngIf="userData">Usuario creador: {{ userData.username }}</h3>
       </div>
     </div>
-    <div class="step-container">
+    <div class="guide-container">
       <div *ngFor="let step of guideWatching.steps; let i = index;" [class.step-layout]="true"
         [ngClass]="{ 'step-completed': i < currentStep, 'current-step': i === currentStep, 'step-uncompleted': i > currentStep }">
         <h2 [id]="'step' + i">Paso {{ i + 1 }}</h2>
@@ -26,27 +26,82 @@
             class="button-space" color="accent">Volver al paso anterior</button>
         </div>
       </div>
+      <div class="align-flex-column rating">
+        <div class="align-flex-row">
+          <button mat-icon-button color="accent" *ngFor="let rating of ratings; let i = index" [id]="'star_'+i"
+            (click)="submitRating(i + 1)" [matTooltip]="rating.description" matTooltipPosition="above" class="rating-star">
+            <mat-icon>
+              {{ userPunctuation >= (i + 1) ? 'star' : 'star_outlined' }}
+            </mat-icon>
+          </button>
+        </div>
+        <h2 *ngIf="!findUserRating()">¡Le agradeceríamos que puntuara la guía!</h2>
+        <h2 *ngIf="findUserRating()">¡Gracias por puntuar la guía!</h2>
+      </div>
       <!-- // TODO no dejar votar si es guía propia -->
-      <form [formGroup]="rating" class="gradient-border bottom-controls"
-        *ngIf="currentStep === guideWatching.steps.length">
+      <!-- <form [formGroup]="rating" class="gradient-border bottom-controls"
+        *ngIf="currentStep === guideWatching.steps.length && !findGuideOwnership()">
         <div class="align-flex-row gradient-content pt-4">
           <mat-form-field class="example-full-width rating" appareance="fill" name="rating">
             <mat-label>Puntuar la guía</mat-label>
             <mat-select formControlName="punctuation">
               @for (rating of ratings; track rating) {
-              <mat-option [value]="rating.value">{{rating.description}}</mat-option>
+              <mat-option [value]="rating.punctuation">{{rating.description}}</mat-option>
               }
             </mat-select>
           </mat-form-field>
-          <button type="submit" mat-flat-button class="button-space" color="primary" (click)="submitRating()">Puntuar</button>
+          <button type="submit" mat-flat-button class="button-space" color="primary"
+            (click)="submitRating()" [disabled]="findGuideOwnership()">Puntuar</button>
         </div>
         <div class="align-flex-row">
           <p class="gradient-content" *ngIf="findUserRating()">
-            Usted ha puntuado la guía con un {{ rating.controls.punctuation.getRawValue() }}</p>
+            Usted ya ha puntuado la guía con un {{ userPunctuation }}</p>
+          <p class="gradient-content" *ngIf="findGuideOwnership()">
+            No puede puntuar una guía de su creación</p>
         </div>
-      </form>
-      <div class="comments">
-
+      </form> -->
+      <div class="comments align-flex-column">
+        <form [formGroup]="comment" *ngIf="!findGuideOwnership()">
+          <h2>Enviar comentario</h2>
+          <mat-form-field class="example-full-width" appareance="fill">
+            <mat-label>Introduzca el comentario que desea enviar</mat-label>
+            <textarea type="text" matInput formControlName="text" placeholder="Ej: '¡Me ha encantado esta guía!'"
+              cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5"
+              #inputDescription [minLength]="50" [maxLength]="400"></textarea>
+            <mat-hint align="start">{{inputDescription.value.length}}/400 (mínimo 50 caracteres)</mat-hint>
+            <mat-error *ngIf="comment.controls.text.touched && comment.controls.text.hasError('minLength')">
+              <strong>Es necesario que la guía contenga el mínimo de caracteres</strong>
+            </mat-error>
+          </mat-form-field>
+          <div>
+            <button type="button" mat-flat-button class="button-space" color="primary" 
+            (click)="submitComment()" [disabled]="findGuideOwnership() || !comment.valid">Publicar comentario</button>
+          </div>
+        </form>
+        <div class="posted-comments" *ngIf="guideWatching.published">
+          <div class="comment-container-title">
+            <h2>Caja de comentarios
+              <mat-button-toggle-group name="fontStyle" aria-label="Font Style">
+                <mat-button-toggle value="bold" (click)="orderCommentsByOld()">Ordenar por antigüedad</mat-button-toggle>
+                <mat-button-toggle value="italic" (click)="orderCommentsByNew()">Ordenar por más nuevo</mat-button-toggle>
+              </mat-button-toggle-group>
+            </h2>
+          </div>
+          <div class="comment-container" *ngFor="let comment of guideWatching.comments; let i = index">
+            <h3>{{ comment.username }}</h3>
+            <h3 *ngIf="comment.formattedDate">Fecha de publicación: {{ comment.formattedDate.toLocaleDateString() }}</h3>
+            <p>{{ comment.text }}</p>
+            <div class="align-flex-row">
+              <!-- <button type="button" mat-flat-button class="button-space" color="accent"
+                *ngIf="comment.userId === userData.id">Editar comentario</button> -->
+              <button type="button" mat-flat-button class="button-space" color="warn" (click)="deleteComment(i)"
+                *ngIf="comment.userId === userData.id || guideWatching.id === userData.id">Borrar comentario</button>
+            </div>
+          </div>
+          <div *ngIf="guideWatching.comments.length === 0" class="comment-container">
+            <h3>No hay ningun comentario publicado</h3>
+          </div>
+        </div>
       </div>
       <div class="align-flex-row options sticky-bottom">
         <button type="button" mat-flat-button data-bs-toggle="offcanvas" href="#offcanvasSteps" class="button-space"

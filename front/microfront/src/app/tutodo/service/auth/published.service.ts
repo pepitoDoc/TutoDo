@@ -1,10 +1,10 @@
 import { Injectable, OnInit, inject } from '@angular/core';
-import { environment } from '../environment/environment';
+import { environment } from '../../environment/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ActivatedRoute, ActivatedRouteSnapshot, CanActivate, CanActivateFn, GuardResult, MaybeAsync, Router, RouterStateSnapshot } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, catchError, of, shareReplay, switchMap } from 'rxjs';
-import { TutodoRoutes } from '../tutodo.routes';
+import { TutodoRoutes } from '../../tutodo.routes';
 
 @Injectable({
   providedIn: 'root'
@@ -13,12 +13,10 @@ export class PublishedService {
 
   private readonly _endpoint = environment.ENDPOINT;
   private readonly _guideEndpoint = `${this._endpoint}/guide`;
-  private guideId!: string;
 
   constructor(
     private readonly _http: HttpClient,
     private readonly _router: Router,
-    private readonly _route: ActivatedRoute,
     private readonly _toast: ToastrService
   ) { }
 

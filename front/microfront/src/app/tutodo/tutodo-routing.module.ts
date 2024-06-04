@@ -8,15 +8,18 @@ import { HomePageComponent } from './pages/home-page/home-page.component';
 import { MainComponent } from './components/main/main.component';
 import { GuideCreateComponent } from './components/guide-create/guide-create.component';
 import { GuideModifyComponent } from './components/guide-modify/guide-modify.component';
-import { AuthService } from './service/auth.service';
+import { AuthService } from './service/auth/auth.service';
 import { Observable } from 'rxjs';
 import { MyGuidesComponent } from './components/my-guides/my-guides.component';
 import { GuideSearchComponent } from './components/guide-search/guide-search.component';
 import { GuideSeeComponent } from './components/guide-see/guide-see.component';
 import { UserData } from './model/user-data';
-import { UserService } from './service/user.service';
+import { UserService } from './service/provider/user.service';
 import { GuideModifyInfoComponent } from './components/guide-modify-info/guide-modify-info.component';
-import { PublishedService } from './service/published.service';
+import { PublishedService } from './service/auth/published.service';
+import { LoginComponent } from './components/login/login.component';
+import { VerifyEmailComponent } from './components/verify-email/verify-email.component';
+import { ConfirmedService } from './service/auth/confirmed.service';
 
 const canActivateGuide: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot,) => {
   return inject(PublishedService).canActivate(route.params['id']);
@@ -24,23 +27,44 @@ const canActivateGuide: CanActivateFn = (route: ActivatedRouteSnapshot, state: R
 
 const routes: Routes = [
   {
-    path: TutodoRoutes.ROOT,
+    path: '',
     component: TutodoComponent,
     children: [
       {
-        path: TutodoRoutes.ROOT,
-        redirectTo: TutodoRoutes.LOGIN,
+        path: '',
+        redirectTo: TutodoRoutes.TUTODO,
         pathMatch: 'full'
       },
       {
         path: TutodoRoutes.LOGIN,
-        component: FrontPageComponent
+        component: FrontPageComponent,
+        children: [
+          {
+            path: '',
+            component: LoginComponent
+          },
+          {
+            path: TutodoRoutes.VERIFY,
+            component: VerifyEmailComponent,
+            canActivate: 
+            [
+              (): Observable<MaybeAsync<GuardResult>> => inject(ConfirmedService).canActivate()
+            ]
+          }
+        ]
       },
       {
         path: TutodoRoutes.TUTODO,
         component: HomePageComponent,
-        canActivate: [(): Observable<MaybeAsync<GuardResult>> => inject(AuthService).canActivate()],
-        canActivateChild: [(): Observable<MaybeAsync<GuardResult>> => inject(AuthService).canActivateChild()],
+        canActivate: 
+        [
+          (): Observable<MaybeAsync<GuardResult>> => inject(AuthService).canActivate()
+        ],
+        canActivateChild: 
+        [
+          (): Observable<MaybeAsync<GuardResult>> => inject(AuthService).canActivateChild()
+        ],
+        resolve: { userData: () => inject(UserService).getUserData$() },
         children: [
           {
             path: TutodoRoutes.HOME,
@@ -64,7 +88,8 @@ const routes: Routes = [
           },
           {
             path: `${TutodoRoutes.SEARCH}`,
-            component: GuideSearchComponent
+            component: GuideSearchComponent,
+            resolve: { userData: () => inject(UserService).getUserData$() }
           },
           {
             path: `${TutodoRoutes.SEE}/:id`,
