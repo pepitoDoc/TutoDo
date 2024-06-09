@@ -68,7 +68,8 @@ const routes: Routes = [
         children: [
           {
             path: TutodoRoutes.HOME,
-            component: HomeComponent
+            component: HomeComponent,
+            resolve: { userData: () => inject(UserService).getUserData$() }
           },
           {
             path: TutodoRoutes.CREATE,

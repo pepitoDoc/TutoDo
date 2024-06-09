@@ -8,6 +8,7 @@ export interface InsertUserRequest {
     username: string;
     email: string;
     password: string;
+    preferences: string[];
 }
 
 export interface GuideStep {

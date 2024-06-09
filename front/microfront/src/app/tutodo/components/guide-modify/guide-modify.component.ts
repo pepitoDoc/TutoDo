@@ -35,7 +35,7 @@ export class GuideModifyComponent implements OnInit {
     steps: this._nnfb.array([
       this._nnfb.group({
         title:  ['', { validators: [Validators.required, Validators.minLength(10), Validators.maxLength(50)] }],
-        description: ['', { validators: [Validators.required, Validators.minLength(50), Validators.maxLength(400)] }],
+        description: ['', { validators: [Validators.required, Validators.minLength(20), Validators.maxLength(400)] }],
         imageFileInput: this._fb.control<File | null>(null),
         imageBase64: [''],
         loadedImage: this._fb.control<string | ArrayBuffer | null>(null),

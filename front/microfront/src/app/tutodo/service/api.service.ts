@@ -1,8 +1,10 @@
-import { HttpClient, HttpEvent, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../environment/environment';
-import { AddRatingRequest, CreateGuideRequest, DeleteGuideStepRequest, FindByFilterRequest, FindByFilterResponse, Guide, InsertUserRequest, LoginUserRequest, AddCommentRequest, SaveGuideInfoRequest, SaveGuideStepsRequest, AddCommentResponse, DeleteCommentRequest } from '../model/data';
-import { Observable, map, share, shareReplay } from 'rxjs';
+import { AddRatingRequest, DeleteGuideStepRequest, FindByFilterRequest,
+  FindByFilterResponse, Guide, InsertUserRequest, LoginUserRequest,
+  AddCommentRequest, AddCommentResponse, DeleteCommentRequest } from '../model/data';
+import { Observable, map, shareReplay } from 'rxjs';
 import { UserData } from '../model/user-data';
 
 @Injectable({
@@ -119,6 +121,28 @@ export class ApiService {
   deleteSaved$(guideId: string): Observable<string> {
     return this._http.patch(`${this._guideEndpoint}/delete-saved/${guideId}`, {},
       { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
+  }
+
+  findNewestGuides$(): Observable<Guide[]> {
+    return this._http.get<Guide[]>(`${this._guideEndpoint}/find-newest`, { withCredentials: true }).pipe(shareReplay(1));
+  }
+
+  findNewestGuidesByPreference$(preference: string): Observable<Guide[]> {
+    return this._http.get<Guide[]>(`${this._guideEndpoint}/find-newest-by-preference`,
+      { withCredentials: true, params: new HttpParams().append('preference', preference) }).pipe(shareReplay(1));
+  }
+
+  sendCode$(codeType: string): Observable<string> {
+    return this._http.post(`${this._userEndpoint}/send-code/${codeType}`, {}, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
+  }
+
+  verifyCode$(codeType: string, codeValue: string): Observable<string> {
+    return this._http.get(`${this._userEndpoint}/verify-code/${codeType}`, { withCredentials: true, responseType: 'text', 
+      params: new HttpParams().append('codeValue', codeValue) }).pipe(shareReplay(1));
+  }
+
+  updateConfirmed$(confirmed: boolean): Observable<string> {
+    return this._http.patch(`${this._userEndpoint}/update-confirmed/${confirmed}`, {}, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
   private _formatGuideDates(guide: Guide): Guide {

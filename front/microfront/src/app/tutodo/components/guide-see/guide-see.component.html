@@ -81,9 +81,9 @@
         <div class="posted-comments" *ngIf="guideWatching.published">
           <div class="comment-container-title">
             <h2>Caja de comentarios
-              <mat-button-toggle-group name="fontStyle" aria-label="Font Style">
-                <mat-button-toggle value="bold" (click)="orderCommentsByOld()">Ordenar por antigüedad</mat-button-toggle>
-                <mat-button-toggle value="italic" (click)="orderCommentsByNew()">Ordenar por más nuevo</mat-button-toggle>
+              <mat-button-toggle-group>
+                <mat-button-toggle (click)="orderCommentsByOld()">Ordenar por antigüedad</mat-button-toggle>
+                <mat-button-toggle (click)="orderCommentsByNew()">Ordenar por más nuevo</mat-button-toggle>
               </mat-button-toggle-group>
             </h2>
           </div>

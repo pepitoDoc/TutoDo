@@ -1,7 +1,6 @@
 package edu.dam.rest.microservice.service;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.UpdateResult;
 import edu.dam.rest.microservice.bean.guide.*;
 import edu.dam.rest.microservice.bean.user.UserSession;
@@ -9,22 +8,18 @@ import edu.dam.rest.microservice.constants.Constants;
 import edu.dam.rest.microservice.persistence.model.*;
 import edu.dam.rest.microservice.persistence.repository.GuideRepository;
 import edu.dam.rest.microservice.persistence.repository.UserRepository;
-import org.bson.Document;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.format.datetime.standard.InstantFormatter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -51,44 +46,29 @@ public class GuideService {
     }
 
     public String guideCreate(CreateGuideRequest createGuideRequest, String userId, MultipartFile guideThumbnail) {
+        var guide = Guide.builder()
+                .userId(userId)
+                .title(createGuideRequest.getTitle())
+                .description(createGuideRequest.getDescription())
+                .published(false)
+                .creationDate(LocalDateTime.now())
+                .steps(new ArrayList<>())
+                .guideTypes(createGuideRequest.getGuideTypes())
+                .ingredients(createGuideRequest.getIngredients().isEmpty()
+                        ? new ArrayList<>() : createGuideRequest.getIngredients())
+                .comments(new ArrayList<>())
+                .ratings(new ArrayList<>())
+                .build();
         if (guideThumbnail != null && Arrays.asList(Constants.VALID_IMAGE_TYPES)
                 .contains(guideThumbnail.getContentType())) {
             var encodedThumbnail = this.encodeImageAsBase64(guideThumbnail);
-            if (!encodedThumbnail.equals("error_encoding")) {
-                var guide = Guide.builder()
-                        .userId(userId)
-                        .title(createGuideRequest.getTitle())
-                        .description(createGuideRequest.getDescription())
-                        .published(false)
-                        .creationDate(LocalDateTime.now())
-                        .steps(new ArrayList<>())
-                        .guideTypes(createGuideRequest.getGuideTypes())
-                        .ingredients(createGuideRequest.getIngredients().isEmpty()
-                                ? new ArrayList<>() : createGuideRequest.getIngredients())
-                        .comments(new ArrayList<>())
-                        .ratings(new ArrayList<>())
-                        .thumbnail(encodedThumbnail)
-                        .build();
-                return insertGuide(userId, guide);
-            } else {
+            if (encodedThumbnail.equals("error_encoding")) {
                 return "error_creating_guide";
             }
         } else {
-            var guide = Guide.builder()
-                    .userId(userId)
-                    .title(createGuideRequest.getTitle())
-                    .description(createGuideRequest.getDescription())
-                    .published(false)
-                    .creationDate(LocalDateTime.now())
-                    .steps(new ArrayList<>())
-                    .guideTypes(createGuideRequest.getGuideTypes())
-                    .ingredients(createGuideRequest.getIngredients().isEmpty()
-                            ? new ArrayList<>() : createGuideRequest.getIngredients())
-                    .comments(new ArrayList<>())
-                    .ratings(new ArrayList<>())
-                    .build();
-            return insertGuide(userId, guide);
+            guide.setThumbnail("");
         }
+        return this.insertGuide(userId, guide);
     }
 
     public String saveGuideStep(SaveGuideStepRequest saveGuideStepRequest, MultipartFile stepImage) {
@@ -222,29 +202,45 @@ public class GuideService {
             }
         }
         operations.add(match(where(Constants.PUBLISHED).is(true)));
-        if (findByFilterRequest.getRating() != null && findByFilterRequest.getRating() >= 0) {
+        if (findByFilterRequest.getRating() != null && findByFilterRequest.getRating() > 0) {
             operations.add(unwind(Constants.RATINGS));
             operations.add(group(Constants.ID).avg("$ratings.punctuation")
                     .as("averagePunctuation"));
             operations.add(match(where("averagePunctuation").gte(findByFilterRequest.getRating())));
+            var result = this.mongoTemplate.aggregate(
+                    newAggregation(operations), Constants.GUIDE_COLLECTION, BasicDBObject.class);
+            return result.getMappedResults().stream()
+                    .map(guide -> this.guideRepository.findById(guide.getObjectId(Constants.ID).toString()))
+                    .filter(Optional::isPresent)
+                    .map(guide -> {
+                        var guideOwner = this.userRepository.findById(guide.orElseThrow().getUserId());
+                        if (guideOwner.isPresent()) {
+                            return FindByFilterResponse.builder()
+                                    .guideFound(guide.orElseThrow())
+                                    .creatorUsername(guideOwner.orElseThrow().getUsername())
+                                    .build();
+                        } else {
+                            return null;
+                        }
+                    })
+                    .collect(Collectors.toList());
+        } else {
+            var result = this.mongoTemplate.aggregate(
+                    newAggregation(operations), Constants.GUIDE_COLLECTION, Guide.class);
+            return result.getMappedResults().stream()
+                    .map(guide -> {
+                        var guideOwner = this.userRepository.findById(guide.getUserId());
+                        if (guideOwner.isPresent()) {
+                            return FindByFilterResponse.builder()
+                                    .guideFound(guide)
+                                    .creatorUsername(guideOwner.orElseThrow().getUsername())
+                                    .build();
+                        } else {
+                            return null;
+                        }
+                    })
+                    .collect(Collectors.toList());
         }
-        var result = this.mongoTemplate.aggregate(
-                newAggregation(operations), Constants.GUIDE_COLLECTION, BasicDBObject.class);
-        return result.getMappedResults().stream()
-                .map(guide -> this.guideRepository.findById(guide.getObjectId(Constants.ID).toString()))
-                .filter(Optional::isPresent)
-                .map(guide -> {
-                    var guideOwner = this.userRepository.findById(guide.orElseThrow().getUserId());
-                    if (guideOwner.isPresent()) {
-                        return FindByFilterResponse.builder()
-                                .guideFound(guide.orElseThrow())
-                                .creatorUsername(guideOwner.orElseThrow().getUsername())
-                                .build();
-                    } else {
-                        return null;
-                    }
-                })
-                .collect(Collectors.toList());
     }
 
     public List<Guide> findOwnGuides(String userId) {
@@ -351,6 +347,25 @@ public class GuideService {
         } else {
             return "operation_unsuccessful";
         }
+    }
+
+    public List<Guide> findNewestGuides() {
+        var operations = new ArrayList<AggregationOperation>();
+        operations.add(sort(Sort.by(Sort.Order.desc(Constants.CREATION_DATE))));
+        operations.add(limit(10));
+        var result = this.mongoTemplate.aggregate(
+                newAggregation(operations), Constants.GUIDE_COLLECTION, Guide.class);
+        return result.getMappedResults().stream().filter(Guide::isPublished).toList();
+    }
+
+    public List<Guide> findNewestGuidesByPreference(String preference) {
+        var operations = new ArrayList<AggregationOperation>();
+        operations.add(match(where(Constants.GUIDE_TYPES).in(preference)));
+        operations.add(sort(Sort.by(Sort.Order.desc(Constants.CREATION_DATE))));
+        operations.add(limit(10));
+        var result = this.mongoTemplate.aggregate(
+                newAggregation(operations), Constants.GUIDE_COLLECTION, Guide.class);
+        return result.getMappedResults().stream().filter(Guide::isPublished).toList();
     }
 
     private String encodeImageAsBase64(MultipartFile image) {

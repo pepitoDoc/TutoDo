@@ -233,11 +233,21 @@ h1 {
 
 img {
     margin: 0px 0px;
-    width: auto;
+    width: 50%;
     border-radius: 10px;
     border: 1px solid black;
     @media(max-width: 768px) {
         width: 75%;
         height: 75%;
     }
+}
+
+.guide-info {
+    width: 75%;
+
+    h2,
+    p {
+        padding: 20px 0px;
+    }
+
 }

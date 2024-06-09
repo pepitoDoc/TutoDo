@@ -1,9 +1,7 @@
 package edu.dam.rest.microservice.web;
 
-import edu.dam.rest.microservice.bean.guideType.FindAllGuideTypesResponse;
 import edu.dam.rest.microservice.constants.ApiConstants;
 import edu.dam.rest.microservice.service.GuideTypeService;
-import edu.dam.rest.microservice.util.GuideDbDump;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

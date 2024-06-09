@@ -82,7 +82,7 @@
                     Estado de la guía: {{ isPublished ? 'publicado' : 'no publicado' }}</mat-slide-toggle>
                 <p *ngIf="this.restoredGuide.steps.length < 5">La guía debe tener 5 o más pasos para ser publicada</p>
             </form>
-            <div *ngIf="!isModifyGuideInfo">
+            <div *ngIf="!isModifyGuideInfo" class="guide-info">
                 <h2>{{ guideInfo.controls.title.getRawValue() }}</h2>
                 <p>{{ guideInfo.controls.description.getRawValue() }}</p>
                 <p>Tipos de la guía: {{ listToString(chosenTypes) | titlecase }}</p>

@@ -7,6 +7,7 @@ import edu.dam.rest.microservice.constants.ApiConstants;
 import edu.dam.rest.microservice.constants.Constants;
 import edu.dam.rest.microservice.persistence.model.User;
 import edu.dam.rest.microservice.service.UserService;
+import edu.dam.rest.microservice.util.VerificationCodeGenerator;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -123,5 +125,41 @@ public class UserController {
         var result = this.userService.updateUserConfirmed(userLogged.getId(), status);
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(result);
     }
+
+    @GetMapping("verify-code/{codeType}")
+    public ResponseEntity<String> verifyUser(
+            @PathVariable("codeType") String codeType, @RequestParam("codeValue") String codeValue,
+            HttpSession httpSession) {
+        var generatedCode = (String) httpSession.getAttribute(codeType);
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN)
+                .body(codeValue.equals(generatedCode) ? "operation_successful" : "operation_unsuccessful");
+    }
+
+    @PostMapping("send-code/{codeType}")
+    public ResponseEntity<String> sendVerification(
+            @PathVariable("codeType") String codeType, HttpSession httpSession) {
+        var userLogged = (UserSession) httpSession.getAttribute("user");
+        var codeValue = new VerificationCodeGenerator().generateVerificationCode();
+        httpSession.setAttribute(codeType, codeValue);
+        var result = this.userService.sendVerification(codeType, codeValue, userLogged.getEmail());
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN)
+                .body(result ? "operation_successful" : "operation_unsuccessful");
+    }
+
+    @PatchMapping("change-password")
+    public ResponseEntity<String> changePassword(@RequestBody String newPassword, HttpSession httpSession) {
+        var userLogged = (UserSession) httpSession.getAttribute("user");
+        var result = this.userService.changePassword(newPassword, userLogged.getId());
+        if (result.equals("operation_successful")) {
+            userLogged.setPassword(newPassword);
+            httpSession.setAttribute("user", userLogged);
+        }
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(result);
+    }
+
+//    @GetMapping("find-users")
+//    public ResponseEntity<List<User>> findUsers(@PathVariable("username") String username) {
+//
+//    }
 
 }

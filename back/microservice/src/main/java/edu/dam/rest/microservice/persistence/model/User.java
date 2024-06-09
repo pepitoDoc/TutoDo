@@ -23,5 +23,6 @@ public class User {
     private List<String> completed;
     private List<String> saved;
     private List<String> created;
+    private List<String> preferences;
 
 }

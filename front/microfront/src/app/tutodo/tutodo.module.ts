@@ -41,6 +41,7 @@ import { GuideSeeComponent } from './components/guide-see/guide-see.component';
 import { GuideCreateComponent } from './components/guide-create/guide-create.component';
 import { GuideModifyInfoComponent } from './components/guide-modify-info/guide-modify-info.component';
 import { VerifyEmailComponent } from './components/verify-email/verify-email.component';
+import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 
 
 @NgModule({
@@ -61,7 +62,8 @@ import { VerifyEmailComponent } from './components/verify-email/verify-email.com
     OptionDialogComponent,
     MyGuidesComponent,
     GuideModifyInfoComponent,
-    VerifyEmailComponent
+    VerifyEmailComponent,
+    ResetPasswordComponent
   ],
   imports: [
     CommonModule,

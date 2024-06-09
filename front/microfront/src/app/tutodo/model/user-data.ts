@@ -6,6 +6,7 @@ export interface UserData {
   completed: string[];
   saved: string[];
   created: string[];
+  preferences: string[];
 }
 
 interface Progress {

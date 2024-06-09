@@ -26,10 +26,10 @@ export class GuideSearchComponent implements OnInit, OnDestroy {
 
   chosenTypes: string[] = [];
   guideFilter = this._nnfb.group({
-    title: ['', [Validators.maxLength(50)]],
-    username: ['', [Validators.maxLength(30)]],
+    title: ['', [Validators.maxLength(100)]],
+    username: ['', [Validators.maxLength(100)]],
     guideTypes: [''],
-    rating: ['']
+    rating: [0]
   });
   @ViewChild('guideTypeInput') guideTypeInput!: ElementRef<HTMLInputElement>;
   @ViewChild('paginator') paginator!: MatPaginator;
@@ -37,8 +37,8 @@ export class GuideSearchComponent implements OnInit, OnDestroy {
   addOnBlur = true;
   readonly _separatorKeysCodes = [] as const;
   guideTypes!: string[];
-  ratings: {description: string, value: string}[] = [{description: '1 (Mala)', value: '1'}, {description: '2 (Mejorable)', value: '2'},
-  {description: '3 (Bueno)', value: '3'}, {description: '4 (Superior)', value: '4'}, {description: '5 (Excelente)', value: '5'}]
+  ratings: {description: string, value: number}[] = [{description: '1 (Mala)', value: 1}, {description: '2 (Mejorable)', value: 2},
+  {description: '3 (Bueno)', value: 3}, {description: '4 (Superior)', value: 4}, {description: '5 (Excelente)', value: 5}]
   searchMode = true;
   announcer = inject(LiveAnnouncer);
   guidesFound!: FindByFilterResponse[];
@@ -81,7 +81,7 @@ export class GuideSearchComponent implements OnInit, OnDestroy {
       title: title,
       username: username,
       guideTypes: this.chosenTypes,
-      rating: parseInt(rating)
+      rating: rating
     }
     this._service.findGuideByFilter$(payload).subscribe({
       next: (response) => {
@@ -143,7 +143,7 @@ export class GuideSearchComponent implements OnInit, OnDestroy {
   atLeastOneValue(): boolean {
     return this.guideFilter.controls.title.value !== ''
       || this.guideFilter.controls.username.value !== ''
-      || this.guideFilter.controls.rating.value !== ''
+      || this.guideFilter.controls.rating.value !== 0
       || this.chosenTypes.length !== 0;
   }
 

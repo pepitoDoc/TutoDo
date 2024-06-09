@@ -157,7 +157,7 @@ h4 {
 
 img {
   margin: 0px 0px;
-  width: auto;
+  width: 50%;
   border-radius: 10px;
   border: 1px solid black;
 
@@ -202,9 +202,9 @@ img {
     text-align: start;
 
     mat-button-toggle-group {
-        margin-left: 20px;
-        border-radius: 10px;
-      }
+      margin-left: 20px;
+      border-radius: 10px;
+    }
 
   }
 

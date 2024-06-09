@@ -19,11 +19,11 @@
           </mat-form-field>
           <mat-form-field class="example-full-width" appareance="fill">
             <mat-label>Contraseña</mat-label>
-            <input type="password" [maxLength]="256" matInput formControlName="password" placeholder="Contraseña"
-              [type]="hidePassword ? 'password' : 'text'">
-            <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" [attr.aria-label]="'Hide password'"
-              [attr.aria-pressed]="hidePassword">
-              <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+            <input type="password" [minLength]="2" [maxLength]="256" matInput formControlName="password"
+              placeholder="Contraseña" [type]="hidePasswordLogin ? 'password' : 'text'">
+            <button mat-icon-button matSuffix (click)="hidePasswordLogin = !hidePasswordLogin"
+              [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePasswordLogin">
+              <mat-icon>{{hidePasswordLogin ? 'visibility_off' : 'visibility'}}</mat-icon>
             </button>
             <mat-error *ngIf="loginForm.controls.password.hasError('required')">
               <strong>Se requiere la contraseña</strong>
@@ -54,29 +54,68 @@
           </mat-form-field>
           <mat-form-field class="example-full-width" appareance="fill">
             <mat-label>Correo electrónico</mat-label>
-            <input type="email" [maxLength]="256" matInput formControlName="email" placeholder="ejemplo@gmail.com">
+            <input type="email" [minLength]="8" [maxLength]="100" matInput formControlName="email"
+              placeholder="ejemplo@gmail.com">
             <mat-error *ngIf="registerForm.controls.email.hasError('required')">
               <strong>Se requiere el correo electrónico</strong>
+            </mat-error>
+            <mat-error *ngIf="registerForm.controls.email.hasError('pattern')">
+              <strong>Debe cumplir el formato de correo electrónico</strong>
             </mat-error>
           </mat-form-field>
           <mat-form-field class="example-full-width" appareance="fill">
             <mat-label>Contraseña</mat-label>
-            <input type="password" matInput formControlName="password" placeholder="Contraseña">
+            <input type="password" #passwordRegister matInput [maxLength]="256" formControlName="password"
+              placeholder="Contraseña" [type]="hidePasswordRegister ? 'password' : 'text'">
+            <button mat-icon-button matSuffix (click)="hidePasswordRegister = !hidePasswordRegister"
+              [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePasswordRegister">
+              <mat-icon>{{hidePasswordRegister ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+            @if(passwordRegister.value === '') {
+              <mat-hint align="start">La contraseña debe contener al menos 8 caracteres, incluyendo una letra mayuscula,
+                una letra minúscula y un número</mat-hint>
+            }
             <mat-error *ngIf="registerForm.controls.password.hasError('required')">
               <strong>Se requiere la contraseña</strong>
+            </mat-error>
+            <mat-error *ngIf="registerForm.controls.password.hasError('pattern')">
+              <strong>La contraseña debe contener al menos 8 caracteres, incluyendo una letra mayuscula,
+                una letra minúscula y un número</strong>
             </mat-error>
           </mat-form-field>
           <mat-form-field class="example-full-width" appareance="fill">
             <mat-label>Confirmar contraseña</mat-label>
-            <input type="password" [maxLength]="256" matInput formControlName="passwordConfirm" placeholder="Contraseña"
-              [type]="hidePassword ? 'password' : 'text'">
-            <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" [attr.aria-label]="'Hide password'"
-              [attr.aria-pressed]="hidePassword">
-              <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+            <input type="password" [minLength]="8" [maxLength]="256" matInput formControlName="passwordConfirm"
+              placeholder="Contraseña" [type]="hidePasswordConfirm ? 'password' : 'text'">
+            <button mat-icon-button matSuffix (click)="hidePasswordConfirm = !hidePasswordConfirm"
+              [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePasswordConfirm">
+              <mat-icon>{{hidePasswordConfirm ? 'visibility_off' : 'visibility'}}</mat-icon>
             </button>
             <mat-error *ngIf="registerForm.controls.passwordConfirm.hasError('required')">
               <strong>Se requiere la contraseña</strong>
             </mat-error>
+          </mat-form-field>
+          <mat-form-field class="example-chip-list">
+            <mat-label>Guías afines</mat-label>
+            <mat-chip-grid #chipGrid1 aria-label="Guide types">
+              @for (guideType of chosenTypes; track guideType) {
+              <mat-chip-row #chipRow1 (removed)="removeType(guideType)">
+                {{guideType}}
+                <button matChipRemove [attr.aria-label]="'remove ' + guideType">
+                  <mat-icon>cancel</mat-icon>
+                </button>
+              </mat-chip-row>
+              }
+            </mat-chip-grid>
+            <input placeholder="Introduzca los tipos de guía" #guideTypeInput formControlName="guideTypes"
+              [matChipInputFor]="chipGrid1" [matAutocomplete]="auto" />
+            <mat-hint align="start">{{chosenTypes.length}}/5</mat-hint>
+            <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectedType($event)">
+              @for (guideType of filteredTypes | async; track guideType) {
+              <mat-option [value]="guideType" *ngIf="!chosenTypes.includes(guideType | titlecase)">{{guideType |
+                titlecase}}</mat-option>
+              }
+            </mat-autocomplete>
           </mat-form-field>
           <button mat-flat-button class="buttonSpace" color="primary" [disabled]="!registerForm.valid"
             (click)="register()">Registrarse</button>

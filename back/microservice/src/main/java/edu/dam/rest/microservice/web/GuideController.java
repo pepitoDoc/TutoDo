@@ -3,7 +3,6 @@ package edu.dam.rest.microservice.web;
 import edu.dam.rest.microservice.bean.guide.*;
 import edu.dam.rest.microservice.bean.user.UserSession;
 import edu.dam.rest.microservice.constants.ApiConstants;
-import edu.dam.rest.microservice.persistence.model.Comment;
 import edu.dam.rest.microservice.persistence.model.Guide;
 import edu.dam.rest.microservice.service.GuideService;
 import jakarta.servlet.http.HttpSession;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping(ApiConstants.GUIDE_ENDPOINT)
@@ -145,6 +143,18 @@ public class GuideController {
         ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.TEXT_PLAIN).body(result) :
         ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN).body(result);
+    }
+
+    @GetMapping("find-newest")
+    public ResponseEntity<List<Guide>> findNewest() {
+        var result = this.guideService.findNewestGuides();
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(result);
+    }
+
+    @GetMapping("find-newest-by-preference")
+    public ResponseEntity<List<Guide>> findNewestByPreference(@RequestParam("preference") String preference) {
+        var result = this.guideService.findNewestGuidesByPreference(preference);
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(result);
     }
 
 }

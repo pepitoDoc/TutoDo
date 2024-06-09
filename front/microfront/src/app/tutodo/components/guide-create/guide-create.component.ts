@@ -37,7 +37,7 @@ export class GuideCreateComponent implements OnInit {
     title: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(100)]],
     description: ['', [Validators.required, Validators.minLength(40), Validators.maxLength(200)]],
     guideTypes: [''],
-    ingredients: ['']
+    ingredients: ['', [Validators.maxLength(100)]]
   });
   @ViewChild('autosize') autosize!: CdkTextareaAutosize;
   @ViewChild('guideTypeInput') guideTypeInput!: ElementRef<HTMLInputElement>;

@@ -7,6 +7,8 @@ import edu.dam.rest.microservice.constants.Constants;
 import edu.dam.rest.microservice.bean.guide.CreatedProjection;
 import edu.dam.rest.microservice.persistence.model.User;
 import edu.dam.rest.microservice.persistence.repository.UserRepository;
+import edu.dam.rest.microservice.util.VerificationCodeGenerator;
+import edu.dam.rest.microservice.util.email.Sender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
@@ -14,6 +16,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
@@ -41,6 +44,7 @@ public class UserService {
                 .completed(new ArrayList<>())
                 .saved(new ArrayList<>())
                 .created(new ArrayList<>())
+                .preferences(insertUserRequest.getPreferences())
                 .build();
         String checkUser = this.findByNameAndEmail(createUser);
         if (!checkUser.equals("user_valid")) {
@@ -92,8 +96,8 @@ public class UserService {
         return sb.toString();
     }
 
-    public User findById(String userId) {
-        var foundUser = this.userRepository.findById(userId);
+    public User findById(String id) {
+        var foundUser = this.userRepository.findById(id);
         if (foundUser.isPresent()) {
             return foundUser.orElseThrow();
             // TODO devolver null si hay isPresent()
@@ -102,9 +106,9 @@ public class UserService {
         }
     }
 
-    public String addToUserStringArray(String userId, String guideId, String field) {
+    public String addToUserStringArray(String id, String guideId, String field) {
         var result = this.mongoTemplate.updateFirst(
-                query(where(Constants.ID).is(userId)),
+                query(where(Constants.ID).is(id)),
                 new Update().push(field, guideId), Constants.USER_COLLECTION);
         if (result.wasAcknowledged() && result.getModifiedCount() == 1) {
             return "operation_successful";
@@ -113,9 +117,9 @@ public class UserService {
         }
     }
 
-    public String deleteFromUserStringArray(String userId, String guideId, String field) {
+    public String deleteFromUserStringArray(String id, String guideId, String field) {
         var result = this.mongoTemplate.updateFirst(
-                query(where(Constants.ID).is(userId)),
+                query(where(Constants.ID).is(id)),
                 new Update().pull(field, guideId), Constants.USER_COLLECTION);
         if (result.wasAcknowledged() && result.getModifiedCount() == 1) {
             return "operation_successful";
@@ -124,8 +128,8 @@ public class UserService {
         }
     }
 
-    public String checkUserConfirmed(String userId) {
-        var result = this.userRepository.findById(userId);
+    public String checkUserConfirmed(String id) {
+        var result = this.userRepository.findById(id);
         if (result.isPresent()) {
             var foundUser = result.orElseThrow();
             if (foundUser.isConfirmed()) {
@@ -138,11 +142,11 @@ public class UserService {
         }
     }
 
-    public String updateUserConfirmed(String userId, boolean confirmed) {
+    public String updateUserConfirmed(String id, boolean confirmed) {
         var result = this.mongoTemplate.updateFirst(
-                query(where(Constants.ID).is(userId)),
+                query(where(Constants.ID).is(id)),
                 new Update().set(Constants.CONFIRMED, confirmed),
-                Constants.GUIDE_COLLECTION
+                Constants.USER_COLLECTION
         );
         if (result.wasAcknowledged() && result.getModifiedCount() > 0) {
             return "operation_successful";
@@ -150,5 +154,27 @@ public class UserService {
             return "operation_unsuccessful";
         }
     }
+
+    public boolean sendVerification(String codeType, String codeValue, String email) {
+        var sender = new Sender();
+        return sender.send("TutoDo", email, Constants.EMAIL_TITLES.get(codeType), codeValue);
+    }
+
+    public String changePassword(String id, String password) {
+        var result = this.mongoTemplate.updateFirst(
+                query(where(Constants.ID).is(id)),
+                new Update().set(Constants.PASSWORD, password),
+                Constants.USER_COLLECTION
+        );
+        if (result.wasAcknowledged()) {
+            return "operation_successful";
+        } else {
+            return "operation_unsuccessful";
+        }
+    }
+
+//    public List<User> findUsers(String username) {
+//
+//    }
 
 }

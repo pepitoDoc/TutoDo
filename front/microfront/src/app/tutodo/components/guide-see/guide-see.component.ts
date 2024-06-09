@@ -38,7 +38,7 @@ export class GuideSeeComponent implements OnInit, AfterViewInit {
     private readonly _service: ApiService,
     private readonly _shared: SharedService,
     private readonly _toast: ToastrService,
-    private _ngZone: NgZone,
+    private _ngZone: NgZone, // TODO DIRECTIVA CAMBIO CLASE
     private _cdr: ChangeDetectorRef
   ) {
     this.userData = this._route.snapshot.data['userData'];

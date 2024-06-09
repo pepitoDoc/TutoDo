@@ -59,7 +59,7 @@
               </button>
             </mat-chip-row>
             }
-            <input placeholder="Introduzca ingredientes o materiales necesarios para la guía"
+            <input placeholder="Introduzca ingredientes o materiales necesarios para la guía" [maxLength]="100"
               [matChipInputFor]="chipGrid2" [matChipInputSeparatorKeyCodes]="separatorKeysCodesIngredients"
               [matChipInputAddOnBlur]="false" (matChipInputTokenEnd)="addIngredient($event)" />
           </mat-chip-grid>

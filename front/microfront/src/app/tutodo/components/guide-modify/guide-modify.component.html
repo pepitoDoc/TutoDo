@@ -13,7 +13,7 @@
               <mat-form-field class="example-full-width" appareance="fill">
                 <mat-label>Título</mat-label>
                 <input type="text" matInput #inputTitle formControlName="title" placeholder="Título del paso {{i+1}}"
-                  [maxLength]="50">
+                  [minlength]="10" [maxLength]="50">
                 <mat-hint align="start">{{inputTitle.value.length}}/50 (mínimo 10 caracteres)</mat-hint>
                 <mat-error *ngIf="step.controls.title.touched && step.controls.title.hasError('required')">
                   <strong>Es necesario el título del paso</strong>
@@ -23,7 +23,7 @@
                 <mat-label>Descripción</mat-label>
                 <textarea type="text" matInput formControlName="description" placeholder="Breve descripción de la guía"
                   cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5"
-                  #inputDescription [minLength]="50" [maxLength]="400"></textarea>
+                  #inputDescription [minLength]="20" [maxLength]="400"></textarea>
                 <mat-hint align="start">{{inputDescription.value.length}}/400 (mínimo 50 caracteres)</mat-hint>
                 <mat-error *ngIf="step.controls.description.touched && step.controls.description.hasError('required')">
                   <strong>Es necesaria una descripción del paso</strong>

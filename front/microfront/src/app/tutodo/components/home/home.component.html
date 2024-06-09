@@ -1,9 +1,78 @@
 <div class="page">
   <div class="row mt-4">
-    <div class="col mainColumn">
-      <div id="loginInputs">
-        bienvenido a noenqe taliscua
+    <div class="col main-column">
+      <h1>Estas guías podrían interesarte</h1>
+      <h2 class="mt-4 pt-4">Guías afines a tus gustos</h2>
+      <mat-button-toggle-group [value]="selectedType" #group="matButtonToggleGroup"
+        (change)="onTypeChange(group.value)">
+        <mat-button-toggle *ngFor="let type of userData.preferences" (click)="findNewestGuidesByPreference(type)">{{
+          type | titlecase }}</mat-button-toggle>
+      </mat-button-toggle-group>
+      @if (userData.preferences.length > 0) {
+      <div *ngIf="(preferredGuides | async) as guides; else noResultsPreferences">
+        @if(guides.length > 0) {
+        <div class="align-grid">
+          <mat-card class="example-card" *ngFor="let guide of guides">
+            <mat-card-header>
+              <mat-card-title>{{ guide.title }}</mat-card-title>
+            </mat-card-header>
+            <img mat-card-lg-image [src]="guide.thumbnail 
+            ? 'data:image/jpeg;base64,' + guide.thumbnail 
+            : '/assets/images/_11707f36-6180-48c1-b259-16214f3e3e34-logo.jpeg'">
+            <mat-card-content>
+              <p>
+                {{ guide.description }}
+              </p>
+            </mat-card-content>
+            <mat-card-actions>
+              <button mat-button>Visualizar guía</button>
+              <button mat-button>Añadir a guardados</button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+        }
+        @else {
+        <h3>No se ha encontrado información</h3>
+        }
       </div>
+      <ng-template #noResultsPreferences>
+        <h3>Cargando información...</h3>
+      </ng-template>
+      }
+      @else {
+      <h3>No has elegido ninguna tipo de guía afin a tus gustos;
+        puedes cambiar esta información en el apartado de "Configuración"</h3>
+      }
+      <h2 class="mt-4 pt-4">Guías recientemente añadidas</h2>
+      <div *ngIf="(newestGuides | async) as guides; else noResultsNewest">
+        @if (guides.length > 0) {
+        <div class="align-grid">
+          <mat-card class="example-card" *ngFor="let guide of guides">
+            <mat-card-header>
+              <mat-card-title>{{ guide.title }}</mat-card-title>
+            </mat-card-header>
+            <img mat-card-md-image [src]="guide.thumbnail 
+                    ? 'data:image/jpeg;base64,' + guide.thumbnail 
+                    : '/assets/images/_11707f36-6180-48c1-b259-16214f3e3e34-logo.jpeg'">
+            <mat-card-content>
+              <p>
+                {{ guide.description }}
+              </p>
+            </mat-card-content>
+            <mat-card-actions>
+              <button mat-button>Visualizar guía</button>
+              <button mat-button>Añadir a guardados</button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+        }
+        @else {
+        <h3>No se ha encontrado información</h3>
+        }
+      </div>
+      <ng-template #noResultsNewest>
+        <h3>No se han encontrado resultados</h3>
+      </ng-template>
     </div>
   </div>
 </div>

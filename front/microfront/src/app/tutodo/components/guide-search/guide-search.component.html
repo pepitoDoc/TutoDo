@@ -8,15 +8,15 @@
       <form class="example-form" [formGroup]="guideFilter">
         <mat-form-field class="example-full-width" appareance="fill">
           <mat-label>Título</mat-label>
-          <input type="text" matInput #inputTitle [maxlength]="50" formControlName="title"
+          <input type="text" matInput #inputTitle [maxlength]="100" formControlName="title"
             placeholder="Título de la guía a buscar">
-          <mat-hint align="start">{{inputTitle.value.length}}/50</mat-hint>
+          <mat-hint align="start">{{inputTitle.value.length}}/100</mat-hint>
         </mat-form-field>
         <mat-form-field class="example-full-width" appareance="fill">
           <mat-label>Nombre del usuario creador</mat-label>
-          <input type="text" matInput #inputUser [maxlength]="30" formControlName="username"
+          <input type="text" matInput #inputUser [maxlength]="100" formControlName="username"
             placeholder="Nombre del usuario que ha creado la guía">
-          <mat-hint align="start">{{inputUser.value.length}}/30</mat-hint>
+          <mat-hint align="start">{{inputUser.value.length}}/100</mat-hint>
         </mat-form-field>
         <mat-form-field class="example-chip-list">
           <mat-label>Tipos de la guía</mat-label>
@@ -44,7 +44,7 @@
         <mat-form-field class="example-full-width rating" appareance="fill" name="rating">
           <mat-label>Puntuaciones</mat-label>
           <mat-select formControlName="rating">
-            <mat-option></mat-option>
+            <mat-option [value]="0">Cualquier puntuación</mat-option>
             @for (rating of ratings; track rating) {
             <mat-option [value]="rating.value">{{rating.description}}</mat-option>
             }

@@ -1,5 +1,7 @@
 package edu.dam.rest.microservice.constants;
 
+import java.util.Map;
+
 public class Constants {
 
     public static final String ID = "_id";
@@ -17,7 +19,6 @@ public class Constants {
     public static final String RATINGS = "ratings";
     public static final String PUNCTUATION = "punctuation";
     public static final String THUMBNAIL = "thumbnail";
-    public static final String DATE = "date";
 
     public static final String USER_COLLECTION = "user";
     public static final String USERNAME = "username";
@@ -33,5 +34,17 @@ public class Constants {
     public static final String[] FILTERED_ENDPOINTS = {"/v1/tutodo/guide/*", "/v1/tutodo/user/delete",
             "/v1/tutodo/user/add-saved", "/v1/tutodo/user/get-user", "/v1/tutodo/user/add-saved",
             "/v1/tutodo/user/delete-saved", "/v1/tutodo/user/logout"};
+    public static final String MAIL_PASSWORD = "mail.smtp.password";
+    public static final String MAIL_USER = "mail.smtp.user";
+    public static final String MAIL_PROPERTIES = "mail.properties";
+    public static final String CREDENTIAL_PROPERTIES = "credentials.properties";
+    public static final String VERIFICATION_TITLE = "Código de verificación para verificar su cuenta en TutoDo";
+    public static final String VERIFICATION_KEY = "verification";
+    public static final String PASSWORD_TITLE = "Código de verificación para restablecer contraseña en TutoDo";
+    public static final String PASSWORD_KEY = "password";
+    public static final Map<String, String> EMAIL_TITLES = Map.ofEntries(
+            Map.entry(VERIFICATION_KEY, VERIFICATION_TITLE),
+            Map.entry(PASSWORD_KEY, PASSWORD_TITLE)
+    );
 
 }
