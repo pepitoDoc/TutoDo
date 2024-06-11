@@ -1,0 +1,76 @@
+.page {
+    height: auto;
+    @media (max-width: 1400px) {
+        height: fit-content;
+        padding-bottom: 20px;
+    }
+}
+
+
+.align-grid {
+    padding: 50px;
+    display: grid;
+    grid-template-rows: 0.5fr 0.5fr;
+    grid-template-columns: 0.25fr 0.25fr 0.25fr 0.25fr;
+    gap: 10px;
+
+    @media(max-width: 1440px) {
+        grid-template-rows: 0.5fr;
+        grid-template-columns: 0.33fr 0.33fr 0.33fr;
+        gap: 20px;
+        padding: 25px;
+    }
+
+    @media(max-width: 768px) {
+        grid-template-rows: 0.5fr;
+        grid-template-columns: 0.5fr 0.5fr;
+        gap: 20px;
+        padding: 25px;
+    }
+
+    @media(max-width: 768px) {
+        grid-template-rows: 0.5fr;
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 25px;
+    }
+}
+
+mat-card-header, mat-card-content, mat-card-actions {
+    padding: 10px 10px;
+}
+
+mat-card:hover {
+    cursor: pointer;
+    transition: background-color 500ms linear;
+    background-color: #ffc371;
+    transition: border 500ms linear;
+    border: 0.5px solid #be93c5;
+}
+
+mat-card {
+    transition: background-color 500ms linear;
+    transition: border 200ms linear;
+}
+
+.options-bottom {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 95%;
+    padding-top: 20px;
+    height: auto;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        padding-bottom: 20px;
+    }
+
+    mat-paginator {
+        border-radius: 20px;
+        border: 1px solid black;
+        margin: 50px 0px 50px 0px;
+    }
+
+}

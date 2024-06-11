@@ -1,8 +1,6 @@
 package edu.dam.rest.microservice.web;
 
-import edu.dam.rest.microservice.bean.user.InsertUserRequest;
-import edu.dam.rest.microservice.bean.user.LoginUserRequest;
-import edu.dam.rest.microservice.bean.user.UserSession;
+import edu.dam.rest.microservice.bean.user.*;
 import edu.dam.rest.microservice.constants.ApiConstants;
 import edu.dam.rest.microservice.constants.Constants;
 import edu.dam.rest.microservice.persistence.model.User;
@@ -77,12 +75,6 @@ public class UserController {
                 .body(userLogged != null ? "session_confirmed" : "session_expired");
     }
 
-    @DeleteMapping("delete")
-    public void deleteUser(HttpSession httpSession) {
-        var user = (UserSession) httpSession.getAttribute("user");
-        this.userService.delete(user);
-    }
-
     @GetMapping("get-user")
     public ResponseEntity<User> getUser(HttpSession httpSession) {
         var userLogged = (UserSession) httpSession.getAttribute("user");
@@ -137,29 +129,37 @@ public class UserController {
 
     @PostMapping("send-code/{codeType}")
     public ResponseEntity<String> sendVerification(
-            @PathVariable("codeType") String codeType, HttpSession httpSession) {
+            @PathVariable("codeType") String codeType, HttpSession httpSession,
+            @RequestBody(required = false) EmailRequest emailRequest) {
         var userLogged = (UserSession) httpSession.getAttribute("user");
         var codeValue = new VerificationCodeGenerator().generateVerificationCode();
         httpSession.setAttribute(codeType, codeValue);
-        var result = this.userService.sendVerification(codeType, codeValue, userLogged.getEmail());
+        var result = this.userService.sendVerification(codeType, codeValue,
+                userLogged == null ? emailRequest.getEmail() : userLogged.getEmail());
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN)
                 .body(result ? "operation_successful" : "operation_unsuccessful");
     }
 
-    @PatchMapping("change-password")
-    public ResponseEntity<String> changePassword(@RequestBody String newPassword, HttpSession httpSession) {
-        var userLogged = (UserSession) httpSession.getAttribute("user");
-        var result = this.userService.changePassword(newPassword, userLogged.getId());
-        if (result.equals("operation_successful")) {
-            userLogged.setPassword(newPassword);
-            httpSession.setAttribute("user", userLogged);
-        }
+    @PatchMapping("change-password-by-email")
+    public ResponseEntity<String> changePasswordByEmail(
+            @RequestBody ChangePasswordRequest changePasswordRequest) {
+        var result = this.userService.changePasswordByEmail(changePasswordRequest);
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(result);
     }
 
-//    @GetMapping("find-users")
-//    public ResponseEntity<List<User>> findUsers(@PathVariable("username") String username) {
-//
-//    }
+    @PatchMapping("change-password-by-id")
+    public ResponseEntity<String> changePasswordById(
+            @RequestBody ChangePasswordRequest changePasswordRequest, HttpSession httpSession) {
+        var userLogged = (UserSession) httpSession.getAttribute("user");
+        var result = this.userService.changePasswordById(userLogged.getId(), changePasswordRequest.getNewPassword());
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(result);
+    }
+
+    @GetMapping("find-users/{username}")
+    public ResponseEntity<UserPaginationResponse> findUsers(
+            @PathVariable("username") String username, @RequestParam(required = false) Integer pageNumber) {
+        var result = this.userService.findAllByUsername(username, pageNumber);
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(result);
+    }
 
 }

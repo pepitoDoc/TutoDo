@@ -6,7 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { AddCommentRequest, AddRatingRequest, DeleteCommentRequest, Guide } from '../../model/data';
-import { Observable, take } from 'rxjs';
+import { take } from 'rxjs';
 import { UserData } from '../../model/user-data';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { OptionDialogComponent } from '../option-dialog/option-dialog.component';

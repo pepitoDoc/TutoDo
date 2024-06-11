@@ -1,4 +1,4 @@
-<nav class="navbar navBorder sticky-top navbar-expand-lg bg-body-tertiary">
+<nav class="navbar nav-border sticky-top navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
         <a class="navbar-brand" routerLink="/tutodo/home" routerLinkActive="active">
             <img src="\assets\images\_11707f36-6180-48c1-b259-16214f3e3e34-logo.jpeg" alt="Bootstrap" width="40"
@@ -10,15 +10,15 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item alignFlex">
-                    <a class="nav-link alignElements" routerLink="/tutodo/home" routerLinkActive="active"
+                <li class="nav-item align-flex">
+                    <a class="nav-link align-elements" routerLink="/tutodo/home" routerLinkActive="active"
                         aria-current="page">Página principal
                     </a>
-                    <mat-icon class="mx-1 alignIcon" routerLink="/tutodo/home" routerLinkActive="active"
+                    <mat-icon class="mx-1 align-icon" routerLink="/tutodo/home" routerLinkActive="active"
                         aria-hidden="false" aria-label="home">home</mat-icon>
                 </li>
-                <li class="nav-item alignFlex dropdown">
-                    <a class="nav-link active alignElements dropdown-toggle" role="button" data-bs-toggle="dropdown"
+                <li class="nav-item align-flex dropdown">
+                    <a class="nav-link active align-elements dropdown-toggle" role="button" data-bs-toggle="dropdown"
                         aria-expanded="false">
                         Guías
                     </a>
@@ -36,22 +36,22 @@
                                 Mis guías guardadas</a></li>
                     </ul>
                 </li>
-                <form class="d-flex alignFlex" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Buscar usuarios" aria-label="Search">
-                    <button class="btn btn-outline-success alignIcon" type="submit">
-                        <mat-icon aria-hidden="false" aria-label="search">search</mat-icon>
-                    </button>
+                <form class="d-flex align-flex" role="search" [formGroup]="userInfo">
+                    <input class="form-control me-2" type="search" placeholder="Buscar usuarios" aria-label="Search" formControlName="username">
+                    <div class="example-button-container">
+                        <button mat-mini-fab color="primary" (click)="searchUser()" [disabled]="!userInfo.valid" aria-label="Example icon button with a menu icon">
+                            <mat-icon>search</mat-icon>
+                        </button>
+                    </div>
                 </form>
             </ul>
             <div class="btn-group">
-                <div class="alignFlex mx-2" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <p class="nav-link active alignElements mx-2" *ngIf="userData">{{ userData.username }}</p>
-                    <mat-icon class="alignIcon" aria-hidden="false" aria-label="settings">account_circle</mat-icon>
+                <div class="align-flex" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <p class="nav-link active align-elements mx-2" *ngIf="userData">{{ userData.username }}</p>
+                    <mat-icon class="align-icon" aria-hidden="false" aria-label="settings">account_circle</mat-icon>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" routerLink="/tutodo/guide-create" routerLinkActive="active">
-                                Crear guía</a></li>
                         <li><a class="dropdown-item" routerLink="/tutodo/guide-search" routerLinkActive="active">
-                                Búsqueda de guías</a></li>
+                                Información de usuario</a></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
@@ -59,9 +59,9 @@
                     </ul>
                 </div>
             </div>
-            <div class="alignFlex mx-2">
-                <p class="nav-link active alignElements mx-2">Opciones</p>
-                <mat-icon class="alignIcon" aria-hidden="false" aria-label="settings">settings</mat-icon>
+            <div class="align-flex">
+                <p class="nav-link active align-elements mx-2">Opciones</p>
+                <mat-icon class="align-icon" aria-hidden="false" aria-label="settings">settings</mat-icon>
             </div>
         </div>
     </div>

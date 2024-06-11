@@ -1,11 +1,17 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../environment/environment';
-import { AddRatingRequest, DeleteGuideStepRequest, FindByFilterRequest,
+import {
+  AddRatingRequest, DeleteGuideStepRequest, FindByFilterRequest,
   FindByFilterResponse, Guide, InsertUserRequest, LoginUserRequest,
-  AddCommentRequest, AddCommentResponse, DeleteCommentRequest } from '../model/data';
+  AddCommentRequest, AddCommentResponse, DeleteCommentRequest,
+  ChangePasswordRequest,
+  GuidePaginationResponse,
+  UserPaginationResponse,
+  GuideInfo
+} from '../model/data';
 import { Observable, map, shareReplay } from 'rxjs';
-import { UserData } from '../model/user-data';
+import { AllUserData } from '../model/user-data';
 
 @Injectable({
   providedIn: 'root'
@@ -26,81 +32,128 @@ export class ApiService {
   }
 
   insertUser$(insertUserRequest: InsertUserRequest): Observable<string> {
-    return this._http.post(`${this._userEndpoint}/create`, insertUserRequest, 
+    return this._http.post(`${this._userEndpoint}/create`, insertUserRequest,
       { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
-  }
-
-  checkSession$(): Observable<string> { // POR AHORA NO LO USA
-    return this._http.get(`${this._userEndpoint}/check-session`, 
-      { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
-  }
-
-  findAllUserInfo$(): Observable<UserData> { // POR AHORA NO LO USO
-    return this._http.get<UserData>(`${this._userEndpoint}/find-all-user-info`, 
-      { withCredentials: true }).pipe(shareReplay(1));
   }
 
   findAllGuideTypes$(): Observable<string[]> {
-    return this._http.get<string[]>(`${this._guideTypeEndpoint}/findAll`, 
+    return this._http.get<string[]>(`${this._guideTypeEndpoint}/findAll`,
       { withCredentials: true }).pipe(shareReplay(1));
   }
 
   createGuide$(createGuideRequest: FormData): Observable<string> {
-    return this._http.post(`${this._guideEndpoint}/create`, createGuideRequest, 
+    return this._http.post(`${this._guideEndpoint}/create`, createGuideRequest,
       { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
   deleteGuide$(guideId: string): Observable<string> {
-    return this._http.delete(`${this._guideEndpoint}/delete/${guideId}`, 
+    return this._http.delete(`${this._guideEndpoint}/delete/${guideId}`,
       { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
   saveGuideStep$(saveGuideStepRequest: FormData): Observable<string> {
-    return this._http.patch(`${this._guideEndpoint}/save-step`, saveGuideStepRequest, 
+    return this._http.patch(`${this._guideEndpoint}/save-step`, saveGuideStepRequest,
       { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
   deleteGuideStep$(deleteGuideStepRequest: DeleteGuideStepRequest): Observable<string> {
-    return this._http.patch(`${this._guideEndpoint}/delete-step`, deleteGuideStepRequest, 
+    return this._http.patch(`${this._guideEndpoint}/delete-step`, deleteGuideStepRequest,
       { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
   saveGuideInfo$(saveGuideInfoRequest: FormData): Observable<string> {
-    return this._http.patch(`${this._guideEndpoint}/save-info`, saveGuideInfoRequest, 
+    return this._http.patch(`${this._guideEndpoint}/save-info`, saveGuideInfoRequest,
       { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
   findGuideById$(guideId: string): Observable<Guide> {
     return this._http.get<Guide>(`${this._guideEndpoint}/find-by-id/${guideId}`, { withCredentials: true }).pipe(
-        map(guide => this._formatGuideDates(guide)),
+      map(guide => this._formatGuideDates(guide)),
+      shareReplay(1));
+  }
+
+  findGuideByFilter$(findByFilterRequest: FindByFilterRequest): Observable<FindByFilterResponse> {
+    return this._http.post<FindByFilterResponse>(`${this._guideEndpoint}/find-by-filter`, findByFilterRequest,
+      { withCredentials: true }).pipe(
+        map(response => {
+          return {
+            ...response, guidesFound: response.guidesFound.map(guideInfo => {
+              return {
+                ...guideInfo, guide:
+                  { ...guideInfo.guide, creationDate: new Date(guideInfo.guide.creationDate) }
+              };
+            })
+          };
+        }),
         shareReplay(1));
   }
 
-  findGuideIsPublished$(guideId: string): Observable<boolean> { // POR AHGORA NO LO USO
-    return this._http.get<boolean>(`${this._guideEndpoint}/find-published-by-id`, 
-      { params: new HttpParams().set('guideId', guideId), withCredentials: true }).pipe(shareReplay(1));
+  findOwnGuides$(pageNumber?: number): Observable<GuidePaginationResponse> {
+    if (pageNumber) {
+      return this._http.get<GuidePaginationResponse>(`${this._guideEndpoint}/find-own-guides`,
+        { withCredentials: true, params: new HttpParams().append('pageNumber', pageNumber) }).pipe(
+          map(response => {
+            return {
+              ...response, guidesRetrieved: response.guidesRetrieved.map(guideInfo => {
+                return { ...guideInfo, creationDate: new Date(guideInfo.creationDate) };
+              })
+            };
+          }),
+          shareReplay(1));
+    } else {
+      return this._http.get<GuidePaginationResponse>(`${this._guideEndpoint}/find-own-guides`,
+        { withCredentials: true }).pipe(
+          map(response => {
+            return {
+              ...response, guidesRetrieved: response.guidesRetrieved.map(guideInfo => {
+                return { ...guideInfo, creationDate: new Date(guideInfo.creationDate) };
+              })
+            };
+          }),
+          shareReplay(1));
+    }
   }
 
-  findGuideByFilter$(findByFilterRequest: FindByFilterRequest): Observable<FindByFilterResponse[]> {
-    return this._http.post<FindByFilterResponse[]>(`${this._guideEndpoint}/find-by-filter`, findByFilterRequest,
-      { withCredentials: true }).pipe(shareReplay(1));
-  }
-
-  findOwnGuides$(): Observable<Guide[]> {
-    return this._http.get<Guide[]>(`${this._guideEndpoint}/find-own-guides`, 
-      { withCredentials: true }).pipe(shareReplay(1));
+  findSaved$(pageNumber?: number): Observable<GuidePaginationResponse> {
+    if (pageNumber) {
+      return this._http.get<GuidePaginationResponse>(`${this._guideEndpoint}/find-saved`,
+        { withCredentials: true, params: new HttpParams().append('pageNumber', pageNumber) }).pipe(
+          map(response => {
+            return {
+              ...response, guidesRetrieved: response.guidesRetrieved.map(guideInfo => {
+                return { ...guideInfo, creationDate: new Date(guideInfo.creationDate) };
+              })
+            };
+          }),
+          shareReplay(1));
+    } else {
+      return this._http.get<GuidePaginationResponse>(`${this._guideEndpoint}/find-saved`,
+        { withCredentials: true }).pipe(
+          map(response => {
+            return {
+              ...response, guidesRetrieved: response.guidesRetrieved.map(guideInfo => {
+                return { ...guideInfo, creationDate: new Date(guideInfo.creationDate) };
+              })
+            };
+          }),
+          shareReplay(1));
+    }
   }
 
   submitRating$(addRatingRequest: AddRatingRequest): Observable<string> {
-    return this._http.patch(`${this._guideEndpoint}/add-rating`, addRatingRequest, 
+    return this._http.patch(`${this._guideEndpoint}/add-rating`, addRatingRequest,
       { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
   submitComment$(addCommentRequest: AddCommentRequest): Observable<AddCommentResponse> {
     return this._http.patch<AddCommentResponse>(`${this._guideEndpoint}/add-comment`, addCommentRequest,
       { withCredentials: true }).pipe(
-        map(response => { return { ...response, comment: 
-          { ...response.comment, formattedDate: new Date(response.comment.date) } } }),
+        map(response => {
+          return {
+            ...response, comment:
+              { ...response.comment, formattedDate: new Date(response.comment.date) }
+          }
+        }),
         shareReplay(1));
   }
 
@@ -114,12 +167,12 @@ export class ApiService {
   }
 
   addSaved$(guideId: string): Observable<string> {
-    return this._http.patch(`${this._guideEndpoint}/add-saved/${guideId}`, {},
+    return this._http.patch(`${this._userEndpoint}/add-saved/${guideId}`, {},
       { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
   deleteSaved$(guideId: string): Observable<string> {
-    return this._http.patch(`${this._guideEndpoint}/delete-saved/${guideId}`, {},
+    return this._http.patch(`${this._userEndpoint}/remove-saved/${guideId}`, {},
       { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
@@ -132,22 +185,42 @@ export class ApiService {
       { withCredentials: true, params: new HttpParams().append('preference', preference) }).pipe(shareReplay(1));
   }
 
-  sendCode$(codeType: string): Observable<string> {
-    return this._http.post(`${this._userEndpoint}/send-code/${codeType}`, {}, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
+  sendCode$(codeType: string, email?: string): Observable<string> {
+    return this._http.post(`${this._userEndpoint}/send-code/${codeType}`,
+      { email: email ? email : '' }, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
   verifyCode$(codeType: string, codeValue: string): Observable<string> {
-    return this._http.get(`${this._userEndpoint}/verify-code/${codeType}`, { withCredentials: true, responseType: 'text', 
-      params: new HttpParams().append('codeValue', codeValue) }).pipe(shareReplay(1));
+    return this._http.get(`${this._userEndpoint}/verify-code/${codeType}`, {
+      withCredentials: true, responseType: 'text',
+      params: new HttpParams().append('codeValue', codeValue)
+    }).pipe(shareReplay(1));
   }
 
   updateConfirmed$(confirmed: boolean): Observable<string> {
     return this._http.patch(`${this._userEndpoint}/update-confirmed/${confirmed}`, {}, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
+  changePasswordByEmail$(payload: ChangePasswordRequest): Observable<string> {
+    return this._http.patch(`${this._userEndpoint}/change-password-by-email`, payload, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
+  }
+
+  changePasswordById$(payload: ChangePasswordRequest): Observable<string> {
+    return this._http.patch(`${this._userEndpoint}/change-password-by-id`, payload, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
+  }
+
+  findUsers$(username: string, pageNumber?: number): Observable<UserPaginationResponse> {
+    if (pageNumber) {
+      return this._http.get<UserPaginationResponse>(`${this._userEndpoint}/find-users/${username}`, 
+        { withCredentials: true, params: new HttpParams().append('pageNumber', pageNumber) }).pipe(shareReplay(1));
+    } else {
+      return this._http.get<UserPaginationResponse>(`${this._userEndpoint}/find-users/${username}`, { withCredentials: true }).pipe(shareReplay(1));
+    }
+  }
+
   private _formatGuideDates(guide: Guide): Guide {
     guide.creationDate = new Date(guide.creationDate);
-    guide.comments = guide.comments.map(comment =>  { return { ...comment, formattedDate: new Date(comment.date) } });
+    guide.comments = guide.comments.map(comment => { return { ...comment, formattedDate: new Date(comment.date) } });
     return guide;
   }
 

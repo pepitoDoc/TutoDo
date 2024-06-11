@@ -102,21 +102,29 @@ public class GuideController {
     }
 
     @PostMapping("find-by-filter")
-    public ResponseEntity<List<FindByFilterResponse>> findByFilter(
+    public ResponseEntity<FindByFilterResponse> findByFilter(
             @RequestBody FindByFilterRequest findByFilterRequest) {
         var result = this.guideService.findByFilter(findByFilterRequest);
         return ResponseEntity.status(HttpStatus.OK).
                 contentType(MediaType.APPLICATION_JSON).body(result);
-        // TODO controlar null en front
     }
 
     @GetMapping("find-own-guides")
-    public ResponseEntity<List<Guide>> findOwnGuides(HttpSession httpSession) {
+    public ResponseEntity<GuidePaginationResponse> findOwnGuides(
+            HttpSession httpSession, @RequestParam(required = false) Integer pageNumber) {
         var userLogged = (UserSession) httpSession.getAttribute("user");
-        var result = this.guideService.findOwnGuides(userLogged.getId());
+        var result = this.guideService.findOwnGuides(userLogged.getId(), pageNumber);
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON).body(result);
-        // TODO controlar null en front
+    }
+
+    @GetMapping("find-saved")
+    public ResponseEntity<GuidePaginationResponse> findSaved(
+            HttpSession httpSession, @RequestParam(required = false) Integer pageNumber) {
+        var userLogged = (UserSession) httpSession.getAttribute("user");
+        var result = this.guideService.findSaved(userLogged.getId(), pageNumber);
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON).body(result);
     }
 
     @PatchMapping("add-comment")

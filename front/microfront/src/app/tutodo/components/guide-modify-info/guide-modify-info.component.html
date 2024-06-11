@@ -1,7 +1,9 @@
 <div class="page">
-    <div class="alignFlexColumn mt-4" *ngIf="restoredGuide">
-        <div class="whiteCard-guideInfo">
+    <div class="align-flex-column mt-4" *ngIf="restoredGuide">
+        <div class="title">
             <h1>Modificar información básica sobre la guía</h1>
+        </div>
+        <div class="white-card-guide-info">
             <form class="example-form" [formGroup]="guideInfo" *ngIf="isModifyGuideInfo">
                 <mat-form-field class="example-full-width" appareance="fill">
                     <mat-label>Título</mat-label>
@@ -64,40 +66,48 @@
                             [matChipInputAddOnBlur]="false" (matChipInputTokenEnd)="addIngredient($event)" />
                     </mat-chip-grid>
                 </mat-form-field>
-                <input type="file" formControlName="imageFile" accept="image/*" class="imageInput"
+                <input type="file" formControlName="imageFile" accept="image/*" class="image-input"
                     (change)="updateGuideThumbnail($event)">
-                <div class="alignFlexColumn mt-3 mb-3" *ngIf="restoredGuide.thumbnail || guideThumbnailLoaded">
+                <div class="align-flex-column mt-3 mb-3" *ngIf="restoredGuide.thumbnail || guideThumbnailLoaded">
                     <p>Imagen actualmente seleccionada</p>
-                    <button type="button" mat-flat-button class="buttonSpace mx-5" color="warn" *ngIf="isModifyGuideInfo"
-                        (click)="deleteImage()">Eliminar imagen</button>
-                    <img mat-card-image [src]="restoredGuide.thumbnail ?
-                        'data:image/jpeg;base64,' + restoredGuide.thumbnail : guideThumbnailLoaded">
+                    <button type="button" mat-flat-button class="button-space mx-5" color="warn"
+                        *ngIf="isModifyGuideInfo" (click)="deleteImage()">Eliminar imagen</button>
+                    <img [src]="restoredGuide.thumbnail ? 'data:image/jpeg;base64,' + restoredGuide.thumbnail : guideThumbnailLoaded">
                 </div>
-                <!-- <div class="mt-3 mb-3" *ngIf="guideThumbnailLoaded">
-                    <p>Imagen actualmente seleccionada:</p>
-                    <img mat-card-image [src]="guideThumbnailLoaded ? guideThumbnailLoaded : ''">
-                </div> -->
-                <mat-slide-toggle class="whiteCard-check mx-2" [checked]="isPublished" (change)="changePublished()" 
+                <mat-slide-toggle class="white-card-check mx-2" [checked]="isPublished" (change)="changePublished()"
                     [disabled]="this.restoredGuide.steps.length < 5">
                     Estado de la guía: {{ isPublished ? 'publicado' : 'no publicado' }}</mat-slide-toggle>
                 <p *ngIf="this.restoredGuide.steps.length < 5">La guía debe tener 5 o más pasos para ser publicada</p>
             </form>
             <div *ngIf="!isModifyGuideInfo" class="guide-info">
-                <h2>{{ guideInfo.controls.title.getRawValue() }}</h2>
-                <p>{{ guideInfo.controls.description.getRawValue() }}</p>
-                <p>Tipos de la guía: {{ listToString(chosenTypes) | titlecase }}</p>
-                <p>Ingredientes/materiales: {{ listToString(ingredients) | titlecase }}</p>
-                <p>Estado de la guía: {{ isPublished ? 'Publicada' : 'No publicada' }}</p>
+                <p><strong>Título: </strong>{{ guideInfo.controls.title.getRawValue() }}</p>
+                <p><strong>Descripción: </strong>{{ guideInfo.controls.description.getRawValue() }}</p>
+                <p><strong>Tipos de la guía: </strong>{{ listToString(chosenTypes) | titlecase }}</p>
+                <p><strong>Ingredientes/materiales: </strong>
+                    @if(ingredients.length > 0) {
+                    <mat-chip-set aria-label="Fish selection">
+                        @for(ingredient of ingredients; track ingredient) {
+                        <mat-chip>{{ ingredient }}</mat-chip>
+                        }
+                    </mat-chip-set>
+                    }
+                </p>
+                <p><strong>Estado de la guía: </strong>{{ isPublished ? 'Publicada' : 'No publicada' }}</p>
+                <div class="align-flex-column mt-3 mb-3" *ngIf="restoredGuide.thumbnail || guideThumbnailLoaded">
+                    <p><strong>Imagen actualmente seleccionada</strong></p>
+                    <img [src]="restoredGuide.thumbnail ? 'data:image/jpeg;base64,' + restoredGuide.thumbnail : guideThumbnailLoaded">
+                </div>
             </div>
-            <div class="optionsDivDown">
-                <button mat-flat-button class="buttonSpace mx-4" color="warn" 
-                    routerLink="/tutodo/guide-modify" routerLinkActive="active">
+            <div class="options-bottom">
+                <button mat-flat-button class="button-space mx-4" color="warn" routerLink="/tutodo/guide-modify"
+                    routerLinkActive="active">
                     Volver a modificar pasos</button>
-                <button mat-flat-button class="buttonSpace mx-4" color="warn"
-                    (click)="cancelChanges()" *ngIf="isModifyGuideInfo">Cancelar cambios</button>
-                <button mat-flat-button [disabled]="!guideInfo.valid || chosenTypes.length < 1" class="buttonSpace mx-4"
-                    color="primary" (click)="saveGuideInfo()" *ngIf="isModifyGuideInfo">Guardar información</button>
-                <button mat-flat-button *ngIf="!isModifyGuideInfo" class="buttonSpace mx-4" color="primary"
+                <button mat-flat-button class="button-space mx-4" color="warn" (click)="cancelChanges()"
+                    *ngIf="isModifyGuideInfo">Cancelar cambios</button>
+                <button mat-flat-button [disabled]="!guideInfo.valid || chosenTypes.length < 1"
+                    class="button-space mx-4" color="primary" (click)="saveGuideInfo()"
+                    *ngIf="isModifyGuideInfo">Guardar información</button>
+                <button mat-flat-button *ngIf="!isModifyGuideInfo" class="button-space mx-4" color="primary"
                     color="accent" (click)="modifyGuideInfo()">Modificar información</button>
             </div>
         </div>

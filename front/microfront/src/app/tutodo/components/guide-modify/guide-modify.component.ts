@@ -109,7 +109,7 @@ export class GuideModifyComponent implements OnInit {
                   : this.stepsForm.controls.steps.getRawValue()
               );
               this._toast.success(
-                `Editando guía: ${this.restoredGuide.title}`,
+                `Editando pasos de guía: ${this.restoredGuide.title}`,
                 'Guía cargada'
               );
             },

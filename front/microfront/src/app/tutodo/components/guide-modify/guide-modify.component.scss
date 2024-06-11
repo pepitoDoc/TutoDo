@@ -1,4 +1,4 @@
-.alignFlexRow {
+.align-flex-row {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -7,7 +7,7 @@
   width: 100%;
 }
 
-.alignFlexColumn {
+.align-flex-column {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -16,42 +16,7 @@
   width: 100%;
 }
 
-.whiteCard-check {
-  width: 20%;
-  height: fit-content;
-  padding: 18px 15px;
-  margin-bottom: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: whitesmoke;
-  border-radius: 20px;
-  border: 1px solid black;
-  @media (max-width: 767px) {
-    width: 90%;
-  }
-}
-
-.whiteCard-guideInfo {
-  padding: 50px 20px;
-  margin-bottom: 100px;
-  margin-top: 100px;
-  width: 75%;
-  height: fit-content;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: white;
-  border-radius: 20px;
-  border: 1px solid black;
-  @media (max-width: 768px) {
-    margin-top: 10px;
-    padding: 0px;
-    width: 95%;
-  }
-}
-
-.whiteCard-step {
+.white-card-step {
   padding: 20px 20px;
   margin-bottom: 50px;
   margin-top: 40px;
@@ -75,14 +40,14 @@ mat-paginator {
   margin-bottom: 10px;
 }
 
-#stepInput {
+.step-input {
   width: 100%;
   @media (max-width: 768px) {
     width: 95%;
   }
 }
 
-.nextStepContainer {
+.next-step-container {
   width: 75%;
   display: flex;
   flex-direction: column;
@@ -135,7 +100,7 @@ mat-form-field {
   }
 }
 
-.buttonSpace {
+.button-space {
   margin-top: 10px;
   margin-bottom: 20px;
   @media (max-width: 768px) {
@@ -151,7 +116,7 @@ mat-form-field {
   }
 }
 
-.optionsDivTop {
+.options-top {
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
@@ -164,7 +129,7 @@ mat-form-field {
   }
 }
 
-.optionsDivDown {
+.options-bottom {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -224,20 +189,21 @@ h1 {
   border-radius: 20px;
 }
 
-.imageInput {
+.image-input {
   width: 90%;
   margin: 10px 5px;
   border: 0.5px solid black;
   border-radius: 5px;
 }
 
-.imageInput:disabled {
+.imag-input:disabled {
   border: 0.5px solid rgb(170, 170, 170);
 }
 
 img {
   margin: 0px 0px;
   width: 50%;
+  height: 400px;
   border-radius: 10px;
   border: 1px solid black;
   @media(max-width: 768px) {

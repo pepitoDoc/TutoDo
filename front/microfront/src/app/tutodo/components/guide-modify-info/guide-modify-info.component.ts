@@ -85,8 +85,8 @@ export class GuideModifyInfoComponent implements OnInit {
             this.chosenTypes = this.restoredGuide.guideTypes;
             this.ingredients = this.restoredGuide.ingredients === null ? [] : this.restoredGuide.ingredients;
             this._toast.success(
-              `Se ha restaurado el progreso de edición de la guía: ${this.restoredGuide.title}`,
-              'Progreso de guía restaurado'
+              `Editando información de guía: ${this.restoredGuide.title}`,
+              'Guía cargada'
             );
           });
         }

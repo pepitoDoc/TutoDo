@@ -1,18 +1,15 @@
-import { Component, ElementRef, EventEmitter, Inject, LOCALE_ID, OnDestroy, OnInit, Output, ViewChild, inject } from '@angular/core';
-import { FormBuilder, FormGroup, NonNullableFormBuilder, ValidatorFn, Validators } from '@angular/forms';
+import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
+import { NonNullableFormBuilder, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../service/api.service';
 import { SharedService } from '../../shared/shared.service';
-import { MatPaginator } from '@angular/material/paginator';
-import { Subject } from 'rxjs/internal/Subject';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { Observable, map, startWith, tap } from 'rxjs';
-import { DecimalPipe } from '@angular/common';
-import { R } from '@angular/cdk/keycodes';
-import { FindByFilterRequest, FindByFilterResponse, Guide, Rating } from '../../model/data';
+import { Observable, map } from 'rxjs';
+import { FindByFilterRequest, FindByFilterResponse, Rating } from '../../model/data';
 import { InfoDialogComponent } from '../info-dialog/info-dialog.component';
 import { TutodoRoutes } from '../../tutodo.routes';
 import { UserData } from '../../model/user-data';
@@ -22,7 +19,7 @@ import { UserData } from '../../model/user-data';
   templateUrl: './guide-search.component.html',
   styleUrl: './guide-search.component.scss'
 })
-export class GuideSearchComponent implements OnInit, OnDestroy {
+export class GuideSearchComponent implements OnInit {
 
   chosenTypes: string[] = [];
   guideFilter = this._nnfb.group({
@@ -41,11 +38,11 @@ export class GuideSearchComponent implements OnInit, OnDestroy {
   {description: '3 (Bueno)', value: 3}, {description: '4 (Superior)', value: 4}, {description: '5 (Excelente)', value: 5}]
   searchMode = true;
   announcer = inject(LiveAnnouncer);
-  guidesFound!: FindByFilterResponse[];
+  findByFilterResponse!: FindByFilterResponse;
   hasGuides$!: Observable<boolean>;
   formValid = false;
-  private unsubscribe = new Subject<void>();
   userData!: UserData;
+  currentPage = 0;
 
   constructor(
     private readonly _nnfb: NonNullableFormBuilder,
@@ -59,11 +56,6 @@ export class GuideSearchComponent implements OnInit, OnDestroy {
     this.userData = this._route.snapshot.data['userData'];
   }
 
-  ngOnDestroy(): void {
-    this.unsubscribe.next();
-    this.unsubscribe.complete();
-  }
-
   ngOnInit(): void {
     this._service.findAllGuideTypes$().subscribe({
       next: (response) => {
@@ -73,6 +65,20 @@ export class GuideSearchComponent implements OnInit, OnDestroy {
         );
       }
     });
+    let receivedParams = false;
+    ['title', 'username', 'rating'].forEach(param => {
+      if (this._route.snapshot.paramMap.get(param) !== null) {
+        this.guideFilter.get(param)?.setValue(this._route.snapshot.paramMap.get(param));
+        receivedParams = true;
+      }
+    });
+    if (this._route.snapshot.paramMap.get('guideType') !== null) {
+      this.chosenTypes.push(this._route.snapshot.paramMap.get('guideType')!);
+      receivedParams = true;
+    }
+    if (receivedParams) {
+      this.searchGuide();
+    }
   };
 
   searchGuide(): void {
@@ -81,12 +87,13 @@ export class GuideSearchComponent implements OnInit, OnDestroy {
       title: title,
       username: username,
       guideTypes: this.chosenTypes,
-      rating: rating
+      rating: rating,
+      pageNumber: this.currentPage
     }
     this._service.findGuideByFilter$(payload).subscribe({
       next: (response) => {
-        if (response !== null  && response.length > 0) {
-          this.guidesFound = response.filter(findByFilter => findByFilter.guideFound !== null);
+        if (response !== null  && response.totalGuides > 0) {
+          this.findByFilterResponse = response;
           this.searchMode = false;
         } else {
           this._dialog.open(InfoDialogComponent, {
@@ -100,14 +107,13 @@ export class GuideSearchComponent implements OnInit, OnDestroy {
         }
       },
       error: (response) => {
-        // Respuesta error
+        // TODO
       }
     });
   }
 
   resetSearch(): void {
     this.searchMode = true;
-    this.guidesFound = [];
   }
 
   visualizeGuide(guideId: string): void {
@@ -115,9 +121,39 @@ export class GuideSearchComponent implements OnInit, OnDestroy {
   }
 
   addSaved(guideId: string): void {
-
+    this._service.addSaved$(guideId).subscribe({
+      next: (response) => {
+        if (response === 'operation_successful') {
+          this._toast.success('Guía añadida a guardados');
+          this.userData.saved.push(guideId);
+        } else {
+          // TODO
+        }
+      },
+      error: (error) => {
+        // TODO
+      }
+    });
   }
 
+  deleteSaved(guideId: string): void {
+    this._service.deleteSaved$(guideId).subscribe({
+      next: (response) => {
+        if (response === 'operation_successful') {
+          this._toast.success('Guía eliminada de guardados');
+          this.userData.saved = this.userData.saved.filter(guide => guide !== guideId);
+        }
+      },
+      error: (error) => {
+        // TODO
+      }
+    });
+  }
+
+  findGuideIsSaved(guideId: string): boolean {
+    return this.userData.saved.includes(guideId);
+  }
+ 
   remove(guideType: string): void {
     const index = this.chosenTypes.indexOf(guideType);
     if (index >= 0) {
@@ -161,6 +197,11 @@ export class GuideSearchComponent implements OnInit, OnDestroy {
     } else {
       return "No puntuado";
     }
+  }
+
+  handlePageEvent(e: PageEvent) {
+    this.currentPage = e.pageIndex;
+    this.searchGuide();
   }
 
 }

@@ -14,6 +14,7 @@ public class FindByFilterRequest {
     private String username;
     private String title;
     private List<String> guideTypes;
-    private Integer rating;
+    private int rating;
+    private int pageNumber;
 
 }

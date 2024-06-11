@@ -39,8 +39,13 @@ export class ConfirmedService {
         }
       }),
       catchError((error) => {
-        this._toast.error('El servidor no se encuentra disponible.', 'Error del servidor');
-        return of(this._router.parseUrl(TutodoRoutes.LOGIN));
+        if (error.status === 401) {
+          this._toast.error('Debe tener una sesión activa.', 'Sesión no detectada');
+          return of(this._router.parseUrl(TutodoRoutes.LOGIN));
+        } else {
+          this._toast.error('El servidor no se encuentra disponible.', 'Error del servidor');
+          return of(this._router.parseUrl(TutodoRoutes.LOGIN));
+        }
       })
     );
   }

@@ -1,4 +1,4 @@
-export interface UserData {
+export interface AllUserData {
   id: string;
   username: string;
   email: string;
@@ -9,7 +9,10 @@ export interface UserData {
   preferences: string[];
 }
 
-interface Progress {
-  id: number;
-  step: number;
+export interface UserData {
+  id: string;
+  username: string;
+  saved: string[];
+  created: string[];
+  preferences: string[];
 }

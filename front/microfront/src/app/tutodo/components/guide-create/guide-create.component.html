@@ -1,6 +1,6 @@
 <div class="page">
-  <div class="alignFlex mt-4">
-    <div class="whiteCard">
+  <div class="align-flex mt-4">
+    <div class="white-card">
       <h1>Información básica sobre la guía</h1>
       <h3>Por favor, rellene el siguiente formulario para obtener
         información esencial sobre la guía que desea crear
@@ -66,17 +66,17 @@
           <mat-hint align="start">{{ingredients.length}}/25 (máximo 25 ingredientes)</mat-hint>
         </mat-form-field>
         <input type="file" accept="image/*" (change)="onFileChanged($event)">
-        <div class="alignFlexColumn mt-4" *ngIf="loadedImage">
+        <div class="align-flex-column mt-4" *ngIf="loadedImage">
           <p>Imagen actualmente seleccionada</p>
           <button type="button" mat-flat-button class="mt-2 mb-2" color="warn"
             (click)="deleteImage()">Eliminar imagen</button>
           <img mat-card-image [src]="loadedImage"
             alt="No se ha podido cargar la imagen correctamente">
         </div>
-        <div class="alignFlex">
-          <button mat-flat-button class="buttonSpace" routerLink="/home" routerLinkActive="active"
+        <div class="align-flex">
+          <button mat-flat-button class="button-space" routerLink="/home" routerLinkActive="active"
             color="warn">Cancelar</button>
-          <button mat-flat-button [disabled]="!guideInfo.valid || chosenTypes.length < 1" class="buttonSpace"
+          <button mat-flat-button [disabled]="!guideInfo.valid || chosenTypes.length < 1" class="button-space"
             color="primary" (click)="guideCreate()">Crear guía</button>
         </div>
       </form>

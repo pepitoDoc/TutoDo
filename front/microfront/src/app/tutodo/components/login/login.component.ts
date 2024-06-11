@@ -18,7 +18,7 @@ export class LoginComponent implements OnInit {
 
   loginForm = this._nnfb.group({
     email: ['', [Validators.required, Validators.maxLength(100)]],
-    password: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(256)]]
+    password: ['', [Validators.required, Validators.maxLength(256)]]
   });
 
   registerForm = this._nnfb.group({

@@ -12,5 +12,8 @@ export enum TutodoRoutes {
   SAVED = 'saved-guides',
   SEE = 'guide-see',
   SEARCH = 'guide-search',
-  VERIFY = 'verify'
+  VERIFY = 'verify',
+  RESET_PASSWORD = 'reset-password',
+  SEARCH_USER = 'search-user',
+  USER_INFO = 'user-info'
 }

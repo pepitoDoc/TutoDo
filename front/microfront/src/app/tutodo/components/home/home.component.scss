@@ -16,25 +16,109 @@
 
 .align-grid {
   display: grid;
-  width: 90%;
+  width: 100%;
+  justify-content: center;
   grid-template-rows: 0.25fr;
-  grid-template-columns: 0.25fr 0.25fr 0.25fr 0.25fr;
-  gap: 20px;
+  grid-template-columns: 20% 20% 20% 20%;
+  gap: 100px;
   margin: 40px 0px;
-
+  background: rgba(245, 245, 245, 0.5);
+  border: 1px solid rgba(128, 128, 128, 0.1);
+  padding: 20px 0px;
+  border-radius: 40px;
+  @media(max-width: 1440px) {
+    padding: 20px 10px;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
   @media(max-width: 768px) {
+    padding: 20px 5px;
     grid-template-columns: 1fr;
     gap: 20px;
   }
 }
 
 img {
+  width: 100%;
+  height: 300px;
   align-self: center;
   justify-self: center;
-  padding: 20px;
+  // @media(max-width: 1440px) {
+  //   height: 200px;
+  // }
+  // @media(max-width: 768px) {
+  //   height: 100px;
+  // }
 }
 
 mat-button-toggle-group {
-  margin-left: 20px;
   border-radius: 10px;
+}
+
+.guides-wrapper {
+  width: 100%;
+  align-items: center;
+}
+
+mat-card-title,
+mat-card-content p,
+mat-card-subtitle {
+  text-align: start;
+  word-break: break-word;
+}
+
+mat-card {
+  border: 1px solid gray;
+}
+
+.title {
+  margin-top: 20px;
+  background: #12c2e9;
+  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #f64f59, #c471ed, #12c2e9);
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #f64f59, #c471ed, #12c2e9);
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  width: fit-content;
+  height: fit-content;
+  border-radius: 25px;
+
+  h1 {
+    width: fit-content;
+    height: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    margin: 4px 4px;
+    padding: 10px 10px;
+    border-radius: 20px;
+  }
+
+}
+
+.guide-type {
+  background: #eacda3;
+  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #d6ae7b, #eacda3);
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #d6ae7b, #eacda3);
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  width: fit-content;
+  height: fit-content;
+  border-radius: 25px;
+  margin: 50px 0px 10px 0px;
+
+  h2 {
+    width: fit-content;
+    height: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    margin: 2px 2px;
+    padding: 0px 5px;
+    border-radius: 20px;
+  }
+
 }

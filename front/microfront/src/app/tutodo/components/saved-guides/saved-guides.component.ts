@@ -1,24 +1,26 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../service/api.service';
 import { SharedService } from '../../shared/shared.service';
-import { GuidePaginationResponse, Rating } from '../../model/data';
+import { Guide, GuidePaginationResponse, Rating } from '../../model/data';
+import { PageEvent } from '@angular/material/paginator';
+import { Observable } from 'rxjs';
 import { TutodoRoutes } from '../../tutodo.routes';
 import { OptionDialogComponent } from '../option-dialog/option-dialog.component';
-import { Observable } from 'rxjs';
-import { PageEvent } from '@angular/material/paginator';
+import { AllUserData, UserData } from '../../model/user-data';
 
 @Component({
-  selector: 'tutodo-my-guides',
-  templateUrl: './my-guides.component.html',
-  styleUrl: './my-guides.component.scss'
+  selector: 'tutodo-saved-guides',
+  templateUrl: './saved-guides.component.html',
+  styleUrl: './saved-guides.component.scss'
 })
-export class MyGuidesComponent implements OnInit {
+export class SavedGuidesComponent {
 
   guidesFound!: Observable<GuidePaginationResponse>;
   currentPage = 0;
+  userData!: UserData;
 
   constructor(
     private readonly _service: ApiService,
@@ -27,10 +29,11 @@ export class MyGuidesComponent implements OnInit {
     private readonly _dialog: MatDialog,
     private readonly _sharedService: SharedService,
     private readonly _toast: ToastrService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
-    this.guidesFound = this._service.findOwnGuides$();
+    this.guidesFound = this._service.findSaved$();
+    this.userData = this._route.snapshot.data['userData'];
   }
 
   visualizeGuide(guideId: string): void {
@@ -62,17 +65,17 @@ export class MyGuidesComponent implements OnInit {
   deleteGuide(guideId: string): void {
     this._dialog.open(OptionDialogComponent, {
       width: '400px',
-            height: 'auto',
-            data: {
-              title: '¿Desea eliminar la guía?',
-            }
+      height: 'auto',
+      data: {
+        title: '¿Desea eliminar la guía?',
+      }
     }).afterClosed().subscribe({
       next: (response) => {
         if (response === true) {
           this._service.deleteGuide$(guideId).subscribe({
             next: (response) => {
               if (response === 'operation_successful') {
-                this.guidesFound = this._service.findOwnGuides$(this.currentPage);
+                this.guidesFound = this._service.findSaved$(this.currentPage);
                 // this.guidesFound = this.guidesFound.filter(guide => guide.id !== guideId);
                 this._toast.success('Guía borrada correctamente', 'Operación exitosa')
               } else {
@@ -110,6 +113,40 @@ export class MyGuidesComponent implements OnInit {
   handlePageEvent(e: PageEvent) {
     this.guidesFound = this._service.findOwnGuides$(e.pageIndex);
     this.currentPage = e.pageIndex;
+  }
+
+  findGuideIsSaved(guideId: string): boolean {
+    return this.userData.saved.includes(guideId);
+  }
+
+  addSaved(guideId: string): void {
+    this._service.addSaved$(guideId).subscribe({
+      next: (response) => {
+        if (response === 'operation_successful') {
+          this._toast.success('Guía añadida a guardados');
+          this.userData.saved.push(guideId);
+        } else {
+          // TODO
+        }
+      },
+      error: (error) => {
+        // TODO
+      }
+    });
+  }
+
+  deleteSaved(guideId: string): void {
+    this._service.deleteSaved$(guideId).subscribe({
+      next: (response) => {
+        if (response === 'operation_successful') {
+          this._toast.success('Guía eliminada de guardados');
+          this.userData.saved = this.userData.saved.filter(guide => guide !== guideId);
+        }
+      },
+      error: (error) => {
+        // TODO
+      }
+    });
   }
 
 }

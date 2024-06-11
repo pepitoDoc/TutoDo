@@ -13,13 +13,16 @@ import { Observable } from 'rxjs';
 import { MyGuidesComponent } from './components/my-guides/my-guides.component';
 import { GuideSearchComponent } from './components/guide-search/guide-search.component';
 import { GuideSeeComponent } from './components/guide-see/guide-see.component';
-import { UserData } from './model/user-data';
+import { AllUserData } from './model/user-data';
 import { UserService } from './service/provider/user.service';
 import { GuideModifyInfoComponent } from './components/guide-modify-info/guide-modify-info.component';
 import { PublishedService } from './service/auth/published.service';
 import { LoginComponent } from './components/login/login.component';
 import { VerifyEmailComponent } from './components/verify-email/verify-email.component';
 import { ConfirmedService } from './service/auth/confirmed.service';
+import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
+import { SearchUserComponent } from './components/search-user/search-user.component';
+import { SavedGuidesComponent } from './components/saved-guides/saved-guides.component';
 
 const canActivateGuide: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot,) => {
   return inject(PublishedService).canActivate(route.params['id']);
@@ -42,6 +45,10 @@ const routes: Routes = [
           {
             path: '',
             component: LoginComponent
+          },
+          {
+            path: TutodoRoutes.RESET_PASSWORD,
+            component: ResetPasswordComponent
           },
           {
             path: TutodoRoutes.VERIFY,
@@ -100,11 +107,16 @@ const routes: Routes = [
           },
           {
             path: `${TutodoRoutes.SAVED}`,
-            component: GuideSearchComponent
+            component: SavedGuidesComponent,
+            resolve: { userData: () => inject(UserService).getUserData$() }
           },
           {
             path: `${TutodoRoutes.MAIN}`,
             component: MainComponent
+          },
+          {
+            path: `${TutodoRoutes.SEARCH_USER}/:username`,
+            component: SearchUserComponent
           },
           {
             path: '**', 

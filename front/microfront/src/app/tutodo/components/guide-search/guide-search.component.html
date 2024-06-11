@@ -1,6 +1,10 @@
 <div class="page">
-  <div class="alignFlex mt-4" *ngIf="searchMode">
-    <div class="whiteCard">
+  @if(searchMode) {
+  <div class="align-flex-column mt-4">
+    <div class="title">
+      <h1>Búsqueda de guías</h1>
+    </div>
+    <div class="white-card">
       <h1>Filtrar búsqueda de guías</h1>
       <h3>Por favor, rellene el siguiente formulario con la información que desee
         para filtrar la búsqueda de las guías según los criterios
@@ -51,7 +55,7 @@
           </mat-select>
           <mat-hint align="start">Se buscarán guías con puntuación igual o mayor a la elegida</mat-hint>
         </mat-form-field>
-        <div class="alignFlex">
+        <div class="align-flex-row">
           <button mat-flat-button class="buttonSpace mx-4" routerLink="/home" routerLinkActive="active"
             color="warn">Cancelar</button>
           <button mat-flat-button class="buttonSpace mx-4" [disabled]="!atLeastOneValue()" color="primary"
@@ -60,41 +64,53 @@
       </form>
     </div>
   </div>
-  <div *ngIf="!searchMode">
-    <div class="alignGrid">
-      <mat-card class="example-card guideCard" *ngFor="let guide of guidesFound">
-        <mat-card-header>
-          <mat-card-title>{{ guide.guideFound.title }}</mat-card-title>
-          <mat-card-subtitle>Usuario creador: {{ guide.creatorUsername }}</mat-card-subtitle>
-        </mat-card-header>
-        <mat-divider></mat-divider>
-        <mat-card-content class="guideResume">
-          <div class="guideInfo">
-            <p><strong>Guía sobre:</strong>{{ formatGuideTypes(guide.guideFound.guideTypes) }}</p>
-            <p><strong>Comentarios:</strong> {{ guide.guideFound.comments.length }}</p>
-            <p><strong>Puntuación media:</strong> {{ ratingMean(guide.guideFound.ratings) }}</p>
-            <p><strong>Estado de publicación:</strong> {{ guide.guideFound.published ? 'Publicado' : 'No publicado' }}</p>
-          </div>
-          <div class="guideInfo">
-            <img mat-card-image [src]="guide.guideFound.thumbnail 
-                        ? 'data:image/jpeg;base64,' + guide.guideFound.thumbnail 
-                        : '/assets/images/_11707f36-6180-48c1-b259-16214f3e3e34-logo.jpeg'">
-          </div>
-        </mat-card-content>
-        <mat-divider></mat-divider>
-        <mat-card-content>
-          <p>
-            {{ guide.guideFound.description }}
-          </p>
-        </mat-card-content>
-        <mat-card-actions>
-          <button mat-button (click)="visualizeGuide(guide.guideFound.id)">Visualizar guía</button>
-          <button mat-button>Añadir a Guardados</button>
-        </mat-card-actions>
-      </mat-card>
-    </div>
-    <div class="optionsDivBottom sticky-bottom">
-      <button mat-flat-button (click)="resetSearch()" color="warn">Volver al filtro</button>
-    </div>
+  }
+  @if(!searchMode) {
+  <div class="align-grid">
+    @for(guideInfo of findByFilterResponse.guidesFound; track guideInfo) {
+    <mat-card class="example-card guide-card">
+      <mat-card-header>
+        <mat-card-title>{{ guideInfo.guide.title }}</mat-card-title>
+        <mat-card-subtitle>Usuario creador: <button mat-button color="primary">{{ guideInfo.username
+            }}</button></mat-card-subtitle>
+      </mat-card-header>
+      <mat-divider></mat-divider>
+      <mat-card-content class="guide-resume">
+        <div class="guide-info">
+          <p><strong>Guía sobre:</strong>{{ formatGuideTypes(guideInfo.guide.guideTypes) }}</p>
+          <p><strong>Comentarios:</strong> {{ guideInfo.guide.amountComments }}</p>
+          <p><strong>Puntuación media:</strong> {{ guideInfo.guide.ratingMean === 0 ? 'No puntuada' :
+            guideInfo.guide.ratingMean }}</p>
+        </div>
+        <div class="guide-info">
+          <img mat-card-image [src]="guideInfo.guide.thumbnail 
+                          ? 'data:image/jpeg;base64,' + guideInfo.guide.thumbnail 
+                          : '/assets/images/_11707f36-6180-48c1-b259-16214f3e3e34-logo.jpeg'">
+        </div>
+      </mat-card-content>
+      <mat-divider></mat-divider>
+      <mat-card-content>
+        <p>
+          {{ guideInfo.guide.description }}
+        </p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-button (click)="visualizeGuide(guideInfo.guide.id)">Visualizar guía</button>
+        @if(!findGuideIsSaved(guideInfo.guide.id)) {
+        <button mat-button color="accent" (click)="addSaved(guideInfo.guide.id)">Añadir a guardados</button>
+        }
+        @else {
+        <button mat-button color="warn" (click)="deleteSaved(guideInfo.guide.id)">Eliminar de guardados</button>
+        }
+      </mat-card-actions>
+    </mat-card>
+    }
   </div>
+  <div class="options-bottom">
+    <button mat-flat-button (click)="resetSearch()" color="warn">Volver al filtro</button>
+    <mat-paginator class="mx-2" #paginator [pageSize]="8" [length]="findByFilterResponse.totalGuides"
+      aria-label="Select page" [showFirstLastButtons]="true" (page)="handlePageEvent($event)" [pageIndex]="currentPage">
+    </mat-paginator>
+  </div>
+  }
 </div>

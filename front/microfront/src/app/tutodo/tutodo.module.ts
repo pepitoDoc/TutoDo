@@ -32,7 +32,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
+import { MatSnackBarModule} from '@angular/material/snack-bar';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { ToastrModule } from 'ngx-toastr';
 import { MyGuidesComponent } from './components/my-guides/my-guides.component';
@@ -42,6 +42,8 @@ import { GuideCreateComponent } from './components/guide-create/guide-create.com
 import { GuideModifyInfoComponent } from './components/guide-modify-info/guide-modify-info.component';
 import { VerifyEmailComponent } from './components/verify-email/verify-email.component';
 import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
+import { SearchUserComponent } from './components/search-user/search-user.component';
+import { SavedGuidesComponent } from './components/saved-guides/saved-guides.component';
 
 
 @NgModule({
@@ -63,7 +65,9 @@ import { ResetPasswordComponent } from './components/reset-password/reset-passwo
     MyGuidesComponent,
     GuideModifyInfoComponent,
     VerifyEmailComponent,
-    ResetPasswordComponent
+    ResetPasswordComponent,
+    SearchUserComponent,
+    SavedGuidesComponent
   ],
   imports: [
     CommonModule,

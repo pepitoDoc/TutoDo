@@ -10,9 +10,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class FindByFilterResponse {
+public class GuidePaginationResponse {
 
-    private List<GuideFilterResult> guidesFound;
     private long totalGuides;
+    private List<GuideInfo> guidesRetrieved;
 
 }

@@ -6,7 +6,7 @@ import { ApiService } from '../../service/api.service';
 import { SharedService } from '../../shared/shared.service';
 import { Observable } from 'rxjs';
 import { Guide } from '../../model/data';
-import { UserData } from '../../model/user-data';
+import { AllUserData, UserData } from '../../model/user-data';
 
 @Component({
   selector: 'tutodo-home',

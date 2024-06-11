@@ -1,4 +1,4 @@
-.alignFlexRow {
+.align-flex-row {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -7,7 +7,7 @@
     width: 100%;
 }
 
-.alignFlexColumn {
+.align-flex-column {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -16,27 +16,10 @@
     width: 100%;
 }
 
-.whiteCard-check {
-    width: 20%;
-    height: fit-content;
-    padding: 18px 15px;
-    margin-bottom: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: whitesmoke;
-    border-radius: 20px;
-    border: 1px solid black;
-
-    @media (max-width: 767px) {
-        width: 90%;
-    }
-}
-
-.whiteCard-guideInfo {
-    padding: 50px 20px;
+.white-card-guide-info {
+    padding: 40px 20px;
     margin-bottom: 100px;
-    margin-top: 100px;
+    margin-top: 50px;
     width: 75%;
     height: fit-content;
     display: flex;
@@ -46,41 +29,18 @@
     border-radius: 20px;
     border: 1px solid black;
 
-    @media (max-width: 768px) {
+    @media (max-width: 1024px) {
         margin-top: 10px;
-        padding: 0px;
-        width: 95%;
+        padding: 20px 5px;
+        width: 100%;
     }
-}
-
-mat-paginator {
-    border-radius: 20px;
-    border: 1px solid black;
-    margin-bottom: 10px;
-}
-
-#stepInput {
-    width: 100%;
-
-    @media (max-width: 768px) {
-        width: 95%;
-    }
-}
-
-.nextStepContainer {
-    width: 75%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding-bottom: 20px;
 }
 
 h1, h2, h3, mat-label, p {
-    text-align: center;
+    text-align: start;
 }
 
-h2, h3, mat-label, p, input {
+h2, h3, mat-label, p, input, strong {
     font-size: 20px;
 
     @media (max-width: 768px) {
@@ -88,12 +48,21 @@ h2, h3, mat-label, p, input {
     }
 }
 
-mat-hint,
-strong {
+mat-hint {
     font-size: 14px;
 
     @media (max-width: 768px) {
         font-size: 10px;
+    }
+}
+
+mat-error {
+    strong {
+        font-size: 14px;
+
+        @media (max-width: 768px) {
+            font-size: 10px;
+        }
     }
 }
 
@@ -126,7 +95,7 @@ mat-form-field {
     }
 }
 
-.buttonSpace {
+.button-space {
     margin-top: 10px;
     margin-bottom: 20px;
 
@@ -144,21 +113,7 @@ mat-form-field {
     }
 }
 
-.optionsDivTop {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    align-items: center;
-    width: 80%;
-    height: auto;
-
-    @media (max-width: 768px) {
-        flex-direction: column;
-        padding-bottom: 20px;
-    }
-}
-
-.optionsDivDown {
+.options-bottom {
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -188,15 +143,8 @@ mat-form-field {
     }
 }
 
-.divider {
-    width: 100%;
-    border-top: 1px solid gray;
-    border-radius: 5px;
-}
-
 .title {
     margin-top: 20px;
-    margin-bottom: 50px;
     background: #12c2e9;
     /* fallback for old browsers */
     background: -webkit-linear-gradient(to right, #f64f59, #c471ed, #12c2e9);
@@ -220,34 +168,42 @@ h1 {
     border-radius: 20px;
 }
 
-.imageInput {
+.image-input {
     width: 90%;
     margin: 10px 5px;
     border: 0.5px solid black;
     border-radius: 5px;
 }
 
-.imageInput:disabled {
+.image-input:disabled {
     border: 0.5px solid rgb(170, 170, 170);
 }
 
 img {
     margin: 0px 0px;
     width: 50%;
+    height: 400px;
     border-radius: 10px;
     border: 1px solid black;
-    @media(max-width: 768px) {
+    @media(max-width: 1024px) {
         width: 75%;
-        height: 75%;
+    }
+    @media(max-width: 767px) {
+        width: 95%;
+        height: 200px;
     }
 }
 
 .guide-info {
-    width: 75%;
+    width: 80%;
 
     h2,
     p {
         padding: 20px 0px;
     }
 
+}
+
+mat-chip-set {
+    margin-top: 20px;
 }

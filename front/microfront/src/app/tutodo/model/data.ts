@@ -97,6 +97,7 @@ export interface FindByFilterRequest {
     title: string;
     guideTypes: string[];
     rating: number;
+    pageNumber: number;
 }
 
 export interface SaveGuideInfoRequest {
@@ -157,7 +158,48 @@ export interface DeleteCommentRequest {
     date: Date;
 }
 
+export interface ChangePasswordRequest {
+    email?: string;
+    newPassword: string;
+}
+
+export interface GuidePaginationResponse {
+    totalGuides: number;
+    guidesRetrieved: GuideInfo[];
+}
+
 export interface FindByFilterResponse {
-    guideFound: Guide;
-    creatorUsername: string;
+    guidesFound: GuideFilterResult[];
+    totalGuides: number;
+}
+
+export interface GuideFilterResult {
+    guide: GuideInfo;
+    username: string;
+}
+
+export interface UserSearchData {
+    id: string;
+    username: string;
+    created: string;
+    preferences: string;
+}
+
+export interface UserPaginationResponse {
+    totalUsers: number;
+    usersFound: UserSearchData[];
+}
+
+export interface GuideInfo {
+    id: string;
+    userId: string;
+    title: string;
+    description: string;
+    published: boolean;
+    creationDate: Date;
+    amountSteps: number;
+    amountComments: number;
+    ratingMean: number;
+    thumbnail: string[];
+    guideTypes: string[];
 }

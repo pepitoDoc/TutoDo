@@ -1,4 +1,4 @@
-.navBorder {
+.nav-border {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -10,25 +10,39 @@
   padding: 0px;
 }
 
-.alignFlex {
+.navbar-collapse {
+
+  ul li,
+  ul form,
+  div {
+    @media(max-width: 768px) {
+      margin: 5px 0px;
+    }
+  }
+}
+
+.align-flex {
   display: flex;
   flex-direction: row;
   align-items: center;
   padding-top: 4px;
-  margin-left: 10px;
+  padding-left: 20px;
 
   p {
     margin-bottom: 0px;
   }
 
+  @media(max-width: 768px) {
+    margin-left: 0px;
+  }
 }
 
-.alignElements {
+.align-elements {
   height: fit-content;
   padding: 0px;
 }
 
-.alignIcon {
+.align-icon {
   height: fit-content;
   padding-bottom: 4px;
 }

@@ -31,9 +31,10 @@ public class Constants {
 
     public static final String GUIDE_TYPE_COLLECTION = "guideType";
     public static final String[] VALID_IMAGE_TYPES = {"image/jpeg", "image/png", "image/gif"};
-    public static final String[] FILTERED_ENDPOINTS = {"/v1/tutodo/guide/*", "/v1/tutodo/user/delete",
-            "/v1/tutodo/user/add-saved", "/v1/tutodo/user/get-user", "/v1/tutodo/user/add-saved",
-            "/v1/tutodo/user/delete-saved", "/v1/tutodo/user/logout"};
+    public static final String[] FILTERED_ENDPOINTS = {"/v1/tutodo/guide/*", "/v1/tutodo/user/get-user",
+            "/v1/tutodo/user/add-saved", "/v1/tutodo/user/remove-saved", "/v1/tutodo/user/logout",
+            "/v1/tutodo/user/check-valid", "/v1/tutodo/user/update-confirmed", "/v1/tutodo/user/change-password-by-id",
+            "/v1/tutodo/user/find-users"};
     public static final String MAIL_PASSWORD = "mail.smtp.password";
     public static final String MAIL_USER = "mail.smtp.user";
     public static final String MAIL_PROPERTIES = "mail.properties";
@@ -46,5 +47,7 @@ public class Constants {
             Map.entry(VERIFICATION_KEY, VERIFICATION_TITLE),
             Map.entry(PASSWORD_KEY, PASSWORD_TITLE)
     );
+
+    public static final int PAGE_SIZE = 8;
 
 }

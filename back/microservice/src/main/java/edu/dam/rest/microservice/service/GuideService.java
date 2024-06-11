@@ -9,6 +9,7 @@ import edu.dam.rest.microservice.persistence.model.*;
 import edu.dam.rest.microservice.persistence.repository.GuideRepository;
 import edu.dam.rest.microservice.persistence.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
@@ -96,11 +97,11 @@ public class GuideService {
                 } else {
                     queryResult.getSteps().add(saveGuideStepRequest.getStepIndex(), step);
                 }
-                var updateResult = this.mongoTemplate.updateFirst(
+                var result = this.mongoTemplate.updateFirst(
                         query(where(Constants.ID).is(saveGuideStepRequest.getGuideId())),
                         new Update().set(Constants.STEPS, queryResult.getSteps()),
                         Constants.GUIDE_COLLECTION);
-                if (updateResult.wasAcknowledged()) {
+                if (result.wasAcknowledged()) {
                     return "guide_updated";
                 } else {
                     return "guide_not_found";
@@ -119,11 +120,11 @@ public class GuideService {
         var queryResult = this.mongoTemplate.findOne(query, StepsProjection.class, Constants.GUIDE_COLLECTION);
         if (queryResult != null) {
             queryResult.getSteps().remove(deleteGuideStepRequest.getStepIndex());
-            var updateResult = this.mongoTemplate.updateFirst(
+            var result = this.mongoTemplate.updateFirst(
                     query(where(Constants.ID).is(deleteGuideStepRequest.getGuideId())),
                     new Update().set(Constants.STEPS, queryResult.getSteps()),
                     Constants.GUIDE_COLLECTION);
-            if (updateResult.wasAcknowledged()) {
+            if (result.wasAcknowledged() && result.getMatchedCount() > 0) {
                 return "guide_updated";
             } else {
                 return "guide_not_found";
@@ -153,7 +154,7 @@ public class GuideService {
                             .set(Constants.INGREDIENTS, saveGuideInfoRequest.getIngredients())
                             .set(Constants.PUBLISHED, saveGuideInfoRequest.isPublished()),
                     Constants.GUIDE_COLLECTION);
-            if (result.wasAcknowledged()) {
+            if (result.wasAcknowledged() && result.getMatchedCount() > 0) {
                 return "guide_updated";
             } else {
                 return "guide_not_found";
@@ -185,7 +186,7 @@ public class GuideService {
         }
     }
 
-    public List<FindByFilterResponse> findByFilter(FindByFilterRequest findByFilterRequest) {
+    public FindByFilterResponse findByFilter(FindByFilterRequest findByFilterRequest) {
         var operations = new ArrayList<AggregationOperation>();
         if (!findByFilterRequest.getTitle().isEmpty()) {
             operations.add(match(where(Constants.TITLE).regex(findByFilterRequest.getTitle(), "i")));
@@ -202,53 +203,100 @@ public class GuideService {
             }
         }
         operations.add(match(where(Constants.PUBLISHED).is(true)));
-        if (findByFilterRequest.getRating() != null && findByFilterRequest.getRating() > 0) {
+        if (findByFilterRequest.getRating() > 0) {
             operations.add(unwind(Constants.RATINGS));
             operations.add(group(Constants.ID).avg("$ratings.punctuation")
                     .as("averagePunctuation"));
             operations.add(match(where("averagePunctuation").gte(findByFilterRequest.getRating())));
+            var countAggregation = new ArrayList<>(operations);
+            countAggregation.add(count().as("total"));
+            var countResult =  this.mongoTemplate.aggregate(
+                    newAggregation(countAggregation), Constants.GUIDE_COLLECTION, BasicDBObject.class);
+            var count = !countResult.getMappedResults().isEmpty()
+                    ? countResult.getMappedResults().get(0).getInt("total") : 0;
+            operations.add(skip((long) findByFilterRequest.getPageNumber() * Constants.PAGE_SIZE));
+            operations.add(limit(Constants.PAGE_SIZE));
             var result = this.mongoTemplate.aggregate(
                     newAggregation(operations), Constants.GUIDE_COLLECTION, BasicDBObject.class);
-            return result.getMappedResults().stream()
-                    .map(guide -> this.guideRepository.findById(guide.getObjectId(Constants.ID).toString()))
-                    .filter(Optional::isPresent)
-                    .map(guide -> {
-                        var guideOwner = this.userRepository.findById(guide.orElseThrow().getUserId());
-                        if (guideOwner.isPresent()) {
-                            return FindByFilterResponse.builder()
-                                    .guideFound(guide.orElseThrow())
-                                    .creatorUsername(guideOwner.orElseThrow().getUsername())
-                                    .build();
-                        } else {
-                            return null;
-                        }
-                    })
-                    .collect(Collectors.toList());
+            return FindByFilterResponse.builder()
+                    .guidesFound(
+                            result.getMappedResults().stream()
+                                    .map(guide ->
+                                            this.guideRepository.findById(guide.getObjectId(Constants.ID).toString()))
+                                    .filter(Optional::isPresent)
+                                    .map(guide -> {
+                                        var guideOwner = this.userRepository.findById(guide.orElseThrow().getUserId());
+                                        if (guideOwner.isPresent()) {
+                                            return GuideFilterResult.builder()
+                                                    .guide(this.buildGuideInfo(guide.orElseThrow()))
+                                                    .username(guideOwner.orElseThrow().getUsername())
+                                                    .build();
+                                        } else {
+                                            return null;
+                                        }
+                                    })
+                                    .filter(Objects::nonNull)
+                                    .collect(Collectors.toList()))
+                    .totalGuides(count).build();
         } else {
+            var countAggregation = new ArrayList<>(operations);
+            countAggregation.add(count().as("total"));
+            var countResult =  this.mongoTemplate.aggregate(
+                    newAggregation(countAggregation), Constants.GUIDE_COLLECTION, BasicDBObject.class);
+            var count = !countResult.getMappedResults().isEmpty()
+                    ? countResult.getMappedResults().get(0).getInt("total") : 0;
+            operations.add(skip((long) findByFilterRequest.getPageNumber() * Constants.PAGE_SIZE));
+            operations.add(limit(Constants.PAGE_SIZE));
             var result = this.mongoTemplate.aggregate(
                     newAggregation(operations), Constants.GUIDE_COLLECTION, Guide.class);
-            return result.getMappedResults().stream()
-                    .map(guide -> {
-                        var guideOwner = this.userRepository.findById(guide.getUserId());
-                        if (guideOwner.isPresent()) {
-                            return FindByFilterResponse.builder()
-                                    .guideFound(guide)
-                                    .creatorUsername(guideOwner.orElseThrow().getUsername())
-                                    .build();
-                        } else {
-                            return null;
-                        }
-                    })
-                    .collect(Collectors.toList());
+            return FindByFilterResponse.builder()
+                    .guidesFound(result.getMappedResults().stream()
+                            .map(guide -> {
+                                var guideOwner = this.userRepository.findById(guide.getUserId());
+                                if (guideOwner.isPresent()) {
+                                    return GuideFilterResult.builder()
+                                            .guide(this.buildGuideInfo(guide))
+                                            .username(guideOwner.orElseThrow().getUsername())
+                                            .build();
+                                } else {
+                                    return null;
+                                }
+                            })
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toList()))
+                    .totalGuides(count).build();
         }
     }
 
-    public List<Guide> findOwnGuides(String userId) {
+    public GuidePaginationResponse findOwnGuides(String userId, Integer pageNumber) {
         var userQuery = new Query().addCriteria(where(Constants.ID).is(userId));
         userQuery.fields().include(Constants.CREATED);
         var userQueryResult = this.mongoTemplate.findOne(userQuery, CreatedProjection.class, Constants.USER_COLLECTION);
         if (userQueryResult != null) {
-            return this.guideRepository.findAllById(userQueryResult.getCreated());
+            var pageable = PageRequest.of(pageNumber == null ? 0 : pageNumber, Constants.PAGE_SIZE,
+                    Sort.by(Sort.Order.desc(Constants.CREATION_DATE)));
+            var page = this.guideRepository.findById(userQueryResult.getCreated(), pageable);
+            return GuidePaginationResponse.builder()
+                    .totalGuides(page.getTotalElements())
+                    .guidesRetrieved(page.stream().map(this::buildGuideInfo).toList())
+                    .build();
+        } else {
+            return null;
+        }
+    }
+
+    public GuidePaginationResponse findSaved(String userId, Integer pageNumber) {
+        var userQuery = new Query().addCriteria(where(Constants.ID).is(userId));
+        userQuery.fields().include(Constants.SAVED);
+        var userQueryResult = this.mongoTemplate.findOne(userQuery, SavedProjection.class, Constants.USER_COLLECTION);
+        if (userQueryResult != null) {
+            var pageable = PageRequest.of(pageNumber == null ? 0 : pageNumber, Constants.PAGE_SIZE,
+                    Sort.by(Sort.Order.desc(Constants.CREATION_DATE)));
+            var page = this.guideRepository.findById(userQueryResult.getSaved(), pageable);
+            return GuidePaginationResponse.builder()
+                    .totalGuides(page.getTotalElements())
+                    .guidesRetrieved(page.stream().map(this::buildGuideInfo).toList())
+                    .build();
         } else {
             return null;
         }
@@ -286,7 +334,7 @@ public class GuideService {
                     new Update().set(Constants.RATINGS + ".$." + Constants.PUNCTUATION,
                             addRatingRequest.getPunctuation()),
                     Constants.GUIDE_COLLECTION);
-            if (setResult.wasAcknowledged() && setResult.getMatchedCount() > 0) { // TODO no distingue si cambia la puntuación o no
+            if (setResult.wasAcknowledged() && setResult.getMatchedCount() > 0) {
                 return "guide_updated";
             } else {
                 UpdateResult pushResult = this.mongoTemplate.updateFirst(
@@ -350,22 +398,26 @@ public class GuideService {
     }
 
     public List<Guide> findNewestGuides() {
-        var operations = new ArrayList<AggregationOperation>();
-        operations.add(sort(Sort.by(Sort.Order.desc(Constants.CREATION_DATE))));
-        operations.add(limit(10));
-        var result = this.mongoTemplate.aggregate(
-                newAggregation(operations), Constants.GUIDE_COLLECTION, Guide.class);
-        return result.getMappedResults().stream().filter(Guide::isPublished).toList();
+        return this.mongoTemplate.find(
+                new Query(where(Constants.PUBLISHED).is(true))
+                        .with(Sort.by(Sort.Order.desc(Constants.CREATION_DATE))).limit(10),
+                Guide.class,
+                Constants.GUIDE_COLLECTION);
     }
 
     public List<Guide> findNewestGuidesByPreference(String preference) {
-        var operations = new ArrayList<AggregationOperation>();
-        operations.add(match(where(Constants.GUIDE_TYPES).in(preference)));
-        operations.add(sort(Sort.by(Sort.Order.desc(Constants.CREATION_DATE))));
-        operations.add(limit(10));
-        var result = this.mongoTemplate.aggregate(
-                newAggregation(operations), Constants.GUIDE_COLLECTION, Guide.class);
-        return result.getMappedResults().stream().filter(Guide::isPublished).toList();
+        return this.mongoTemplate.find(
+                new Query(where(Constants.PUBLISHED).is(true).and(Constants.GUIDE_TYPES).in(preference))
+                        .with(Sort.by(Sort.Order.desc(Constants.CREATION_DATE))).limit(10),
+                Guide.class,
+                Constants.GUIDE_COLLECTION);
+//        var operations = new ArrayList<AggregationOperation>();
+//        operations.add(match(where(Constants.GUIDE_TYPES).in(preference)));
+//        operations.add(sort(Sort.by(Sort.Order.desc(Constants.CREATION_DATE))));
+//        operations.add(limit(10));
+//        var result = this.mongoTemplate.aggregate(
+//                newAggregation(operations), Constants.GUIDE_COLLECTION, Guide.class);
+//        return result.getMappedResults().stream().filter(Guide::isPublished).toList();
     }
 
     private String encodeImageAsBase64(MultipartFile image) {
@@ -387,4 +439,26 @@ public class GuideService {
             return "operation_unsuccessful";
         }
     }
+
+    private GuideInfo buildGuideInfo(Guide guide) {
+        return GuideInfo.builder()
+                .id(guide.getId())
+                .userId(guide.getUserId())
+                .title(guide.getTitle())
+                .description(guide.getDescription())
+                .published(guide.isPublished())
+                .creationDate(guide.getCreationDate())
+                .amountSteps(guide.getSteps().size())
+                .guideTypes(guide.getGuideTypes())
+                .amountComments(guide.getComments().size())
+                .ratingMean(guide.getRatings().isEmpty() ? 0 : this.ratingMean(guide.getRatings()))
+                .thumbnail(guide.getThumbnail())
+                .build();
+    }
+
+    private float ratingMean(List<Rating> ratings) {
+        var ratingSum = ratings.stream().mapToInt(Rating::getPunctuation).sum();
+        return (float) Math.round(((float) ratingSum / ratings.size()) * 10) / 10;
+    }
+
 }

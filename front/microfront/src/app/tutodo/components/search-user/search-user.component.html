@@ -1,1 +1,40 @@
-<p>search-user works!</p>
+<div class="page" *ngIf="(usersFound | async) as users; else noUsers">
+    <div class="align-grid">
+        @for(user of users.usersFound; track user) {
+        <mat-card (click)="findUserGuides()">
+            <mat-card-header>
+                <mat-card-title>{{ user.username }}</mat-card-title>
+                <mat-card-subtitle>Número de guías creadas: {{ user.created.length }}</mat-card-subtitle>
+            </mat-card-header>
+            @if(user.preferences.length > 0) {
+            <mat-card-content>
+                <p>Seleccione un tipo de guía para buscar guías de este usuario que pertenezcan a ese tipo</p>
+            </mat-card-content>
+            <mat-card-actions align="start">
+                @for(type of user.preferences; track type) {
+                <button mat-button (click)="findUserGuidesByPreference(type)">{{ type }}</button>
+                }
+            </mat-card-actions>
+            }
+            @else {
+            <mat-card-content>
+                <p>Este usuario no tiene preferencia de tipos de guía</p>
+            </mat-card-content>
+            }
+        </mat-card>
+        }
+        @if(users && users.totalUsers > 0) {
+        }
+    </div>
+    @if(users.totalUsers > 8) { <div class="options-bottom">
+        <mat-paginator class="mx-2" #paginator [pageSize]="8" [length]="users.totalUsers" aria-label="Select page"
+            [showFirstLastButtons]="true" (page)="handlePageEvent($event)" [pageIndex]="currentPage">
+        </mat-paginator>
+</div>
+}
+</div>
+<ng-template #noUsers>
+    <div class="page">
+        <h2>Cargando información...</h2>
+    </div>
+</ng-template>

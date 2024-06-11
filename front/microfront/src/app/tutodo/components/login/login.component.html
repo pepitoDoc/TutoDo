@@ -39,6 +39,10 @@
           <p>¿No tiene cuenta?</p>
           <button mat-button class="buttonSpace" color="accent" (click)="changeInputState()">Regístrese aquí</button>
         </div>
+        <div class="rowAlign">
+          <p>¿No recuerda su contraseña?</p>
+          <button mat-button class="buttonSpace" color="accent" routerLink="/login/reset-password" routerLinkActive="active">Reiniciar contraseña</button>
+        </div>
       </div>
       <!-- Register form -->
       <div class="columnContent" *ngIf="!inputState">
@@ -125,7 +129,7 @@
         </form>
         <div class="rowAlign">
           <p>¿Ya tienes cuenta?</p>
-          <button mat-button class="buttonSpace" color="accent" (click)="changeInputState()">Inicia sesión</button>
+          <button mat-button class="buttonSpace" color="accent" (click)="changeInputState()">Inicie sesión</button>
         </div>
       </div>
     </div>

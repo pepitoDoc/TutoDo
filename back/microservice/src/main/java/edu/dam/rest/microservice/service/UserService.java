@@ -1,23 +1,20 @@
 package edu.dam.rest.microservice.service;
 
-import edu.dam.rest.microservice.bean.user.InsertUserRequest;
-import edu.dam.rest.microservice.bean.user.LoginUserRequest;
-import edu.dam.rest.microservice.bean.user.UserSession;
+import edu.dam.rest.microservice.bean.user.*;
 import edu.dam.rest.microservice.constants.Constants;
-import edu.dam.rest.microservice.bean.guide.CreatedProjection;
 import edu.dam.rest.microservice.persistence.model.User;
 import edu.dam.rest.microservice.persistence.repository.UserRepository;
-import edu.dam.rest.microservice.util.VerificationCodeGenerator;
 import edu.dam.rest.microservice.util.email.Sender;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
@@ -46,7 +43,7 @@ public class UserService {
                 .created(new ArrayList<>())
                 .preferences(insertUserRequest.getPreferences())
                 .build();
-        String checkUser = this.findByNameAndEmail(createUser);
+        String checkUser = this.findAllByUsernameOrEmail(createUser);
         if (!checkUser.equals("user_valid")) {
             return checkUser;
         } else {
@@ -73,34 +70,10 @@ public class UserService {
         }
     }
 
-    public void delete(UserSession userLogged) {
-        this.userRepository.deleteById(userLogged.getId());
-    }
-
-    public String findByNameAndEmail(User user) {
-        var foundUsers = this.userRepository.findByUsernameOrEmail(user.getUsername(), user.getEmail());
-        var sb = new StringBuilder();
-        foundUsers.forEach( (foundUser) -> {
-            if (foundUser.getUsername().equals(user.getUsername())
-                    && foundUser.getEmail().equals(user.getEmail())) {
-                sb.append("username_takenemail_taken");
-            } else if (foundUser.getUsername().equals(user.getUsername())) {
-                sb.append("username_taken");
-            } else if (foundUser.getEmail().equals(user.getEmail())) {
-                sb.append("email_taken");
-            }
-        });
-        if (sb.toString().isEmpty()) {
-            sb.append("user_valid");
-        }
-        return sb.toString();
-    }
-
     public User findById(String id) {
         var foundUser = this.userRepository.findById(id);
         if (foundUser.isPresent()) {
             return foundUser.orElseThrow();
-            // TODO devolver null si hay isPresent()
         } else {
             return null;
         }
@@ -160,10 +133,10 @@ public class UserService {
         return sender.send("TutoDo", email, Constants.EMAIL_TITLES.get(codeType), codeValue);
     }
 
-    public String changePassword(String id, String password) {
+    public String changePasswordById(String id, String newPassword) {
         var result = this.mongoTemplate.updateFirst(
                 query(where(Constants.ID).is(id)),
-                new Update().set(Constants.PASSWORD, password),
+                new Update().set(Constants.PASSWORD, newPassword),
                 Constants.USER_COLLECTION
         );
         if (result.wasAcknowledged()) {
@@ -173,8 +146,57 @@ public class UserService {
         }
     }
 
-//    public List<User> findUsers(String username) {
-//
-//    }
+    public String changePasswordByEmail(ChangePasswordRequest changePasswordRequest) {
+        var userFound = this.userRepository.findByEmail(changePasswordRequest.getEmail());
+        if (userFound != null) {
+            var result = this.mongoTemplate.updateFirst(
+                    query(where(Constants.ID).is(userFound.getId())),
+                    new Update().set(Constants.PASSWORD, changePasswordRequest.getNewPassword()),
+                    Constants.USER_COLLECTION
+            );
+            if (result.wasAcknowledged()) {
+                return "operation_successful";
+            } else {
+                return "operation_unsuccessful";
+            }
+        } else {
+            return "operation_unsuccessful";
+        }
+    }
 
+    public UserPaginationResponse findAllByUsername(String username, Integer pageNumber) {
+        var userPattern = Pattern.compile(username, Pattern.CASE_INSENSITIVE);
+        var pageable = PageRequest.of(pageNumber == null ? 0 : pageNumber, Constants.PAGE_SIZE,
+                Sort.by(Sort.Order.desc(Constants.CREATION_DATE)));
+        var userPage = this.userRepository.findAllByUsernameRegex(userPattern.toString(), pageable);
+        return UserPaginationResponse.builder()
+                .totalUsers(userPage.getTotalElements())
+                .usersFound(userPage.stream().map(user -> UserSearchData.builder()
+                        .id(user.getId())
+                        .username(user.getUsername())
+                        .created(user.getCreated())
+                        .preferences(user.getPreferences())
+                        .saved(user.getSaved())
+                        .build()).toList())
+                .build();
+    }
+
+    private String findAllByUsernameOrEmail(User user) {
+        var foundUsers = this.userRepository.findAllByUsernameOrEmail(user.getUsername(), user.getEmail());
+        var sb = new StringBuilder();
+        foundUsers.forEach( (foundUser) -> {
+            if (foundUser.getUsername().equals(user.getUsername())
+                    && foundUser.getEmail().equals(user.getEmail())) {
+                sb.append("username_takenemail_taken");
+            } else if (foundUser.getUsername().equals(user.getUsername())) {
+                sb.append("username_taken");
+            } else if (foundUser.getEmail().equals(user.getEmail())) {
+                sb.append("email_taken");
+            }
+        });
+        if (sb.toString().isEmpty()) {
+            sb.append("user_valid");
+        }
+        return sb.toString();
+    }
 }
