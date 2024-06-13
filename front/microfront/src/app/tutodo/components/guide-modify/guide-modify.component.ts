@@ -9,13 +9,13 @@ import { FormBuilder, FormControl, FormGroup, NonNullableFormBuilder, Validators
 import { ApiService } from '../../service/api.service';
 import {
   FormStep,
-  Guide,
+  GuideModifySteps,
   SaveGuideStepRequest,
   StepSnapshot,
 } from '../../model/data';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { InfoDialogComponent } from '../info-dialog/info-dialog.component';
 import { SharedService } from '../../shared/shared.service';
@@ -23,6 +23,7 @@ import { take } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { OptionDialogComponent } from '../option-dialog/option-dialog.component';
+import { TutodoRoutes } from '../../tutodo.routes';
 
 @Component({
   selector: 'tutodo-guide-modify',
@@ -50,7 +51,7 @@ export class GuideModifyComponent implements OnInit {
   announcer = inject(LiveAnnouncer);
   guideId!: string;
   stepSnapshots: StepSnapshot[] = [];
-  restoredGuide!: Guide;
+  restoredGuide!: GuideModifySteps;
 
   constructor(
     private _ngZone: NgZone,
@@ -58,7 +59,6 @@ export class GuideModifyComponent implements OnInit {
     private readonly _fb: FormBuilder,
     private readonly _service: ApiService,
     private readonly _router: Router,
-    private readonly _route: ActivatedRoute,
     private readonly _dialog: MatDialog,
     private readonly _sharedService: SharedService,
     private readonly _toast: ToastrService
@@ -76,10 +76,10 @@ export class GuideModifyComponent implements OnInit {
             'No se ha podido encontrar ninguna guía para editar.',
             'No se ha podido acceder a la página'
           );
-          this._router.navigate([`../`], { relativeTo: this._route });
+          this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
         } else {
           this.guideId = response.guideIdModifying;
-          this._service.findGuideById$(this.guideId).subscribe({
+          this._service.findGuideByIdSteps$(this.guideId).subscribe({
             next: (response) => {
               this.restoredGuide = response;
               const steps: FormStep[] = [];
@@ -114,13 +114,15 @@ export class GuideModifyComponent implements OnInit {
               );
             },
             error: (response) => {
-              // TODO
+              this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+              this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
             }
           });
         }
       },
       error: (error) => {
-        // TODO
+        this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+        this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
       }
     });
   }
@@ -160,12 +162,13 @@ export class GuideModifyComponent implements OnInit {
           this.disableStep(index);
           const stepIndex = this.stepSnapshots.findIndex(step => step.index === index);
           this.stepSnapshots.splice(stepIndex, 1);
-          // TODO controlar index -1
           this.stepsForm.controls.steps.controls[index].controls.saved.setValue(true);
           this._toast.success(
             `Se ha guardado la información sobre el paso ${index + 1}.`,
             'Información guardada'
           );
+        } else {
+          this._toast.error('Error en la operación', 'Error del servidor');
         }
       },
       error: () => {
@@ -218,7 +221,7 @@ export class GuideModifyComponent implements OnInit {
         }
       },
       error: (error) => {
-        // TODO
+        this._toast.error('Opción no registrada correctamente');
       }
     });
   }

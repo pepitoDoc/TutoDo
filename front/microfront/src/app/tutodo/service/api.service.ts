@@ -1,18 +1,21 @@
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../environment/environment';
 import {
   AddRatingRequest, DeleteGuideStepRequest, FindByFilterRequest,
-  FindByFilterResponse, Guide, InsertUserRequest, LoginUserRequest,
+  FindByFilterResponse, LoginUserRequest,
   AddCommentRequest, AddCommentResponse, DeleteCommentRequest,
-  ChangePasswordRequest,
+  ChangePasswordByEmailRequest,
   GuidePaginationResponse,
   UserPaginationResponse,
-  GuideInfo
+  GuideInfo,
+  GuideVisualizeInfo,
+  GuideModifySteps,
+  GuideModifyInfo,
+  InsertUserRequest,
+  ChangePasswordByIdRequest
 } from '../model/data';
 import { Observable, map, shareReplay } from 'rxjs';
-import { AllUserData } from '../model/user-data';
-
 @Injectable({
   providedIn: 'root'
 })
@@ -66,77 +69,42 @@ export class ApiService {
       { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
-  findGuideById$(guideId: string): Observable<Guide> {
-    return this._http.get<Guide>(`${this._guideEndpoint}/find-by-id/${guideId}`, { withCredentials: true }).pipe(
-      map(guide => this._formatGuideDates(guide)),
+  findGuideByIdVisualize$(guideId: string): Observable<GuideVisualizeInfo> {
+    return this._http.get<GuideVisualizeInfo>(`${this._guideEndpoint}/find-by-id-visualize/${guideId}`, { withCredentials: true }).pipe(
+      map(guide => { return { ...guide, comments: guide.comments.map(comment => { return { ...comment, date: new Date(comment.date) } }) } }),
       shareReplay(1));
+  }
+
+  findGuideByIdSteps$(guideId: string): Observable<GuideModifySteps> {
+    return this._http.get<GuideModifySteps>(`${this._guideEndpoint}/find-by-id-steps/${guideId}`, { withCredentials: true }).pipe(shareReplay(1));
+  }
+
+  findGuideByIdInfo$(guideId: string): Observable<GuideModifyInfo> {
+    return this._http.get<GuideModifyInfo>(`${this._guideEndpoint}/find-by-id-info/${guideId}`, { withCredentials: true }).pipe(shareReplay(1));
   }
 
   findGuideByFilter$(findByFilterRequest: FindByFilterRequest): Observable<FindByFilterResponse> {
     return this._http.post<FindByFilterResponse>(`${this._guideEndpoint}/find-by-filter`, findByFilterRequest,
-      { withCredentials: true }).pipe(
-        map(response => {
-          return {
-            ...response, guidesFound: response.guidesFound.map(guideInfo => {
-              return {
-                ...guideInfo, guide:
-                  { ...guideInfo.guide, creationDate: new Date(guideInfo.guide.creationDate) }
-              };
-            })
-          };
-        }),
-        shareReplay(1));
+      { withCredentials: true }).pipe(shareReplay(1));
   }
 
   findOwnGuides$(pageNumber?: number): Observable<GuidePaginationResponse> {
     if (pageNumber) {
       return this._http.get<GuidePaginationResponse>(`${this._guideEndpoint}/find-own-guides`,
-        { withCredentials: true, params: new HttpParams().append('pageNumber', pageNumber) }).pipe(
-          map(response => {
-            return {
-              ...response, guidesRetrieved: response.guidesRetrieved.map(guideInfo => {
-                return { ...guideInfo, creationDate: new Date(guideInfo.creationDate) };
-              })
-            };
-          }),
-          shareReplay(1));
+        { withCredentials: true, params: new HttpParams().append('pageNumber', pageNumber) }).pipe(shareReplay(1));
     } else {
       return this._http.get<GuidePaginationResponse>(`${this._guideEndpoint}/find-own-guides`,
-        { withCredentials: true }).pipe(
-          map(response => {
-            return {
-              ...response, guidesRetrieved: response.guidesRetrieved.map(guideInfo => {
-                return { ...guideInfo, creationDate: new Date(guideInfo.creationDate) };
-              })
-            };
-          }),
-          shareReplay(1));
+        { withCredentials: true }).pipe(shareReplay(1));
     }
   }
 
   findSaved$(pageNumber?: number): Observable<GuidePaginationResponse> {
     if (pageNumber) {
       return this._http.get<GuidePaginationResponse>(`${this._guideEndpoint}/find-saved`,
-        { withCredentials: true, params: new HttpParams().append('pageNumber', pageNumber) }).pipe(
-          map(response => {
-            return {
-              ...response, guidesRetrieved: response.guidesRetrieved.map(guideInfo => {
-                return { ...guideInfo, creationDate: new Date(guideInfo.creationDate) };
-              })
-            };
-          }),
-          shareReplay(1));
+        { withCredentials: true, params: new HttpParams().append('pageNumber', pageNumber) }).pipe(shareReplay(1));
     } else {
       return this._http.get<GuidePaginationResponse>(`${this._guideEndpoint}/find-saved`,
-        { withCredentials: true }).pipe(
-          map(response => {
-            return {
-              ...response, guidesRetrieved: response.guidesRetrieved.map(guideInfo => {
-                return { ...guideInfo, creationDate: new Date(guideInfo.creationDate) };
-              })
-            };
-          }),
-          shareReplay(1));
+        { withCredentials: true }).pipe(shareReplay(1));
     }
   }
 
@@ -176,12 +144,12 @@ export class ApiService {
       { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
-  findNewestGuides$(): Observable<Guide[]> {
-    return this._http.get<Guide[]>(`${this._guideEndpoint}/find-newest`, { withCredentials: true }).pipe(shareReplay(1));
+  findNewestGuides$(): Observable<GuideInfo[]> {
+    return this._http.get<GuideInfo[]>(`${this._guideEndpoint}/find-newest`, { withCredentials: true }).pipe(shareReplay(1));
   }
 
-  findNewestGuidesByPreference$(preference: string): Observable<Guide[]> {
-    return this._http.get<Guide[]>(`${this._guideEndpoint}/find-newest-by-preference`,
+  findNewestGuidesByPreference$(preference: string): Observable<GuideInfo[]> {
+    return this._http.get<GuideInfo[]>(`${this._guideEndpoint}/find-newest-by-preference`,
       { withCredentials: true, params: new HttpParams().append('preference', preference) }).pipe(shareReplay(1));
   }
 
@@ -201,27 +169,37 @@ export class ApiService {
     return this._http.patch(`${this._userEndpoint}/update-confirmed/${confirmed}`, {}, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
-  changePasswordByEmail$(payload: ChangePasswordRequest): Observable<string> {
+  changePasswordByEmail$(payload: ChangePasswordByEmailRequest): Observable<string> {
     return this._http.patch(`${this._userEndpoint}/change-password-by-email`, payload, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
-  changePasswordById$(payload: ChangePasswordRequest): Observable<string> {
+  changePasswordById$(payload: ChangePasswordByIdRequest): Observable<string> {
     return this._http.patch(`${this._userEndpoint}/change-password-by-id`, payload, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
   findUsers$(username: string, pageNumber?: number): Observable<UserPaginationResponse> {
     if (pageNumber) {
-      return this._http.get<UserPaginationResponse>(`${this._userEndpoint}/find-users/${username}`, 
+      return this._http.get<UserPaginationResponse>(`${this._userEndpoint}/find-users/${username}`,
         { withCredentials: true, params: new HttpParams().append('pageNumber', pageNumber) }).pipe(shareReplay(1));
     } else {
       return this._http.get<UserPaginationResponse>(`${this._userEndpoint}/find-users/${username}`, { withCredentials: true }).pipe(shareReplay(1));
     }
   }
 
-  private _formatGuideDates(guide: Guide): Guide {
-    guide.creationDate = new Date(guide.creationDate);
-    guide.comments = guide.comments.map(comment => { return { ...comment, formattedDate: new Date(comment.date) } });
-    return guide;
+  addCompleted$(guideId: string): Observable<string> {
+    return this._http.patch(`${this._userEndpoint}/add-completed/${guideId}`, {}, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
+  }
+
+  changeUsername$(username: string): Observable<string> {
+    return this._http.patch(`${this._userEndpoint}/change-username/${username}`, {}, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
+  }
+
+  changeEmail$(email: string): Observable<string> {
+    return this._http.patch(`${this._userEndpoint}/change-email`, { email: email }, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
+  }
+
+  changePreferences$(preferences: string[]): Observable<string> {
+    return this._http.patch(`${this._userEndpoint}/change-preferences`, { guideTypes: preferences }, { withCredentials: true, responseType: 'text' }).pipe(shareReplay(1));
   }
 
 }

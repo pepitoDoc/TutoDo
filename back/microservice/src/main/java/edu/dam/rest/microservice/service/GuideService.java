@@ -101,7 +101,7 @@ public class GuideService {
                         query(where(Constants.ID).is(saveGuideStepRequest.getGuideId())),
                         new Update().set(Constants.STEPS, queryResult.getSteps()),
                         Constants.GUIDE_COLLECTION);
-                if (result.wasAcknowledged()) {
+                if (result.wasAcknowledged() && result.getMatchedCount() > 0) {
                     return "guide_updated";
                 } else {
                     return "guide_not_found";
@@ -164,10 +164,47 @@ public class GuideService {
         }
     }
 
-    public Guide findGuide(String guideId) {
+    public GuideVisualizeInfo findGuideVisualize(String guideId, String userId) {
+        var foundGuide = this.guideRepository.findByIdAndPublished(guideId, true);
+        if (foundGuide != null) {
+            var userLogged = this.userRepository.findById(userId);
+            if (userLogged.isPresent()) {
+                var user = userLogged.orElseThrow();
+                var userRating = foundGuide.getRatings().stream()
+                        .filter(rating -> rating.getUserId().equals(userId))
+                        .limit(1)
+                        .toList();
+                return new GuideVisualizeInfo(
+                        foundGuide,
+                        foundGuide.getComments(),
+                        foundGuide.getRatings().isEmpty() ? 0 : this.ratingMean(foundGuide.getRatings()),
+                        userRating.isEmpty() ? 0 : userRating.get(0).getPunctuation(),
+                        user.getCompleted().contains(foundGuide.getId()),
+                        foundGuide.getRatings().stream().anyMatch(rating -> rating.getUserId().equals(userId)),
+                        foundGuide.getUserId().equals(userId)
+                );
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    public GuideModifySteps findGuideModifySteps(String guideId) {
         var foundGuide = this.guideRepository.findById(guideId);
         if (foundGuide.isPresent()) {
-            return foundGuide.orElseThrow();
+            return new GuideModifySteps(foundGuide.orElseThrow());
+        } else {
+            return null;
+        }
+    }
+
+    public GuideModifyInfo findGuideModifyInfo(String guideId) {
+        var foundGuide = this.guideRepository.findById(guideId);
+        if (foundGuide.isPresent()) {
+            var guide = foundGuide.orElseThrow();
+            return new GuideModifyInfo(guide, guide.getSteps().size());
         } else {
             return null;
         }
@@ -397,27 +434,22 @@ public class GuideService {
         }
     }
 
-    public List<Guide> findNewestGuides() {
-        return this.mongoTemplate.find(
+    public List<GuideInfo> findNewestGuides() {
+        var result = this.mongoTemplate.find(
                 new Query(where(Constants.PUBLISHED).is(true))
                         .with(Sort.by(Sort.Order.desc(Constants.CREATION_DATE))).limit(10),
                 Guide.class,
                 Constants.GUIDE_COLLECTION);
+        return result.stream().map(this::buildGuideInfo).toList();
     }
 
-    public List<Guide> findNewestGuidesByPreference(String preference) {
-        return this.mongoTemplate.find(
+    public List<GuideInfo> findNewestGuidesByPreference(String preference) {
+        var result = this.mongoTemplate.find(
                 new Query(where(Constants.PUBLISHED).is(true).and(Constants.GUIDE_TYPES).in(preference))
                         .with(Sort.by(Sort.Order.desc(Constants.CREATION_DATE))).limit(10),
                 Guide.class,
                 Constants.GUIDE_COLLECTION);
-//        var operations = new ArrayList<AggregationOperation>();
-//        operations.add(match(where(Constants.GUIDE_TYPES).in(preference)));
-//        operations.add(sort(Sort.by(Sort.Order.desc(Constants.CREATION_DATE))));
-//        operations.add(limit(10));
-//        var result = this.mongoTemplate.aggregate(
-//                newAggregation(operations), Constants.GUIDE_COLLECTION, Guide.class);
-//        return result.getMappedResults().stream().filter(Guide::isPublished).toList();
+        return result.stream().map(this::buildGuideInfo).toList();
     }
 
     private String encodeImageAsBase64(MultipartFile image) {

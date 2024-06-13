@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { TutodoRoutes } from '../../tutodo.routes';
 import { UserPaginationResponse } from '../../model/data';
 import { PageEvent } from '@angular/material/paginator';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'tutodo-search-user',
@@ -21,6 +22,7 @@ export class SearchUserComponent implements OnInit {
     private readonly _router: Router,
     private readonly _route: ActivatedRoute,
     private readonly _service: ApiService,
+    private readonly _toast: ToastrService
   ) { }
 
   ngOnInit(): void {
@@ -29,11 +31,17 @@ export class SearchUserComponent implements OnInit {
       this.username = username;
       this.usersFound = this._service.findUsers$(username);
     } else {
-      // TODO
+      this._toast.error('No se ha podido recibir el nombre de usuario de la búsqueda', 'Error de búsqueda');
+      this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
     }
     this._route.params.subscribe(params => {
-      this.username = params['username'];
-      this.usersFound = this._service.findUsers$(this.username);
+      if (params['username']) {
+        this.username = params['username'];
+        this.usersFound = this._service.findUsers$(this.username);
+      } else {
+        this._toast.error('No se ha podido recibir el nombre de usuario de la búsqueda', 'Error de búsqueda');
+        this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
+      }
     });
   }
 

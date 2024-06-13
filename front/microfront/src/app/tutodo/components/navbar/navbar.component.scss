@@ -4,6 +4,9 @@
   align-items: center;
   width: 100%;
   border-bottom: 1px solid gray;
+  @media(max-width: 1044px) {
+    position: sticky;
+  }
 }
 
 .navbar-brand {
@@ -30,16 +33,22 @@
 
   p {
     margin-bottom: 0px;
+    margin-right: 8px;
+  }
+
+  &.user {
+    margin-right: 90px;
   }
 
   @media(max-width: 768px) {
-    margin-left: 0px;
+    margin: 0px;
   }
 }
 
 .align-elements {
   height: fit-content;
   padding: 0px;
+  margin: 0px;
 }
 
 .align-icon {

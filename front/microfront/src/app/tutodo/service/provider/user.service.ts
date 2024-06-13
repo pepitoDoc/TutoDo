@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environment/environment';
-import { AllUserData, UserData } from '../../model/user-data';
+import { UserBasicInfo, UserData } from '../../model/user-data';
 import { Observable, shareReplay } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 
@@ -18,5 +18,10 @@ export class UserService {
 
   getUserData$(): Observable<UserData> {
     return this._httpClient.get<UserData>(`${this._userEndpoint}/get-user`, { withCredentials: true }).pipe(shareReplay(1));
-   }
+  }
+
+  getUserBasicInfo$(): Observable<UserBasicInfo> {
+    return this._httpClient.get<UserBasicInfo>(`${this._userEndpoint}/get-user-basic`, { withCredentials: true }).pipe(shareReplay(1));
+  }
+
 }

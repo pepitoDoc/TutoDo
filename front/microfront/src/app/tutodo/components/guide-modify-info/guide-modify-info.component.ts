@@ -1,6 +1,5 @@
 import { Component, NgZone, OnInit, ViewChild, inject } from '@angular/core';
 import { NonNullableFormBuilder, FormBuilder, Validators } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../service/api.service';
@@ -10,8 +9,9 @@ import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { ENTER, COMMA } from '@angular/cdk/keycodes';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MatChipEditedEvent, MatChipGrid, MatChipInputEvent } from '@angular/material/chips';
-import { Guide, SaveGuideInfoRequest, GuideInfoSnapshot } from '../../model/data';
+import { SaveGuideInfoRequest, GuideInfoSnapshot, GuideModifyInfo } from '../../model/data';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { TutodoRoutes } from '../../tutodo.routes';
 
 @Component({
   selector: 'tutodo-guide-modify-info',
@@ -40,7 +40,7 @@ export class GuideModifyInfoComponent implements OnInit {
   guideThumbnailFile!: File | null;
   guideThumbnailLoaded!: string | ArrayBuffer | null;
   guideInfoSnapshot!: GuideInfoSnapshot; 
-  restoredGuide!: Guide;
+  restoredGuide!: GuideModifyInfo;
   isPublished = false;
   isModifyGuideInfo = false;
   ingredientsFlag = false;
@@ -52,7 +52,6 @@ export class GuideModifyInfoComponent implements OnInit {
     private readonly _service: ApiService,
     private readonly _router: Router,
     private readonly _route: ActivatedRoute,
-    private readonly _dialog: MatDialog,
     private readonly _sharedService: SharedService,
     private readonly _toast: ToastrService
   ) { }
@@ -71,10 +70,9 @@ export class GuideModifyInfoComponent implements OnInit {
           this._router.navigate([`../`], { relativeTo: this._route });
         } else {
           this.guideId = response.guideIdModifying;
-          this._service.findGuideById$(this.guideId).subscribe((response) => {
+          this._service.findGuideByIdInfo$(this.guideId).subscribe((response) => {
             this.restoredGuide = response;
-            this.isPublished = this.restoredGuide.steps.length >= 5 
-              ? this.restoredGuide.published : false;
+            this.isPublished = this.restoredGuide.published;
             this.guideInfo.setValue({
               title: this.restoredGuide.title,
               description: this.restoredGuide.description,
@@ -101,7 +99,8 @@ export class GuideModifyInfoComponent implements OnInit {
           );
       },
       error: (error) => {
-        // TODO
+        this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+        this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
       }
     });
   }

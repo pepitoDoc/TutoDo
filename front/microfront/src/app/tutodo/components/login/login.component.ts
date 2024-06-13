@@ -1,10 +1,10 @@
 import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import { ApiService } from '../../service/api.service';
 import { InsertUserRequest, LoginUserRequest } from '../../model/data';
-import { FormBuilder, FormGroup, NonNullableFormBuilder, PatternValidator, Validators } from '@angular/forms';
-import { ActivatedRoute, Route, Router } from '@angular/router';
+import { NonNullableFormBuilder, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TutodoRoutes } from '../../tutodo.routes';
-import { Observable, map, switchMap } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
@@ -67,10 +67,9 @@ export class LoginComponent implements OnInit {
           );
       },
       error: (error) => {
-        // TODO
+        this._toast.error('El servidor no se encuentra disponible', 'Error del servidor');
       }
     });
-    // TODO dialog para ver si hay iniciada sesión
   }
 
   login(): void {

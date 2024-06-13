@@ -36,7 +36,7 @@ public class Sender {
      * @param to      recipient email address
      * @param subject email subject
      * @param content email content in html format
-     * @return a {@link boolean} indicating if the email was sent or not.
+     * @return a boolean indicating if the email was sent or not.
      */
     public boolean send(String from, String to, String subject, String content) {
         // Get the Session object.// and pass username and password
@@ -76,7 +76,7 @@ public class Sender {
                         credentialProp.getProperty(Constants.MAIL_PASSWORD));
             }
         });
-        session.setDebug(true);
+        session.setDebug(false);
         return session;
     }
 

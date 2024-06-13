@@ -5,8 +5,4 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface GuideTypeRepository extends MongoRepository<GuideType, String> {
 
-    GuideType findByType(String type);
-
-    boolean existsByType(String type);
-
 }

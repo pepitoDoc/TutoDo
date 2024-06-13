@@ -1,1 +1,159 @@
-<p>user-modify-info works!</p>
+<div class="page">
+    @if(userData) {
+    <div class="align-flex-column mt-4">
+        <div class="title">
+            <h1>Información sobre el usuario</h1>
+        </div>
+        <div class="white-card">
+            @if(!showModify) {
+            <div class="user-info">
+                <div class="user-control">
+                    <p><strong>Nombre de usuario: </strong>{{ userData.username }}</p>
+                    <button mat-flat-button color="primary" (click)="modifyInfo(0)">Modificar nombre</button>
+                </div>
+                <div class="user-control">
+                    <p><strong>Correo electrónico: </strong>{{ userData.email }}</p>
+                    <button mat-flat-button color="primary" (click)="modifyInfo(1)">Modificar correo</button>
+                </div>
+                <div class="user-control">
+                    <p><strong>Contraseña: </strong>********</p>
+                    <button mat-flat-button color="primary" (click)="modifyInfo(2)">Modificar contraseña</button>
+                </div>
+                <div class="user-control">
+                    <p><strong>Preferencias de guía: </strong>{{ listToString(userData.preferences) | titlecase }}</p>
+                    <button mat-flat-button color="primary" (click)="modifyInfo(3)">Modificar preferencias</button>
+                </div>
+            </div>
+            }
+            @else {
+            <div class="user-modify">
+                @if(dataModifying[0]) {
+                <h2>Cambiar nombre de usuario</h2>
+                <form [formGroup]="usernameInfo">
+                    <mat-form-field class="example-full-width" appareance="fill">
+                        <mat-label>Nombre de usuario</mat-label>
+                        <input type="text" [maxLength]="100" matInput formControlName="username"
+                            placeholder="AntonioTuto">
+                        <mat-error *ngIf="usernameInfo.controls.username.hasError('required')">
+                            <strong>Se requiere el nombre de usuario</strong>
+                        </mat-error>
+                    </mat-form-field>
+                </form>
+                }
+                @else if(dataModifying[1]) {
+                <h2>Cambiar correo electrónico</h2>
+                <form [formGroup]="emailInfo">
+                    <mat-form-field class="example-full-width" appareance="fill">
+                        <mat-label>Correo electrónico</mat-label>
+                        <input type="email" [minLength]="8" [maxLength]="100" matInput formControlName="email"
+                            placeholder="ejemplo@gmail.com">
+                        <mat-error *ngIf="emailInfo.controls.email.hasError('required')">
+                            <strong>Se requiere el correo electrónico</strong>
+                        </mat-error>
+                        <mat-error *ngIf="emailInfo.controls.email.hasError('pattern')">
+                            <strong>Debe cumplir el formato de correo electrónico</strong>
+                        </mat-error>
+                    </mat-form-field>
+                </form>
+                }
+                @else if(dataModifying[2]) {
+                <h2>Cambiar contraseña</h2>
+                <form [formGroup]="passwordInfo">
+                    <mat-form-field class="example-full-width" appareance="fill">
+                        <mat-label>Contraseña actual</mat-label>
+                        <input type="password" [minLength]="8" [maxLength]="256" matInput formControlName="oldPassword"
+                            placeholder="Contraseña actual" [type]="hidePassword[0] ? 'password' : 'text'">
+                        <button mat-icon-button matSuffix (click)="hidePassword[0] = !hidePassword[0]"
+                            [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePassword[0]">
+                            <mat-icon>{{ hidePassword[0] ? 'visibility_off' : 'visibility' }}</mat-icon>
+                        </button>
+                        <mat-error *ngIf="passwordInfo.controls.oldPassword.hasError('required')">
+                            <strong>Se requiere la contraseña</strong>
+                        </mat-error>
+                    </mat-form-field>
+                    <mat-form-field class="example-full-width" appareance="fill">
+                        <mat-label>Nueva contraseña</mat-label>
+                        <input type="password" #passwordRegister matInput [maxLength]="256"
+                            formControlName="newPassword" placeholder="Contraseña"
+                            [type]="hidePassword[1] ? 'password' : 'text'">
+                        <button mat-icon-button matSuffix (click)="hidePassword[1] = !hidePassword[1]"
+                            [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePassword[1]">
+                            <mat-icon>{{ hidePassword[1] ? 'visibility_off' : 'visibility' }}</mat-icon>
+                        </button>
+                        @if(passwordRegister.value === '') {
+                        <mat-hint align="start">La contraseña debe contener al menos 8 caracteres, incluyendo una letra
+                            mayuscula, una letra minúscula y un número</mat-hint>
+                        }
+                        <mat-error *ngIf="passwordInfo.controls.newPassword.hasError('required')">
+                            <strong>Se requiere la contraseña</strong>
+                        </mat-error>
+                        <mat-error *ngIf="passwordInfo.controls.newPassword.hasError('pattern')">
+                            <strong>La contraseña debe contener al menos 8 caracteres, incluyendo una letra mayuscula,
+                                una letra minúscula y un número</strong>
+                        </mat-error>
+                    </mat-form-field>
+                    <mat-form-field class="example-full-width" appareance="fill">
+                        <mat-label>Confirmar contraseña</mat-label>
+                        <input type="password" [minLength]="8" [maxLength]="256" matInput
+                            formControlName="newPasswordConfirm" placeholder="Contraseña"
+                            [type]="hidePassword[2] ? 'password' : 'text'">
+                        <button mat-icon-button matSuffix (click)="hidePassword[2] = !hidePassword[2]"
+                            [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePassword[2]">
+                            <mat-icon>{{ hidePassword[2] ? 'visibility_off' : 'visibility' }}</mat-icon>
+                        </button>
+                        <mat-error *ngIf="passwordInfo.controls.newPasswordConfirm.hasError('required')">
+                            <strong>Se requiere la contraseña</strong>
+                        </mat-error>
+                    </mat-form-field>
+                </form>
+                }
+                @else if(dataModifying[3]) {
+                <h2>Cambiar preferencias de guías</h2>
+                <form [formGroup]="preferencesInfo">
+                    <mat-form-field class="example-chip-list">
+                        <mat-label>Guías afines</mat-label>
+                        <mat-chip-grid #chipGrid1 aria-label="Guide types">
+                            @for (guideType of chosenTypes; track guideType) {
+                            <mat-chip-row #chipRow1 (removed)="removeType(guideType)">
+                                {{guideType}}
+                                <button matChipRemove [attr.aria-label]="'remove ' + guideType">
+                                    <mat-icon>cancel</mat-icon>
+                                </button>
+                            </mat-chip-row>
+                            }
+                        </mat-chip-grid>
+                        <input placeholder="Introduzca los tipos de guía" #guideTypeInput formControlName="guideTypes"
+                            [matChipInputFor]="chipGrid1" [matAutocomplete]="auto" />
+                        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectedType($event)">
+                            @for (guideType of filteredTypes | async; track guideType) {
+                            <mat-option [value]="guideType"
+                                *ngIf="!chosenTypes.includes(guideType | titlecase)">{{guideType | titlecase}}</mat-option>
+                            }
+                        </mat-autocomplete>
+                    </mat-form-field>
+                </form>
+                }
+                <div class="align-flex-row options">
+                    <button type="button" mat-flat-button class="button-space" color="warn" (click)="showInfo()">Cancelar cambios</button>
+                    @if(dataModifying[0]) {
+                    <button type="button" mat-flat-button class="button-space" color="primary" [disabled]="!usernameInfo.valid" (click)="changeUsername()">Cambiar nombre</button>
+                    }
+                    @else if(dataModifying[1]) {
+                    <button type="button" mat-flat-button class="button-space" color="primary" [disabled]="!emailInfo.valid" (click)="changeEmail()">Cambiar correo electrónico</button>
+                    }
+                    @else if(dataModifying[2]) {
+                    <button type="button" mat-flat-button class="button-space" color="primary" [disabled]="!passwordInfo.valid" (click)="changePassword()">Cambiar contraseña</button>
+                    }
+                    @else if(dataModifying[3]) {
+                    <button type="button" mat-flat-button class="button-space" color="primary" (click)="changePreferences()">Cambiar preferencias</button>
+                    }
+                </div>
+                @if(modifyMessage != '') {
+                    <mat-error class="align-flex-row options"><strong>{{ modifyMessage }}</strong></mat-error>
+                }
+            </div>
+            }
+        </div>
+    </div>
+    }
+</div>

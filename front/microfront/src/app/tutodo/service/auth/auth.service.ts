@@ -2,7 +2,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router, MaybeAsync, GuardResult } from '@angular/router';
-import { tap, Observable, shareReplay, switchMap, of, catchError } from 'rxjs';
+import { Observable, shareReplay, switchMap, of, catchError } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../environment/environment';
 import { TutodoRoutes } from '../../tutodo.routes';

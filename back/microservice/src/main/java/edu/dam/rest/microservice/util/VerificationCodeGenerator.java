@@ -36,7 +36,6 @@ public class VerificationCodeGenerator {
      * @return - String - La clave
      */
     public String generateVerificationCode() {
-
         return this.random.ints(0, CHARACTERS.length())
                 .mapToObj(CHARACTERS::charAt)
                 .distinct()

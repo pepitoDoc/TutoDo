@@ -1,4 +1,4 @@
-.loginInputs {
+.login-inputs {
   width: 100%;
   height: fit-content;
   background-color: #eff8fc;
@@ -6,7 +6,7 @@
   border: 1px solid black;
 }
 
-.columnContent {
+.column-content {
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -27,7 +27,7 @@ h2, h3, mat-label, p {
   text-align: center;
 }
 
-.rowAlign {
+.row-align {
   display: flex;
   justify-content: center;
   flex-direction: row;
@@ -39,7 +39,7 @@ mat-form-field {
   margin: 10px 5px;
 }
 
-.buttonSpace {
+.button-space {
   margin-top: 10px;
   margin-bottom: 20px;
 }
@@ -49,14 +49,13 @@ img {
   margin: 0px 0px;
   width: 100%;
   height: 100%;
-  @media(max-width: 768px) {
-    width: 100%;
-    height: 100%;
-  }
 }
 
-.pageLogo {
+.page-logo {
   display: flex;
   justify-content: center;
   align-items: center;
+  @media(max-width: 1024px) {
+    display: none;
+  }
 }

@@ -4,12 +4,12 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../service/api.service';
 import { SharedService } from '../../shared/shared.service';
-import { Guide, GuidePaginationResponse, Rating } from '../../model/data';
+import { GuidePaginationResponse, Rating } from '../../model/data';
 import { PageEvent } from '@angular/material/paginator';
 import { Observable } from 'rxjs';
 import { TutodoRoutes } from '../../tutodo.routes';
 import { OptionDialogComponent } from '../option-dialog/option-dialog.component';
-import { AllUserData, UserData } from '../../model/user-data';
+import { UserData } from '../../model/user-data';
 
 @Component({
   selector: 'tutodo-saved-guides',
@@ -34,6 +34,10 @@ export class SavedGuidesComponent {
   ngOnInit(): void {
     this.guidesFound = this._service.findSaved$();
     this.userData = this._route.snapshot.data['userData'];
+    if (!this.userData) {
+      this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+      this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
+    }
   }
 
   visualizeGuide(guideId: string): void {
@@ -46,7 +50,8 @@ export class SavedGuidesComponent {
         this._router.navigate([`../${TutodoRoutes.MODIFY}`], { relativeTo: this._route });
       },
       error: (error) => {
-        // TODO
+        this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+        this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
       }
     });
   }
@@ -57,7 +62,8 @@ export class SavedGuidesComponent {
         this._router.navigate([`../${TutodoRoutes.MODIFY_INFO}`], { relativeTo: this._route });
       },
       error: (error) => {
-        // TODO
+        this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+        this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
       }
     });
   }
@@ -76,20 +82,20 @@ export class SavedGuidesComponent {
             next: (response) => {
               if (response === 'operation_successful') {
                 this.guidesFound = this._service.findSaved$(this.currentPage);
-                // this.guidesFound = this.guidesFound.filter(guide => guide.id !== guideId);
                 this._toast.success('Guía borrada correctamente', 'Operación exitosa')
               } else {
-                // TODO
+                this._toast.error('Error en la operación', 'Error del servidor');
               }
             },
             error: (error) => {
-              // TODO
+              this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+              this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
             }
-          })
+          });
         }
       },
       error: (error) => {
-        // TODO
+        this._toast.error('Opción no registrada correctamente');
       }
     })
   }
@@ -126,11 +132,12 @@ export class SavedGuidesComponent {
           this._toast.success('Guía añadida a guardados');
           this.userData.saved.push(guideId);
         } else {
-          // TODO
+          this._toast.error('Error en la operación', 'Error del servidor');
         }
       },
       error: (error) => {
-        // TODO
+        this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+        this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
       }
     });
   }
@@ -141,10 +148,13 @@ export class SavedGuidesComponent {
         if (response === 'operation_successful') {
           this._toast.success('Guía eliminada de guardados');
           this.userData.saved = this.userData.saved.filter(guide => guide !== guideId);
+        } else {
+          this._toast.error('Error en la operación', 'Error del servidor');
         }
       },
       error: (error) => {
-        // TODO
+        this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+        this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
       }
     });
   }

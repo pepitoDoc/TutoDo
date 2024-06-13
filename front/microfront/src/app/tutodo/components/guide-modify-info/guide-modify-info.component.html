@@ -74,10 +74,10 @@
                         *ngIf="isModifyGuideInfo" (click)="deleteImage()">Eliminar imagen</button>
                     <img [src]="restoredGuide.thumbnail ? 'data:image/jpeg;base64,' + restoredGuide.thumbnail : guideThumbnailLoaded">
                 </div>
-                <mat-slide-toggle class="white-card-check mx-2" [checked]="isPublished" (change)="changePublished()"
-                    [disabled]="this.restoredGuide.steps.length < 5">
-                    Estado de la guía: {{ isPublished ? 'publicado' : 'no publicado' }}</mat-slide-toggle>
-                <p *ngIf="this.restoredGuide.steps.length < 5">La guía debe tener 5 o más pasos para ser publicada</p>
+                <mat-slide-toggle class="mt-4 mb-4 mx-2" [checked]="isPublished" (change)="changePublished()"
+                    [disabled]="this.restoredGuide.amountSteps < 5">
+                    <strong>Estado de la guía: {{ isPublished ? 'publicado' : 'no publicado' }}</strong></mat-slide-toggle>
+                <p *ngIf="this.restoredGuide.amountSteps < 5">La guía debe tener 5 o más pasos para ser publicada</p>
             </form>
             <div *ngIf="!isModifyGuideInfo" class="guide-info">
                 <p><strong>Título: </strong>{{ guideInfo.controls.title.getRawValue() }}</p>

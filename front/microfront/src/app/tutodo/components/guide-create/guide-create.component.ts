@@ -65,7 +65,6 @@ export class GuideCreateComponent implements OnInit {
   ngOnInit(): void {
     this._service.findAllGuideTypes$().subscribe({
       next: (response) => {
-        // TODO tipos empty
         this.guideTypes = response;
         this.filteredTypes =
           this.guideInfo.controls.guideTypes.valueChanges.pipe(
@@ -77,7 +76,8 @@ export class GuideCreateComponent implements OnInit {
           );
       },
       error: (error) => {
-        // TODO
+        this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+        this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
       }
     });
   }
@@ -171,15 +171,17 @@ export class GuideCreateComponent implements OnInit {
               });
             },
             error: (error) => {
-              // TODO
+              this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+              this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
             }
           });
         } else {
-          // TODO
+          this._toast.error('Error en la operación', 'Error del servidor');
         }
       },
       error: (err) => {
-        // TODO
+        this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+        this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
       },
     });
   }

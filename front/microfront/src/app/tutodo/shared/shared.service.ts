@@ -1,8 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, ReplaySubject, Subject, shareReplay } from 'rxjs';
+import { Observable, ReplaySubject, shareReplay } from 'rxjs';
 import { environment } from '../environment/environment';
-import { SharedData } from '../model/data';
 
 @Injectable({
   providedIn: 'root'

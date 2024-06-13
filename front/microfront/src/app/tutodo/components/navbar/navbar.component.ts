@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { SharedService } from '../../shared/shared.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TutodoRoutes } from '../../tutodo.routes';
 import { ApiService } from '../../service/api.service';
@@ -20,7 +19,6 @@ export class NavbarComponent {
   });
 
   constructor(
-    private readonly _shared: SharedService,
     private readonly _service: ApiService,
     private readonly _route: ActivatedRoute,
     private readonly _router: Router,
@@ -37,9 +35,9 @@ export class NavbarComponent {
         this._router.navigate([`/${TutodoRoutes.LOGIN}`]);
       },
       error: (error) => {
-        // TODO
+        this._toast.error('Error en la operación', 'Error del servidor');
       }
-    })
+    });
   }
 
   searchUser(): void {

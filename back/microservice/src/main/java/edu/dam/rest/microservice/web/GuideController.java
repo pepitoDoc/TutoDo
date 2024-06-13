@@ -3,7 +3,6 @@ package edu.dam.rest.microservice.web;
 import edu.dam.rest.microservice.bean.guide.*;
 import edu.dam.rest.microservice.bean.user.UserSession;
 import edu.dam.rest.microservice.constants.ApiConstants;
-import edu.dam.rest.microservice.persistence.model.Guide;
 import edu.dam.rest.microservice.service.GuideService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.websocket.server.PathParam;
@@ -74,13 +73,32 @@ public class GuideController {
                 .body(result);
     }
 
-    @GetMapping("find-by-id/{guideId}")
-    public ResponseEntity<Guide> findGuide(@PathVariable("guideId") String guideId) {
-        var guideFound = this.guideService.findGuide(guideId);
+    @GetMapping("find-by-id-visualize/{guideId}")
+    public ResponseEntity<GuideVisualizeInfo> findGuideVisualize(
+            @PathVariable("guideId") String guideId, HttpSession httpSession) {
+        var userLogged = (UserSession) httpSession.getAttribute("user");
+        var guideFound = this.guideService.findGuideVisualize(guideId, userLogged.getId());
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(guideFound);
-        // TODO controlar null en front
+    }
+
+    @GetMapping("find-by-id-steps/{guideId}")
+    public ResponseEntity<GuideModifySteps> findGuideModifySteps(
+            @PathVariable("guideId") String guideId) {
+        var guideFound = this.guideService.findGuideModifySteps(guideId);
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(guideFound);
+    }
+
+    @GetMapping("find-by-id-info/{guideId}")
+    public ResponseEntity<GuideModifyInfo> findGuideModifyInfo(
+            @PathVariable("guideId") String guideId) {
+        var guideFound = this.guideService.findGuideModifyInfo(guideId);
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(guideFound);
     }
 
     @GetMapping("find-published-by-id")
@@ -154,13 +172,13 @@ public class GuideController {
     }
 
     @GetMapping("find-newest")
-    public ResponseEntity<List<Guide>> findNewest() {
+    public ResponseEntity<List<GuideInfo>> findNewest() {
         var result = this.guideService.findNewestGuides();
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(result);
     }
 
     @GetMapping("find-newest-by-preference")
-    public ResponseEntity<List<Guide>> findNewestByPreference(@RequestParam("preference") String preference) {
+    public ResponseEntity<List<GuideInfo>> findNewestByPreference(@RequestParam("preference") String preference) {
         var result = this.guideService.findNewestGuidesByPreference(preference);
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(result);
     }

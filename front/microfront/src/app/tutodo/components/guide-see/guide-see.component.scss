@@ -14,10 +14,20 @@
   flex-direction: row;
   height: 100%;
   width: 100%;
-}
 
+  &.options {
+    @media(max-width: 767px) {
+      flex-direction: column;
+    }
+  }
+}
 .info-spacing {
   margin: 50px 0px;
+  width: 50%;
+
+  @media(max-width: 1440px) {
+    width: 95%;
+  }
 }
 
 .bottom-controls {
@@ -32,7 +42,6 @@
   /* Chrome 10-25, Safari 5.1-6 */
   background: linear-gradient(to right, #f64f59, #c471ed, #12c2e9);
   /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-  width: fit-content;
   height: fit-content;
   border-radius: 25px;
 }
@@ -51,6 +60,11 @@
 
 .title-content {
   flex-direction: column;
+
+  h1 {
+    text-decoration: underline;
+  }
+
 }
 
 .guide-container {
@@ -61,8 +75,8 @@
   align-items: center;
   padding-bottom: 40px;
 
-  @media(max-width: 768px) {
-    width: 95%;
+  @media(max-width: 1440px) {
+    width: 100%;
   }
 }
 
@@ -100,6 +114,9 @@
   background: linear-gradient(to right, #f64f59, #c471ed, #12c2e9);
   transition: width 500ms;
   width: 75%;
+  @media(max-width: 1044px) {
+    width: 85%;
+  }
 }
 
 .step-completed:hover {
@@ -111,20 +128,21 @@
   background: linear-gradient(to right, #f64f59, #c471ed, #12c2e9);
   transition: width 500ms;
   width: 90%;
+  @media(max-width: 1044px) {
+    width: 95%;
+  }
 }
 
 .step-uncompleted {
-  transition: background 500ms;
+  filter: blur(3px);
+  -webkit-filter: blur(3px);
   background: rgb(179, 179, 179);
-  transition: width 500ms;
   width: 75%;
-}
 
-.step-uncompleted:hover {
-  transition: background 500ms;
-  background: rgb(219, 219, 219);
-  transition: width 500ms;
-  width: 90%;
+  img {
+    filter: blur(10px);
+    -webkit-filter: blur(10px);
+  }
 }
 
 .button-space {
@@ -133,17 +151,7 @@
 
 mat-progress-bar {
   position: fixed;
-}
-
-.options {
-  margin-top: 20px;
-  display: none;
-  visibility: collapse;
-
-  @media(max-width: 768px) {
-    display: inherit;
-    visibility: visible;
-  }
+  width: 100%;
 }
 
 h1,
@@ -153,6 +161,56 @@ h4 {
   width: auto;
   text-align: center;
   word-break: break-word;
+}
+
+h2,
+h3,
+mat-label,
+p,
+h4,
+input {
+  font-size: 20px;
+
+  @media (max-width: 1044px) {
+    font-size: 14px;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 12px;
+  }
+}
+
+h1 {
+  font-size: 24px;
+
+  @media (max-width: 1044px) {
+    font-size: 16px;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 14px;
+  }
+}
+
+mat-hint {
+  font-size: 14px;
+
+  @media (max-width: 768px) {
+    font-size: 10px;
+  }
+}
+
+button {
+  font-size: 20px;
+
+  @media (max-width: 1000px) {
+    font-size: 16px;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 11px;
+    word-break: break-word;
+  }
 }
 
 img {
@@ -170,6 +228,11 @@ img {
 .rating {
   margin-top: 50px;
   margin-bottom: 50px;
+  background: #ffc371;
+  border-radius: 20px;
+  border: 1px solid rgba(128, 128, 128, 0.5);
+  width: fit-content;
+  padding: 0px 10px;
 }
 
 .comments {
@@ -191,8 +254,13 @@ img {
       margin: 10px 5px;
 
       @media (max-width: 768px) {
-        margin: 0px 0px;
+        margin: 10px 0px;
       }
+    }
+
+    @media (max-width: 1044px) {
+      margin: 10px 0px;
+      width: 100%;
     }
   }
 
@@ -200,10 +268,21 @@ img {
     padding-left: 10px;
     width: fit-content;
     text-align: start;
+  }
 
-    mat-button-toggle-group {
-      margin-left: 20px;
-      border-radius: 10px;
+  mat-button-toggle-group {
+    margin-left: 20px;
+    border-radius: 10px;
+
+    @media (max-width: 768px) {
+      margin: 10px 0px;
+      width: 100%;
+    }
+
+    mat-button-toggle {
+      @media (max-width: 1044px) {
+        font-size: 14px;
+      }
     }
 
   }
@@ -236,10 +315,16 @@ img {
 
 
 
-.buttonDiv {
+.button-div {
   padding: 0 21px;
   border-radius: 30px 0 0 30px;
   font-size: 14px;
+  border: 1px solid rgba(128, 128, 128, 0.1);
+  word-break: break-word;
+
+  @media(max-width: 1044px) {
+    font-size: 10px;
+  }
 }
 
 .fixed {
@@ -249,12 +334,17 @@ img {
   width: 12%;
   z-index: 999;
 
+  @media(max-width: 1044px) {
+    top: 30vh;
+    width: 10%;
+  }
+
   @media(max-width: 768px) {
     visibility: hidden;
   }
 }
 
-.sideButton {
+.side-button {
   display: block;
   border: 0;
   line-height: 3;
@@ -267,16 +357,16 @@ img {
   border-radius: 20px 0 0 20px;
 }
 
-.sideAction {
+.side-action {
   margin-left: 20px;
 }
 
-.sideHelp {
+.side-help {
   margin-top: 30px;
   margin-left: 50px;
 }
 
-.buttonDiv:hover {
+.button-div:hover {
   background: white;
   transition: margin 500ms;
   margin-left: -20px;

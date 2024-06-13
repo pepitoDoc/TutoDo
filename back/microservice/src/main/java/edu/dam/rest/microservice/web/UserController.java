@@ -1,9 +1,9 @@
 package edu.dam.rest.microservice.web;
 
+import edu.dam.rest.microservice.bean.guideType.GuideTypes;
 import edu.dam.rest.microservice.bean.user.*;
 import edu.dam.rest.microservice.constants.ApiConstants;
 import edu.dam.rest.microservice.constants.Constants;
-import edu.dam.rest.microservice.persistence.model.User;
 import edu.dam.rest.microservice.service.UserService;
 import edu.dam.rest.microservice.util.VerificationCodeGenerator;
 import jakarta.servlet.http.HttpSession;
@@ -13,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -76,11 +75,23 @@ public class UserController {
     }
 
     @GetMapping("get-user")
-    public ResponseEntity<User> getUser(HttpSession httpSession) {
+    public ResponseEntity<UserData> getUser(HttpSession httpSession) {
         var userLogged = (UserSession) httpSession.getAttribute("user");
         var userInfo = this.userService.findById(userLogged.getId());
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON).body(userInfo);
+    }
+
+    @GetMapping("get-user-basic")
+    public ResponseEntity<UserBasicInfo> getUserBasic(HttpSession httpSession) {
+        var userLogged = (UserSession) httpSession.getAttribute("user");
+        var userBasicInfo = UserBasicInfo.builder()
+                .username(userLogged.getUsername())
+                .email(userLogged.getEmail())
+                .preferences(userLogged.getPreferences())
+                .build();
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON).body(userBasicInfo);
     }
 
     @PatchMapping("add-saved/{guideId}")
@@ -142,16 +153,23 @@ public class UserController {
 
     @PatchMapping("change-password-by-email")
     public ResponseEntity<String> changePasswordByEmail(
-            @RequestBody ChangePasswordRequest changePasswordRequest) {
-        var result = this.userService.changePasswordByEmail(changePasswordRequest);
+            @RequestBody ChangePasswordByEmailRequest changePasswordByEmailRequest) {
+        var result = this.userService.changePasswordByEmail(changePasswordByEmailRequest);
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(result);
     }
 
     @PatchMapping("change-password-by-id")
     public ResponseEntity<String> changePasswordById(
-            @RequestBody ChangePasswordRequest changePasswordRequest, HttpSession httpSession) {
+            @RequestBody ChangePasswordByIdRequest changePasswordByIdRequest, HttpSession httpSession) {
         var userLogged = (UserSession) httpSession.getAttribute("user");
-        var result = this.userService.changePasswordById(userLogged.getId(), changePasswordRequest.getNewPassword());
+        var result = this.userService.changePasswordById(
+                userLogged.getId(),
+                changePasswordByIdRequest.getOldPassword(),
+                changePasswordByIdRequest.getNewPassword());
+        if (result.equals("operation_successful")) {
+            userLogged.setPassword(changePasswordByIdRequest.getNewPassword());
+            httpSession.setAttribute("user", userLogged);
+        }
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(result);
     }
 
@@ -160,6 +178,49 @@ public class UserController {
             @PathVariable("username") String username, @RequestParam(required = false) Integer pageNumber) {
         var result = this.userService.findAllByUsername(username, pageNumber);
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(result);
+    }
+
+    @PatchMapping("add-completed/{guideId}")
+    public ResponseEntity<String> addCompleted(
+            @PathVariable("guideId") String guideId, HttpSession httpSession) {
+        var userLogged = (UserSession) httpSession.getAttribute("user");
+        var result = this.userService.addCompleted(guideId, userLogged.getId());
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(result);
+    }
+
+    @PatchMapping("change-username/{username}")
+    public ResponseEntity<String> changeUsername(
+            @PathVariable("username") String username, HttpSession httpSession) {
+        var userLogged = (UserSession) httpSession.getAttribute("user");
+        var result = this.userService.changeUsername(username, userLogged.getId());
+        if (result.equals("operation_successful")) {
+            userLogged.setUsername(username);
+            httpSession.setAttribute("user", userLogged);
+        }
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(result);
+    }
+
+    @PatchMapping("change-email")
+    public ResponseEntity<String> changeEmail(
+            @RequestBody EmailRequest emailRequest, HttpSession httpSession) {
+        var userLogged = (UserSession) httpSession.getAttribute("user");
+        var result = this.userService.changeEmail(emailRequest.getEmail(), userLogged.getId());
+        if (result.equals("operation_successful")) {
+            userLogged.setEmail(emailRequest.getEmail());
+            httpSession.setAttribute("user", userLogged);
+        }
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(result);
+    }
+
+    @PatchMapping("change-preferences")
+    public ResponseEntity<String> changePreferences(@RequestBody GuideTypes guideTypes, HttpSession httpSession) {
+        var userLogged = (UserSession) httpSession.getAttribute("user");
+        var result = this.userService.changeUserPreferences(guideTypes.getGuideTypes(), userLogged.getId());
+        if (result.equals("operation_successful")) {
+            userLogged.setPreferences(guideTypes.getGuideTypes());
+            httpSession.setAttribute("user", userLogged);
+        }
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(result);
     }
 
 }

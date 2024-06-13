@@ -1,31 +1,32 @@
-import { AfterViewInit, ChangeDetectorRef, Component, NgZone, OnInit, ViewChild } from '@angular/core';
-import { Validators, FormBuilder, NonNullableFormBuilder } from '@angular/forms';
+import { Component, NgZone, OnInit, ViewChild } from '@angular/core';
+import { Validators, NonNullableFormBuilder } from '@angular/forms';
 import { ApiService } from '../../service/api.service';
 import { SharedService } from '../../shared/shared.service';
 import { MatDialog } from '@angular/material/dialog';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { AddCommentRequest, AddRatingRequest, DeleteCommentRequest, Guide } from '../../model/data';
+import { AddCommentRequest, AddRatingRequest, DeleteCommentRequest, GuideVisualizeInfo } from '../../model/data';
 import { take } from 'rxjs';
 import { UserData } from '../../model/user-data';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { OptionDialogComponent } from '../option-dialog/option-dialog.component';
+import { TutodoRoutes } from '../../tutodo.routes';
 
 @Component({
   selector: 'tutodo-guide-see',
   templateUrl: './guide-see.component.html',
   styleUrl: './guide-see.component.scss'
 })
-export class GuideSeeComponent implements OnInit, AfterViewInit {
+export class GuideSeeComponent implements OnInit {
 
-  guideWatching!: Guide;
+  guideWatching!: GuideVisualizeInfo;
   currentStep = 0;
   ratings: { description: string, punctuation: number }[] = [{ description: '1 (Mala)', punctuation: 1 }, { description: '2 (Mejorable)', punctuation: 2 },
     { description: '3 (Bueno)', punctuation: 3 }, { description: '4 (Superior)', punctuation: 4 }, { description: '5 (Excelente)', punctuation: 5 }];
   comment = this._nnfb.group({
     text: ['', [Validators.required, Validators.minLength(50), Validators.maxLength(500)]]
   });
-  userPunctuation!: number;
+  userRating!: number;
   userData!: UserData;
 
   @ViewChild('autosize') autosize!: CdkTextareaAutosize;
@@ -38,37 +39,31 @@ export class GuideSeeComponent implements OnInit, AfterViewInit {
     private readonly _service: ApiService,
     private readonly _shared: SharedService,
     private readonly _toast: ToastrService,
-    private _ngZone: NgZone, // TODO DIRECTIVA CAMBIO CLASE
-    private _cdr: ChangeDetectorRef
+    private _ngZone: NgZone
   ) {
     this.userData = this._route.snapshot.data['userData'];
-  }
-
-  ngAfterViewInit(): void {
   }
 
   ngOnInit(): void {
     const guideId = this._route.snapshot.paramMap.get('id');
     if (guideId !== null) {
-      this._service.findGuideById$(guideId).subscribe({
+      this._service.findGuideByIdVisualize$(guideId).subscribe({
         next: (response) => {
           if (response !== null && response !== undefined) {
             this.guideWatching = response;
-            this.findUserRating();
-            this.orderCommentsByNew();
-            if (this.findGuideOwnership()) {
-              // TODO deshabilitar estrellitas
-              this.comment.disable();
-            }
+            if (this.guideWatching.ownership) this.comment.disable();
+            if (this.guideWatching.completed) this.currentStep = this.guideWatching.steps.length;
+            this.userRating = this.guideWatching.userRating;
           }
         },
         error: (error) => {
-          // TODO
+          this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+          this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
         }
       })
     } else {
       this._toast.info('No se ha podido encontrar la guía seleccionada.', 'No se ha podido acceder a la página');
-      this._router.navigate([`../`], { relativeTo: this._route });
+      this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
     }
   }
 
@@ -76,8 +71,21 @@ export class GuideSeeComponent implements OnInit, AfterViewInit {
     this.currentStep++;
     this._shared.setPersistedData$({ [this.guideWatching.id]: this.currentStep }).subscribe();
     if (this.currentStep === this.guideWatching.steps.length) {
-      this._toast.success('Ahora puede añadir una puntuación a la guía o dejar un comentario.',
-        '¡Ha llegado al final de la guía!');
+      this._service.addCompleted$(this.guideWatching.id).subscribe({
+        next: (response) => {
+          if (response === 'operation_successful') {
+            this._toast.success('Ahora puede añadir una puntuación a la guía o dejar un comentario.',
+              '¡Ha llegado al final de la guía!');
+            this.guideWatching.completed = true;
+          } else {
+            this._toast.error('Error en la operación', 'Error del servidor');
+          }
+        },
+        error: (error) => {
+          this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+          this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
+        }
+      });
     }
   }
 
@@ -86,43 +94,24 @@ export class GuideSeeComponent implements OnInit, AfterViewInit {
     this._shared.setPersistedData$({[this.guideWatching.id]: this.currentStep}).subscribe();
   }
 
-  findUserRating(): boolean {
-    const userRating = this.guideWatching.ratings.find(rating => rating.userId === this.userData.id);
-    if (userRating !== undefined) {
-      if (this.userPunctuation === undefined) {
-        this.userPunctuation = userRating.punctuation;
-      }
-      return true;
-    } else {
-      this.userPunctuation = 3;
-      return false;
-    }
-  }
-
-  findGuideOwnership(): boolean {
-    return this.userData.created.includes(this.guideWatching.id);
-  }
-
   submitRating(punctuation: number): void {
-    // TODO añadir lógica no puntuar guia propia
     const payload: AddRatingRequest = {
       guideId: this.guideWatching.id,
       punctuation: punctuation
-    }
+    };
     this._service.submitRating$(payload).subscribe({
       next: (response) => {
         if (response === 'guide_updated') {
-          // this.guideWatching.ratings.push(
-          //   { userId: this.userData.id, punctuation: punctuation });
-          this.userPunctuation = punctuation;
+          this.userRating = punctuation;
           this._toast.clear();
           this._toast.success('¡Gracias por puntuar la guía!', 'Puntuación registrada');
         } else {
-          // TODO
+          this._toast.error('Error en la operación', 'Error del servidor');
         }
       },
       error: (error) => {
-        // TODO
+        this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+        this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
       }
     });
   }
@@ -131,7 +120,7 @@ export class GuideSeeComponent implements OnInit, AfterViewInit {
     const payload: AddCommentRequest = {
       guideId: this.guideWatching.id,
       comment: this.comment.controls.text.value
-    }
+    };
     this._service.submitComment$(payload).subscribe({
       next: (response) => {
         if (response.result === 'operation_successful') {
@@ -139,12 +128,15 @@ export class GuideSeeComponent implements OnInit, AfterViewInit {
           this.comment.reset();
           this.comment.controls.text.setErrors(null);
           this._toast.success('Su comentario se ha publicado correctamente', 'Comentario publicado')
+        } else {
+          this._toast.error('Error en la operación', 'Error del servidor');
         }
       },
       error: (error) => {
-        // TODO
+        this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+        this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
       }
-    })
+    });
   }
 
   deleteComment(index: number): void {
@@ -164,13 +156,15 @@ export class GuideSeeComponent implements OnInit, AfterViewInit {
               if (response === 'operation_successful') {
                 this.guideWatching.comments.splice(index, 1);
                 this._toast.info('Comentario eliminado');
+              } else {
+                this._toast.error('Error en la operación', 'Error del servidor');
               }
             }
           });
         }
       },
       error: (error) => {
-        // TODO
+        this._toast.error('Opción no registrada correctamente');
       }
     });
   }
@@ -193,6 +187,44 @@ export class GuideSeeComponent implements OnInit, AfterViewInit {
     this._ngZone.onStable
       .pipe(take(1))
       .subscribe(() => this.autosize.resizeToFitContent(true));
+  }
+
+  addSaved(guideId: string): void {
+    this._service.addSaved$(guideId).subscribe({
+      next: (response) => {
+        if (response === 'operation_successful') {
+          this._toast.success('Guía añadida a guardados');
+          this.userData.saved.push(guideId);
+        } else {
+          this._toast.error('Error en la operación', 'Error del servidor');
+        }
+      },
+      error: (error) => {
+        this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+        this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
+      }
+    });
+  }
+
+  deleteSaved(guideId: string): void {
+    this._service.deleteSaved$(guideId).subscribe({
+      next: (response) => {
+        if (response === 'operation_successful') {
+          this._toast.success('Guía eliminada de guardados');
+          this.userData.saved = this.userData.saved.filter(guide => guide !== guideId);
+        } else {
+          this._toast.error('Error en la operación', 'Error del servidor');
+        }
+      },
+      error: (error) => {
+        this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+        this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
+      }
+    });
+  }
+
+  findGuideIsSaved(guideId: string): boolean {
+    return this.userData.saved.includes(guideId);
   }
 
 }

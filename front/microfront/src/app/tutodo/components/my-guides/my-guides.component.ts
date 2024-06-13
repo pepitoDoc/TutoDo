@@ -43,7 +43,8 @@ export class MyGuidesComponent implements OnInit {
         this._router.navigate([`../${TutodoRoutes.MODIFY}`], { relativeTo: this._route });
       },
       error: (error) => {
-        // TODO
+        this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+        this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
       }
     });
   }
@@ -54,7 +55,8 @@ export class MyGuidesComponent implements OnInit {
         this._router.navigate([`../${TutodoRoutes.MODIFY_INFO}`], { relativeTo: this._route });
       },
       error: (error) => {
-        // TODO
+        this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+        this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
       }
     });
   }
@@ -73,20 +75,20 @@ export class MyGuidesComponent implements OnInit {
             next: (response) => {
               if (response === 'operation_successful') {
                 this.guidesFound = this._service.findOwnGuides$(this.currentPage);
-                // this.guidesFound = this.guidesFound.filter(guide => guide.id !== guideId);
                 this._toast.success('Guía borrada correctamente', 'Operación exitosa')
               } else {
-                // TODO
+                this._toast.error('Error en la operación', 'Error del servidor');
               }
             },
             error: (error) => {
-              // TODO
+              this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+              this._router.navigate([`/${TutodoRoutes.TUTODO}`]);
             }
           })
         }
       },
       error: (error) => {
-        // TODO
+        this._toast.error('Opción no registrada correctamente');
       }
     })
   }

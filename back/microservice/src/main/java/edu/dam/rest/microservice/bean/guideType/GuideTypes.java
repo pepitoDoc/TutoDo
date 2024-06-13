@@ -9,7 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class FindAllGuideTypesResponse {
+public class GuideTypes {
 
     public List<String> guideTypes;
 

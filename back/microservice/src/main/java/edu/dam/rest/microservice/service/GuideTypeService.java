@@ -1,6 +1,5 @@
 package edu.dam.rest.microservice.service;
 
-import edu.dam.rest.microservice.bean.guideType.FindAllGuideTypesResponse;
 import edu.dam.rest.microservice.persistence.model.GuideType;
 import edu.dam.rest.microservice.persistence.repository.GuideTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;

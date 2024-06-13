@@ -1,12 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../service/api.service';
-import { SharedService } from '../../shared/shared.service';
 import { Observable } from 'rxjs';
-import { Guide } from '../../model/data';
-import { AllUserData, UserData } from '../../model/user-data';
+import { GuideInfo } from '../../model/data';
+import { UserData } from '../../model/user-data';
+import { TutodoRoutes } from '../../tutodo.routes';
 
 @Component({
   selector: 'tutodo-home',
@@ -16,16 +15,14 @@ import { AllUserData, UserData } from '../../model/user-data';
 export class HomeComponent implements OnInit {
 
   userData!: UserData;
-  newestGuides!: Observable<Guide[]>;
-  preferredGuides!: Observable<Guide[]>;
+  newestGuides!: Observable<GuideInfo[]>;
+  preferredGuides!: Observable<GuideInfo[]>;
   selectedType!: string;
 
   constructor(
     private readonly _router: Router,
     private readonly _route: ActivatedRoute,
-    private readonly _dialog: MatDialog,
     private readonly _service: ApiService,
-    private readonly _shared: SharedService,
     private readonly _toast: ToastrService
   ) {
     this.userData = this._route.snapshot.data['userData'];
@@ -44,6 +41,48 @@ export class HomeComponent implements OnInit {
 
   onTypeChange(selectedType: string): void {
     this.selectedType = selectedType;
+  }
+
+  visualizeGuide(guideId: string): void {
+    this._router.navigate([`../${TutodoRoutes.SEE}/${guideId}`], { relativeTo: this._route });
+  }
+
+  addSaved(guideId: string): void {
+    this._service.addSaved$(guideId).subscribe({
+      next: (response) => {
+        if (response === 'operation_successful') {
+          this._toast.success('Guía añadida a guardados');
+          this.userData.saved.push(guideId);
+        } else {
+          this._toast.error('Error en la operación', 'Error del servidor');
+        }
+      },
+      error: (error) => {
+        this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+        window.location.reload();
+      }
+    });
+  }
+
+  deleteSaved(guideId: string): void {
+    this._service.deleteSaved$(guideId).subscribe({
+      next: (response) => {
+        if (response === 'operation_successful') {
+          this._toast.success('Guía eliminada de guardados');
+          this.userData.saved = this.userData.saved.filter(guide => guide !== guideId);
+        } else {
+          this._toast.error('Error en la operación', 'Error del servidor');
+        }
+      },
+      error: (error) => {
+        this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+        window.location.reload();
+      }
+    });
+  }
+
+  findGuideIsSaved(guideId: string): boolean {
+    return this.userData.saved.includes(guideId);
   }
 
 }

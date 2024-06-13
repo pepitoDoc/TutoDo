@@ -14,6 +14,9 @@
   height: 100%;
   width: 100%;
   margin-top: 20px;
+  @media(max-width: 768px) {
+    margin-top: 50px;
+  }
 }
 
 .align-grid {
@@ -91,10 +94,12 @@ mat-card-subtitle {
 img {
   margin: 0px 0px;
   width: 100%;
-
+  height: 300px;
+  @media(max-width: 1440px) {
+    height: 200px;
+  }
   @media(max-width: 768px) {
-    width: 100%;
-    height: 100%;
+    height: 250px;
   }
 }
 
@@ -208,7 +213,6 @@ input {
   }
 }
 
-// TODO checkear si hace falta strong
 mat-hint {
   font-size: 14px;
 

@@ -28,13 +28,15 @@ public class Constants {
     public static final String COMPLETED = "completed";
     public static final String SAVED = "saved";
     public static final String CREATED = "created";
+    public static final String PREFERENCES = "preferences";
 
     public static final String GUIDE_TYPE_COLLECTION = "guideType";
     public static final String[] VALID_IMAGE_TYPES = {"image/jpeg", "image/png", "image/gif"};
     public static final String[] FILTERED_ENDPOINTS = {"/v1/tutodo/guide/*", "/v1/tutodo/user/get-user",
             "/v1/tutodo/user/add-saved", "/v1/tutodo/user/remove-saved", "/v1/tutodo/user/logout",
             "/v1/tutodo/user/check-valid", "/v1/tutodo/user/update-confirmed", "/v1/tutodo/user/change-password-by-id",
-            "/v1/tutodo/user/find-users"};
+            "/v1/tutodo/user/find-users", "/v1/tutodo/user/get-user-basic", "/v1/tutodo/user/add-completed",
+            "/v1/tutodo/user/change-username", "/v1/tutodo/user/change-email", "/v1/tutodo/user/change-preferences"};
     public static final String MAIL_PASSWORD = "mail.smtp.password";
     public static final String MAIL_USER = "mail.smtp.user";
     public static final String MAIL_PROPERTIES = "mail.properties";

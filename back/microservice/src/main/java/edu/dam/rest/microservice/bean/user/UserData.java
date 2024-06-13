@@ -4,18 +4,17 @@ import lombok.*;
 
 import java.util.List;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
-public class UserSearchData {
+public class UserData {
 
     private String id;
     private String username;
-    private List<String> created;
     private List<String> saved;
+    private List<String> created;
     private List<String> preferences;
-
 
 }

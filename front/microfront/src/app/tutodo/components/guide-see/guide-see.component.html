@@ -1,18 +1,33 @@
 <!-- Página -->
 <div class="page">
-  <div class="align-flex-column" *ngIf="guideWatching !== undefined">
+  <div class="align-flex-column" *ngIf="guideWatching">
     <div class="gradient-border info-spacing">
       <div class="gradient-content title-content">
         <h1>{{ guideWatching.title }}</h1>
         <h2>{{ guideWatching.description }}</h2>
         <h2>Guía sobre {{ formatGuideTypes() }}</h2>
-        <h3 *ngIf="userData">Usuario creador: {{ userData.username }}</h3>
+        <h3 *ngIf="userData"><strong>Usuario creador: </strong>{{ userData.username }}</h3>
+        <h3><strong>Puntuación media: </strong>{{ guideWatching.ratingMean }}</h3>
+        <div class="align-flex-row options">
+          @if(!findGuideIsSaved(guideWatching.id)) {
+          <button type="button" mat-flat-button color="accent" class="button-space" 
+            (click)="addSaved(guideWatching.id)">Añadir a guardados</button>
+          }
+          @else {
+          <button type="button" mat-flat-button color="warn" class="button-space" 
+            (click)="deleteSaved(guideWatching.id)">Eliminar de guardados</button>
+          }
+          <button type="button" mat-flat-button data-bs-toggle="offcanvas" href="#offcanvasSteps" class="button-space"
+            color="primary" aria-controls="offcanvasSteps">Pasos de la guía</button>
+          <button type="button" mat-flat-button data-bs-toggle="offcanvas" href="#offcanvasIngredients"
+            class="button-space" color="primary" aria-controls="offcanvasIngredients">Ingredientes/materiales</button>
+        </div>
       </div>
     </div>
     <div class="guide-container">
       <div *ngFor="let step of guideWatching.steps; let i = index;" [class.step-layout]="true"
         [ngClass]="{ 'step-completed': i < currentStep, 'current-step': i === currentStep, 'step-uncompleted': i > currentStep }">
-        <h2 [id]="'step' + i">Paso {{ i + 1 }}</h2>
+        <h2 [id]="'step' + (i + 1)">Paso {{ i + 1 }}</h2>
         <h3>{{ step.title }}</h3>
         <h4>{{ step.description }}</h4>
         <div class="align-flex-column mt-3 mb-3" *ngIf="step.image !== ''">
@@ -20,48 +35,29 @@
             alt="No se ha podido cargar la imagen correctamente">
         </div>
         <div class="align-flex-row">
-          <button type="button" *ngIf="i === currentStep" (click)="nextStep()" mat-flat-button class="button-space"
-            color="primary">Marcar paso como completado</button>
-          <button type="button" *ngIf="i === currentStep && i !== 0" (click)="previousStep()" mat-flat-button
-            class="button-space" color="accent">Volver al paso anterior</button>
+          <a type="button" *ngIf="i === currentStep" (click)="nextStep()" mat-flat-button class="button-space"
+            color="primary" [href]="'/tutodo/guide-see/' + guideWatching.id + '#step' + (i + 1)" target="_self">Marcar
+            paso como completado</a>
+          <a type="button" *ngIf="i === currentStep && i !== 0" (click)="previousStep()" mat-flat-button
+            class="button-space" color="accent" [href]="'/tutodo/guide-see/' + guideWatching.id + '#step' + (i - 1)"
+            target="_self">Volver al paso anterior</a>
         </div>
       </div>
-      <div class="align-flex-column rating">
+      <div class="align-flex-column rating" *ngIf="!guideWatching.ownership && guideWatching.completed">
         <div class="align-flex-row">
           <button mat-icon-button color="accent" *ngFor="let rating of ratings; let i = index" [id]="'star_'+i"
-            (click)="submitRating(i + 1)" [matTooltip]="rating.description" matTooltipPosition="above" class="rating-star">
+            (click)="submitRating(i + 1)" [matTooltip]="rating.description" matTooltipPosition="above"
+            class="rating-star">
             <mat-icon>
-              {{ userPunctuation >= (i + 1) ? 'star' : 'star_outlined' }}
+              {{ userRating >= (i + 1) ? 'star' : 'star_outlined' }}
             </mat-icon>
           </button>
         </div>
-        <h2 *ngIf="!findUserRating()">¡Le agradeceríamos que puntuara la guía!</h2>
-        <h2 *ngIf="findUserRating()">¡Gracias por puntuar la guía!</h2>
+        <h2 *ngIf="!guideWatching.rated">¡Le agradeceríamos que puntuara la guía!</h2>
+        <h2 *ngIf="guideWatching.rated">¡Gracias por haber puntuado la guía!</h2>
       </div>
-      <!-- // TODO no dejar votar si es guía propia -->
-      <!-- <form [formGroup]="rating" class="gradient-border bottom-controls"
-        *ngIf="currentStep === guideWatching.steps.length && !findGuideOwnership()">
-        <div class="align-flex-row gradient-content pt-4">
-          <mat-form-field class="example-full-width rating" appareance="fill" name="rating">
-            <mat-label>Puntuar la guía</mat-label>
-            <mat-select formControlName="punctuation">
-              @for (rating of ratings; track rating) {
-              <mat-option [value]="rating.punctuation">{{rating.description}}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <button type="submit" mat-flat-button class="button-space" color="primary"
-            (click)="submitRating()" [disabled]="findGuideOwnership()">Puntuar</button>
-        </div>
-        <div class="align-flex-row">
-          <p class="gradient-content" *ngIf="findUserRating()">
-            Usted ya ha puntuado la guía con un {{ userPunctuation }}</p>
-          <p class="gradient-content" *ngIf="findGuideOwnership()">
-            No puede puntuar una guía de su creación</p>
-        </div>
-      </form> -->
       <div class="comments align-flex-column">
-        <form [formGroup]="comment" *ngIf="!findGuideOwnership()">
+        <form [formGroup]="comment" *ngIf="!guideWatching.ownership && guideWatching.completed">
           <h2>Enviar comentario</h2>
           <mat-form-field class="example-full-width" appareance="fill">
             <mat-label>Introduzca el comentario que desea enviar</mat-label>
@@ -74,26 +70,25 @@
             </mat-error>
           </mat-form-field>
           <div>
-            <button type="button" mat-flat-button class="button-space" color="primary" 
-            (click)="submitComment()" [disabled]="findGuideOwnership() || !comment.valid">Publicar comentario</button>
+            <button type="button" mat-flat-button class="button-space" color="primary" (click)="submitComment()"
+              [disabled]="(guideWatching.ownership || !comment.valid) && guideWatching.completed">Publicar
+              comentario</button>
           </div>
         </form>
-        <div class="posted-comments" *ngIf="guideWatching.published">
+        <div class="posted-comments">
           <div class="comment-container-title">
-            <h2>Caja de comentarios
-              <mat-button-toggle-group>
-                <mat-button-toggle (click)="orderCommentsByOld()">Ordenar por antigüedad</mat-button-toggle>
-                <mat-button-toggle (click)="orderCommentsByNew()">Ordenar por más nuevo</mat-button-toggle>
-              </mat-button-toggle-group>
-            </h2>
+            <h2>Caja de comentarios</h2>
+            <mat-button-toggle-group>
+              <mat-button-toggle (click)="orderCommentsByOld()">Ordenar por antigüedad</mat-button-toggle>
+              <mat-button-toggle (click)="orderCommentsByNew()">Ordenar por más nuevo</mat-button-toggle>
+            </mat-button-toggle-group>
           </div>
           <div class="comment-container" *ngFor="let comment of guideWatching.comments; let i = index">
             <h3>{{ comment.username }}</h3>
-            <h3 *ngIf="comment.formattedDate">Fecha de publicación: {{ comment.formattedDate.toLocaleDateString() }}</h3>
+            <h3 *ngIf="comment.formattedDate">Fecha de publicación: {{ comment.formattedDate.toLocaleDateString() }}
+            </h3>
             <p>{{ comment.text }}</p>
             <div class="align-flex-row">
-              <!-- <button type="button" mat-flat-button class="button-space" color="accent"
-                *ngIf="comment.userId === userData.id">Editar comentario</button> -->
               <button type="button" mat-flat-button class="button-space" color="warn" (click)="deleteComment(i)"
                 *ngIf="comment.userId === userData.id || guideWatching.id === userData.id">Borrar comentario</button>
             </div>
@@ -103,34 +98,33 @@
           </div>
         </div>
       </div>
-      <div class="align-flex-row options sticky-bottom">
+      <div class="align-flex-row">
         <button type="button" mat-flat-button data-bs-toggle="offcanvas" href="#offcanvasSteps" class="button-space"
           color="primary" aria-controls="offcanvasSteps">Pasos de la guía</button>
         <button type="button" mat-flat-button data-bs-toggle="offcanvas" href="#offcanvasIngredients"
           class="button-space" color="primary" aria-controls="offcanvasIngredients">Ingredientes/materiales</button>
       </div>
     </div>
-
     <mat-progress-bar mode="determinate" class="sticky-bottom"
       [value]="(100 / guideWatching.steps.length) * currentStep"></mat-progress-bar>
   </div>
 </div>
 <!-- Botones laterales -->
-<div class="fixed">
-  <div class="sideAction">
-    <a class="sideButton sideAction" data-bs-toggle="offcanvas" href="#offcanvasSteps" role="button"
+<!-- <div class="fixed">
+  <div class="side-action">
+    <a class="side-button side-action" data-bs-toggle="offcanvas" href="#offcanvasSteps" role="button"
       aria-controls="offcanvasSteps">
-      <div class="buttonDiv bg-b-blue">
+      <div class="button-div bg-b-blue">
         Pasos de la guía
       </div>
     </a>
-    <a class="sideButton sideAction" data-bs-toggle="offcanvas" href="#offcanvasIngredients" role="button">
-      <div class="buttonDiv bg-b-orange">
+    <a class="side-button side-action" data-bs-toggle="offcanvas" href="#offcanvasIngredients" role="button">
+      <div class="button-div bg-b-orange">
         Ingredientes/materiales
       </div>
     </a>
   </div>
-</div>
+</div> -->
 <!-- Offcanvas pasos -->
 <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasSteps" aria-labelledby="offcanvasStepsLabel">
   <div class="offcanvas-header">

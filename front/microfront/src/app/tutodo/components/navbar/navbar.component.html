@@ -1,4 +1,4 @@
-<nav class="navbar nav-border sticky-top navbar-expand-lg bg-body-tertiary">
+<nav class="navbar nav-border fixed-top navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
         <a class="navbar-brand" routerLink="/tutodo/home" routerLinkActive="active">
             <img src="\assets\images\_11707f36-6180-48c1-b259-16214f3e3e34-logo.jpeg" alt="Bootstrap" width="40"
@@ -46,11 +46,11 @@
                 </form>
             </ul>
             <div class="btn-group">
-                <div class="align-flex" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <p class="nav-link active align-elements mx-2" *ngIf="userData">{{ userData.username }}</p>
+                <div class="align-flex user" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <p class="nav-link active align-elements" *ngIf="userData">{{ userData.username }}</p>
                     <mat-icon class="align-icon" aria-hidden="false" aria-label="settings">account_circle</mat-icon>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" routerLink="/tutodo/guide-search" routerLinkActive="active">
+                        <li><a class="dropdown-item" routerLink="/tutodo/user-info" routerLinkActive="active">
                                 Información de usuario</a></li>
                         <li>
                             <hr class="dropdown-divider">
@@ -59,10 +59,10 @@
                     </ul>
                 </div>
             </div>
-            <div class="align-flex">
+            <!-- <div class="align-flex">
                 <p class="nav-link active align-elements mx-2">Opciones</p>
                 <mat-icon class="align-icon" aria-hidden="false" aria-label="settings">settings</mat-icon>
-            </div>
+            </div> -->
         </div>
     </div>
 </nav>

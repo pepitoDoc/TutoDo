@@ -4,8 +4,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../service/api.service';
 import { SharedService } from '../../shared/shared.service';
+import { ChangePasswordByEmailRequest } from '../../model/data';
 import { TutodoRoutes } from '../../tutodo.routes';
-import { ChangePasswordRequest } from '../../model/data';
 
 @Component({
   selector: 'tutodo-reset-password',
@@ -14,7 +14,6 @@ import { ChangePasswordRequest } from '../../model/data';
 })
 export class ResetPasswordComponent {
 
-  verificationCode!: string;
   codeChecked = false;
   codeSent = false;
   codeConfirmed = false;
@@ -46,10 +45,6 @@ export class ResetPasswordComponent {
     private readonly _toast: ToastrService
   ) { }
 
-  ngOnInit(): void {
-
-  }
-
   sendCode(): void {
     this._apiService.sendCode$('password', this.emailInfo.controls.email.value).subscribe({
       next: (response) => {
@@ -57,13 +52,15 @@ export class ResetPasswordComponent {
           this._toast.success('Por favor, comprueba la bandeja de su correo electrónico '
             + 'para obtener el código de verificación.',
             'Código de verificación enviado');
+          this.resetMessage = '';
           this.codeSent = true;
         } else {
-          this._toast.error() // TODO
+          this._toast.error('Error en la operación', 'Error del servidor');
         }
       },
       error: (error) => {
-        // TODO
+        this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+        this._router.navigate([`/${TutodoRoutes.LOGIN}`]);
       }
     });
   }
@@ -73,32 +70,38 @@ export class ResetPasswordComponent {
       next: (response) => {
         if (response === 'operation_successful') {
           this.codeConfirmed = true;
+          this.resetMessage = '';
           this._toast.success('Puede introducir la nueva contraseña', 'Código confirmado');
         } else {
-          this._toast.error() // TODO
+          this._toast.warning('El código introducido no es válido', 'Código no válido');
+          this.resetMessage = 'El código introducido no es válido';
         }
       },
       error: (error) => {
-        // TODO
+        this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+        this._router.navigate([`/${TutodoRoutes.LOGIN}`]);
       }
     });
   }
 
   resetPassword(): void {
     if (this.passwordInfo.controls.passwordConfirm.value === this.passwordInfo.controls.password.value) {
-      const payload: ChangePasswordRequest = {
+      const payload: ChangePasswordByEmailRequest = {
         email: this.emailInfo.controls.email.value,
         newPassword: this.passwordInfo.controls.passwordConfirm.value
-      }
+      };
       this._apiService.changePasswordByEmail$(payload).subscribe({
         next: (response) => {
           if (response === 'operation_successful') {
             this._toast.success('Ahora puede iniciar sesión con sus nuevas credenciales', 'Contraseña actualizada correctamente');
             this._router.navigate([`../`], { relativeTo: this._route });
+          } else {
+            this._toast.error('Error en la operación', 'Error del servidor');
           }
         },
         error: (error) => {
-
+          this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+          this._router.navigate([`/${TutodoRoutes.LOGIN}`]);
         }
       });
     } else {

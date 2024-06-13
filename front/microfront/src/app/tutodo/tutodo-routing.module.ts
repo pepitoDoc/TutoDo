@@ -5,7 +5,6 @@ import { TutodoRoutes } from './tutodo.routes';
 import { HomeComponent } from './components/home/home.component';
 import { FrontPageComponent } from './pages/front-page/front-page.component';
 import { HomePageComponent } from './pages/home-page/home-page.component';
-import { MainComponent } from './components/main/main.component';
 import { GuideCreateComponent } from './components/guide-create/guide-create.component';
 import { GuideModifyComponent } from './components/guide-modify/guide-modify.component';
 import { AuthService } from './service/auth/auth.service';
@@ -13,7 +12,6 @@ import { Observable } from 'rxjs';
 import { MyGuidesComponent } from './components/my-guides/my-guides.component';
 import { GuideSearchComponent } from './components/guide-search/guide-search.component';
 import { GuideSeeComponent } from './components/guide-see/guide-see.component';
-import { AllUserData } from './model/user-data';
 import { UserService } from './service/provider/user.service';
 import { GuideModifyInfoComponent } from './components/guide-modify-info/guide-modify-info.component';
 import { PublishedService } from './service/auth/published.service';
@@ -23,6 +21,7 @@ import { ConfirmedService } from './service/auth/confirmed.service';
 import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 import { SearchUserComponent } from './components/search-user/search-user.component';
 import { SavedGuidesComponent } from './components/saved-guides/saved-guides.component';
+import { UserModifyInfoComponent } from './components/user-modify-info/user-modify-info.component';
 
 const canActivateGuide: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot,) => {
   return inject(PublishedService).canActivate(route.params['id']);
@@ -111,12 +110,12 @@ const routes: Routes = [
             resolve: { userData: () => inject(UserService).getUserData$() }
           },
           {
-            path: `${TutodoRoutes.MAIN}`,
-            component: MainComponent
-          },
-          {
             path: `${TutodoRoutes.SEARCH_USER}/:username`,
             component: SearchUserComponent
+          },
+          {
+            path: `${TutodoRoutes.USER_INFO}`,
+            component: UserModifyInfoComponent
           },
           {
             path: '**', 

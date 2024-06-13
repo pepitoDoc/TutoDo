@@ -5,6 +5,7 @@ import edu.dam.rest.microservice.constants.Constants;
 import edu.dam.rest.microservice.persistence.model.User;
 import edu.dam.rest.microservice.persistence.repository.UserRepository;
 import edu.dam.rest.microservice.util.email.Sender;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -43,7 +44,7 @@ public class UserService {
                 .created(new ArrayList<>())
                 .preferences(insertUserRequest.getPreferences())
                 .build();
-        String checkUser = this.findAllByUsernameOrEmail(createUser);
+        String checkUser = this.findAllByUsernameOrEmail(createUser.getUsername(), createUser.getEmail());
         if (!checkUser.equals("user_valid")) {
             return checkUser;
         } else {
@@ -70,10 +71,17 @@ public class UserService {
         }
     }
 
-    public User findById(String id) {
+    public UserData findById(String id) {
         var foundUser = this.userRepository.findById(id);
         if (foundUser.isPresent()) {
-            return foundUser.orElseThrow();
+            var user = foundUser.orElseThrow();
+            return UserData.builder()
+                    .id(user.getId())
+                    .username(user.getUsername())
+                    .saved(user.getSaved())
+                    .created(user.getCreated())
+                    .preferences(user.getPreferences())
+                    .build();
         } else {
             return null;
         }
@@ -133,31 +141,40 @@ public class UserService {
         return sender.send("TutoDo", email, Constants.EMAIL_TITLES.get(codeType), codeValue);
     }
 
-    public String changePasswordById(String id, String newPassword) {
-        var result = this.mongoTemplate.updateFirst(
-                query(where(Constants.ID).is(id)),
-                new Update().set(Constants.PASSWORD, newPassword),
-                Constants.USER_COLLECTION
-        );
-        if (result.wasAcknowledged()) {
-            return "operation_successful";
-        } else {
-            return "operation_unsuccessful";
-        }
-    }
-
-    public String changePasswordByEmail(ChangePasswordRequest changePasswordRequest) {
-        var userFound = this.userRepository.findByEmail(changePasswordRequest.getEmail());
+    public String changePasswordByEmail(ChangePasswordByEmailRequest changePasswordByEmailRequest) {
+        var userFound = this.userRepository.findByEmail(changePasswordByEmailRequest.getEmail());
         if (userFound != null) {
             var result = this.mongoTemplate.updateFirst(
                     query(where(Constants.ID).is(userFound.getId())),
-                    new Update().set(Constants.PASSWORD, changePasswordRequest.getNewPassword()),
+                    new Update().set(Constants.PASSWORD, changePasswordByEmailRequest.getNewPassword()),
                     Constants.USER_COLLECTION
             );
             if (result.wasAcknowledged()) {
                 return "operation_successful";
             } else {
                 return "operation_unsuccessful";
+            }
+        } else {
+            return "operation_unsuccessful";
+        }
+    }
+
+    public String changePasswordById(String id, String oldPassword, String newPassword) {
+        var userFound = this.userRepository.findById(id);
+        if (userFound.isPresent()) {
+            var user = userFound.orElseThrow();
+            if (user.getPassword().equals(oldPassword)) {
+                var result = this.mongoTemplate.updateFirst(
+                        query(where(Constants.ID).is(id)),
+                        new Update().set(Constants.PASSWORD, newPassword),
+                        Constants.USER_COLLECTION);
+                if (result.wasAcknowledged() && result.getMatchedCount() > 0) {
+                    return "operation_successful";
+                } else {
+                    return "operation_unsuccessful";
+                }
+            } else {
+                return "password_incorrect";
             }
         } else {
             return "operation_unsuccessful";
@@ -181,16 +198,74 @@ public class UserService {
                 .build();
     }
 
-    private String findAllByUsernameOrEmail(User user) {
-        var foundUsers = this.userRepository.findAllByUsernameOrEmail(user.getUsername(), user.getEmail());
+    public String addCompleted(String guideId, String id) {
+        var result = this.mongoTemplate.updateFirst(
+                query(where(Constants.ID).is(id)),
+                new Update().push(Constants.COMPLETED, guideId),
+                Constants.USER_COLLECTION);
+        if (result.wasAcknowledged() && result.getModifiedCount() > 0) {
+            return "operation_successful";
+        } else {
+            return "operation_unsuccessful";
+        }
+    }
+
+    public String changeUsername(String username, String id) {
+        var usernameCheck = this.findAllByUsernameOrEmail(username, StringUtils.EMPTY);
+        if (!usernameCheck.equals("username_taken")) {
+            var result = this.mongoTemplate.updateFirst(
+                    query(where(Constants.ID).is(id)),
+                    new Update().set(Constants.USERNAME, username),
+                    Constants.USER_COLLECTION);
+            if (result.wasAcknowledged() && result.getModifiedCount() > 0) {
+                return "operation_successful";
+            } else {
+                return "operation_unsuccessful";
+            }
+        } else {
+            return usernameCheck;
+        }
+    }
+
+    public String changeEmail(String email, String id) {
+        var emailCheck = this.findAllByUsernameOrEmail(StringUtils.EMPTY, email);
+        if (!emailCheck.equals("email_taken")) {
+            var result = this.mongoTemplate.updateFirst(
+                    query(where(Constants.ID).is(id)),
+                    new Update().set(Constants.EMAIL, email),
+                    Constants.USER_COLLECTION);
+            if (result.wasAcknowledged() && result.getModifiedCount() > 0) {
+                return this.updateUserConfirmed(id, false);
+            } else {
+                return "operation_unsuccessful";
+            }
+        } else {
+            return emailCheck;
+        }
+    }
+
+    public String changeUserPreferences(List<String> preferences, String id) {
+        var result = this.mongoTemplate.updateFirst(
+                query(where(Constants.ID).is(id)),
+                new Update().set(Constants.PREFERENCES, preferences),
+                Constants.USER_COLLECTION);
+        if (result.wasAcknowledged() && result.getMatchedCount() > 0) {
+            return "operation_successful";
+        } else {
+            return "operation_unsuccessful";
+        }
+    }
+
+    private String findAllByUsernameOrEmail(String username, String email) {
+        var foundUsers = this.userRepository.findAllByUsernameOrEmail(username, email);
         var sb = new StringBuilder();
         foundUsers.forEach( (foundUser) -> {
-            if (foundUser.getUsername().equals(user.getUsername())
-                    && foundUser.getEmail().equals(user.getEmail())) {
+            if (foundUser.getUsername().equals(username)
+                    && foundUser.getEmail().equals(email)) {
                 sb.append("username_takenemail_taken");
-            } else if (foundUser.getUsername().equals(user.getUsername())) {
+            } else if (foundUser.getUsername().equals(username)) {
                 sb.append("username_taken");
-            } else if (foundUser.getEmail().equals(user.getEmail())) {
+            } else if (foundUser.getEmail().equals(email)) {
                 sb.append("email_taken");
             }
         });

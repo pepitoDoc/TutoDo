@@ -16,3 +16,9 @@ export interface UserData {
   created: string[];
   preferences: string[];
 }
+
+export interface UserBasicInfo {
+  username: string;
+  email: string;
+  preferences: string[];
+}

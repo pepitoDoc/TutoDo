@@ -71,7 +71,7 @@ export interface Rating {
 }
 export interface Guide {
     id: string;
-    userid: string;
+    userId: string;
     title: string;
     description: string;
     published: boolean;
@@ -158,8 +158,13 @@ export interface DeleteCommentRequest {
     date: Date;
 }
 
-export interface ChangePasswordRequest {
-    email?: string;
+export interface ChangePasswordByEmailRequest {
+    email: string;
+    newPassword: string;
+}
+
+export interface ChangePasswordByIdRequest {
+    oldPassword: string;
     newPassword: string;
 }
 
@@ -196,10 +201,43 @@ export interface GuideInfo {
     title: string;
     description: string;
     published: boolean;
-    creationDate: Date;
     amountSteps: number;
     amountComments: number;
     ratingMean: number;
     thumbnail: string[];
     guideTypes: string[];
+}
+
+export interface GuideVisualizeInfo {
+    id: string;
+    userId: string;
+    title: string;
+    description: string;
+    steps: Step[];
+    guideTypes: string[];
+    ingredients: string[];
+    comments: Comment[];
+    ratingMean: number;
+    thumbnail: string;
+    rated: boolean;
+    userRating: number;
+    completed: boolean;
+    ownership: boolean;
+}
+
+export interface GuideModifyInfo {
+    id: string;
+    title: string;
+    description: string;
+    published: boolean;
+    guideTypes: string[];
+    ingredients: string[];
+    thumbnail: string;
+    amountSteps: number;
+}
+
+export interface GuideModifySteps {
+    id: string;
+    title: string;
+    steps: Step[];
 }

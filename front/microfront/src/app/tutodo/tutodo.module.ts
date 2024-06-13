@@ -14,7 +14,6 @@ import { HomeComponent } from './components/home/home.component';
 import { FrontPageComponent } from './pages/front-page/front-page.component';
 import { HomePageComponent } from './pages/home-page/home-page.component';
 import { MatIconModule } from '@angular/material/icon';
-import { MainComponent } from './components/main/main.component';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -44,6 +43,7 @@ import { VerifyEmailComponent } from './components/verify-email/verify-email.com
 import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 import { SearchUserComponent } from './components/search-user/search-user.component';
 import { SavedGuidesComponent } from './components/saved-guides/saved-guides.component';
+import { UserModifyInfoComponent } from './components/user-modify-info/user-modify-info.component';
 
 
 @NgModule({
@@ -59,7 +59,6 @@ import { SavedGuidesComponent } from './components/saved-guides/saved-guides.com
     GuideSearchComponent,
     GuideSeeComponent,
     GuideCreateComponent,
-    MainComponent,
     InfoDialogComponent,
     OptionDialogComponent,
     MyGuidesComponent,
@@ -67,7 +66,8 @@ import { SavedGuidesComponent } from './components/saved-guides/saved-guides.com
     VerifyEmailComponent,
     ResetPasswordComponent,
     SearchUserComponent,
-    SavedGuidesComponent
+    SavedGuidesComponent,
+    UserModifyInfoComponent
   ],
   imports: [
     CommonModule,

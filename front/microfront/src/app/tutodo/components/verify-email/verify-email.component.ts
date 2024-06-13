@@ -16,6 +16,7 @@ export class VerifyEmailComponent implements OnInit {
   verificationCode!: string;
   codeChecked = false;
   codeSent = false;
+  verifyMessage = '';
 
   verificationInfo = this._nnfb.group({
     code: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(8)]]
@@ -36,14 +37,13 @@ export class VerifyEmailComponent implements OnInit {
         if (typeof response === 'object' && Object.keys(response).length !== 0 && response.verification) {
           this.verificationCode = response.verificationCode;
           this.codeSent = true;
-          this._toast.info(); // TODO
+          this._toast.info('Ya existe un proceso de verificación en curso; por favor, ' +
+            'compruebe su correo para obtener el código, o seleccione "Reenviar código" para obtener un código nuevo',
+            'Proceso de verificación en curso.');
         }
         this.codeChecked = true;
-      },
-      error: (error) => {
-        // TODO
       }
-    })
+    });
   }
 
   sendCode(): void {
@@ -55,11 +55,12 @@ export class VerifyEmailComponent implements OnInit {
             'Código de verificación enviado');
           this.codeSent = true;
         } else {
-          this._toast.error() // TODO
+          this._toast.error('Error en la operación', 'Error del servidor');
         }
       },
       error: (error) => {
-        // TODO
+        this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+        this._router.navigate([`/${TutodoRoutes.LOGIN}`]);
       }
     });
   }
@@ -73,18 +74,23 @@ export class VerifyEmailComponent implements OnInit {
               if (response === 'operation_successful') {
                 this._toast.success('Se ha verificado su cuenta correctamente.', 'Cuenta verificada');
                 this._router.navigate([`../${TutodoRoutes.TUTODO}`], { relativeTo: this._route });
+              } else {
+                this._toast.error('Error en la operación', 'Error del servidor');
               }
             },
             error: (error) => {
-              // TODO
+              this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+              this._router.navigate([`/${TutodoRoutes.LOGIN}`]);
             }
           });
         } else {
-          this._toast.error() // TODO
+          this._toast.warning('El código introducido no es válido', 'Código no válido');
+          this.verifyMessage = 'El código introducido no es válido';
         }
       },
       error: (error) => {
-        // TODO
+        this._toast.error('Ha sido redirigido debido a que ha ocurrido un error en el servidor', 'Error del servidor');
+        this._router.navigate([`/${TutodoRoutes.LOGIN}`]);
       }
     });
   }

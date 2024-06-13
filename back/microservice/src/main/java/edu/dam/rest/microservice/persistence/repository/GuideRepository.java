@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface GuideRepository extends MongoRepository<Guide, String> {
 
-    List<Guide> findByUserId(String userId);
+    Guide findByIdAndPublished(String id, boolean published);
 
     @Query("{ '_id' : { $in: ?0 } }")
     Page<Guide> findById(List<String> ids, Pageable pageable);

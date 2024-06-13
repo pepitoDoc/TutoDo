@@ -29,8 +29,13 @@
               </p>
             </mat-card-content>
             <mat-card-actions>
-              <button mat-button>Visualizar guía</button>
-              <button mat-button>Añadir a guardados</button>
+              <button mat-button (click)="visualizeGuide(guide.id)" >Visualizar guía</button>
+              @if(!findGuideIsSaved(guide.id)) {
+              <button mat-button color="accent" (click)="addSaved(guide.id)">Añadir a guardados</button>
+              }
+              @else {
+              <button mat-button color="warn" (click)="deleteSaved(guide.id)">Eliminar de guardados</button>
+              }
             </mat-card-actions>
           </mat-card>
         </div>
