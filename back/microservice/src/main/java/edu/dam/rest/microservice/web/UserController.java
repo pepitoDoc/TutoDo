@@ -134,8 +134,14 @@ public class UserController {
             @PathVariable("codeType") String codeType, @RequestParam("codeValue") String codeValue,
             HttpSession httpSession) {
         var generatedCode = (String) httpSession.getAttribute(codeType);
-        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN)
-                .body(codeValue.equals(generatedCode) ? "operation_successful" : "operation_unsuccessful");
+        if (codeValue.equals(generatedCode)) {
+            httpSession.removeAttribute(codeType);
+            return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN)
+                    .body("operation_successful");
+        } else {
+            return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN)
+                    .body("operation_unsuccessful");
+        }
     }
 
     @PostMapping("send-code/{codeType}")

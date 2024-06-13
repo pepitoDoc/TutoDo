@@ -176,6 +176,7 @@ export class GuideModifyComponent implements OnInit {
           `Ha habido un error guardando la información sobre el paso ${index}.`,
           'Operación fallida'
         );
+        window.location.reload();
       }
     });
   }
@@ -213,6 +214,7 @@ export class GuideModifyComponent implements OnInit {
                   `Ha habido un error eliminando el paso ${index + 1}.`,
                   'Operación fallida'
                 );
+                window.location.reload();
               }
             });
           } else {
@@ -284,7 +286,7 @@ export class GuideModifyComponent implements OnInit {
         text: [
           'Para publicar una guía, deberá tener en cuenta lo siguiente:',
           '1. La guía debe de tener mínimo 5 pasos',
-          '2. La guía podrá tener como máximo 20 pasos',
+          '2. La guía podrá tener como máximo 50 pasos',
         ]
       }
     });
@@ -316,7 +318,7 @@ export class GuideModifyComponent implements OnInit {
     if (this.stepsForm.controls.steps.controls[index].controls.modifying.getRawValue() === true 
       || (this.stepsForm.controls.steps.controls[index + 1] 
         && this.stepsForm.controls.steps.controls[index + 1].controls.modifying.getRawValue() === true)
-      || this.stepsForm.controls.steps.length === 20) {
+      || this.stepsForm.controls.steps.length === 50) {
       return true;
     } else {
       return false;
@@ -330,7 +332,7 @@ export class GuideModifyComponent implements OnInit {
   }
 
   getCreateButtonText(index: number): string {
-    if (this.stepsForm.controls.steps.length < 20) {
+    if (this.stepsForm.controls.steps.length < 50) {
       return index % 4 === 3 ? 'Insertar paso en la siguiente página' : 'Insertar paso'
     } else {
       return 'Límite de pasos alcanzado'

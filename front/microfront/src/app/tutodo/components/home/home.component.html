@@ -2,7 +2,7 @@
   <div class="row mt-4">
     <div class="col main-column">
       <div class="title">
-        <h1>Guías que te podrían interesar</h1>
+        <h1>Página principal</h1>
       </div>
       <div class="guide-type">
         <h2>Guías que te podrían interesar</h2>
@@ -41,16 +41,20 @@
         </div>
         }
         @else {
-        <h3>No se ha encontrado información</h3>
+        <div class="align-flex-row mt-3">
+          <h3><strong>No se ha encontrado información</strong></h3>
+        </div>
         }
       </div>
       <ng-template #noResultsPreferences>
-        <h3>Cargando información...</h3>
+        <h3><strong>Cargando información...</strong></h3>
       </ng-template>
       }
       @else {
-      <h3>No has elegido ninguna tipo de guía afin a tus gustos;
-        puedes cambiar esta información en el apartado de "Configuración"</h3>
+      <div class="align-flex-row mt-3">
+        <h3><strong>No has elegido ninguna tipo de guía afin a tus gustos;
+          puedes cambiar esta información en el apartado de "Configuración"</strong></h3>
+      </div>
       }
       <div class="guide-type">
         <h2>Guías recientemente añadidas</h2>
@@ -71,18 +75,27 @@
               </p>
             </mat-card-content>
             <mat-card-actions>
-              <button mat-button>Visualizar guía</button>
-              <button mat-button>Añadir a guardados</button>
+              <button mat-button (click)="visualizeGuide(guide.id)">Visualizar guía</button>
+              @if(!findGuideIsSaved(guide.id)) {
+              <button mat-button color="accent" (click)="addSaved(guide.id)">Añadir a guardados</button>
+              }
+              @else {
+              <button mat-button color="warn" (click)="deleteSaved(guide.id)">Eliminar de guardados</button>
+              }
             </mat-card-actions>
           </mat-card>
         </div>
         }
         @else {
-        <h3>No se ha encontrado información</h3>
+        <div class="align-flex-row mt-3">
+          <h3><strong>No se ha encontrado información</strong></h3>
+        </div>
         }
       </div>
       <ng-template #noResultsNewest>
-        <h3>Cargando información...</h3>
+        <div class="align-flex-row mt-3">
+          <h3><strong>Cargando información...</strong></h3>
+        </div>
       </ng-template>
     </div>
   </div>

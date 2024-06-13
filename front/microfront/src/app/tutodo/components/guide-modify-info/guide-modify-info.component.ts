@@ -21,10 +21,10 @@ import { TutodoRoutes } from '../../tutodo.routes';
 export class GuideModifyInfoComponent implements OnInit {
 
   guideInfo = this._nnfb.group({
-    title: ['', { validators: [Validators.required, Validators.minLength(10), Validators.maxLength(50)] }],
-    description: ['', { validators: [Validators.required, Validators.minLength(40), Validators.maxLength(100)] }],
+    title: ['', { validators: [Validators.required, Validators.minLength(10), Validators.maxLength(100)] }],
+    description: ['', { validators: [Validators.required, Validators.minLength(40), Validators.maxLength(200)] }],
     guideTypes: [''],
-    ingredients: [''],
+    ingredients: ['', [Validators.maxLength(100)]],
     imageFile: this._fb.control<File | null>(null)
   });
   @ViewChild('autosize') autosize!: CdkTextareaAutosize;
@@ -246,7 +246,7 @@ export class GuideModifyInfoComponent implements OnInit {
 
   addIngredient(ingredient: MatChipInputEvent): void {
     const value = (ingredient.value || '').trim();
-    if (value && this.guideInfoSnapshot) {
+    if (value && this.guideInfoSnapshot && value.length < 100) {
       this.ingredients.push(value);
     }
     ingredient.chipInput!.clear();
@@ -259,7 +259,7 @@ export class GuideModifyInfoComponent implements OnInit {
       return;
     }
     const index = this.ingredients.indexOf(ingredient);
-    if (index >= 0) {
+    if (index >= 0 && value.length < 100) {
       this.ingredients[index] = value;
     }
   }

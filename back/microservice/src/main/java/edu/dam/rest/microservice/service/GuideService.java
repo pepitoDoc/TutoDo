@@ -65,6 +65,8 @@ public class GuideService {
             var encodedThumbnail = this.encodeImageAsBase64(guideThumbnail);
             if (encodedThumbnail.equals("error_encoding")) {
                 return "error_creating_guide";
+            } else {
+                guide.setThumbnail(encodedThumbnail);
             }
         } else {
             guide.setThumbnail("");
@@ -168,14 +170,17 @@ public class GuideService {
         var foundGuide = this.guideRepository.findByIdAndPublished(guideId, true);
         if (foundGuide != null) {
             var userLogged = this.userRepository.findById(userId);
-            if (userLogged.isPresent()) {
+            var guideOwner = this.userRepository.findById(foundGuide.getUserId());
+            if (userLogged.isPresent() && guideOwner.isPresent()) {
                 var user = userLogged.orElseThrow();
+                var owner = guideOwner.orElseThrow();
                 var userRating = foundGuide.getRatings().stream()
                         .filter(rating -> rating.getUserId().equals(userId))
                         .limit(1)
                         .toList();
                 return new GuideVisualizeInfo(
                         foundGuide,
+                        owner.getUsername(),
                         foundGuide.getComments(),
                         foundGuide.getRatings().isEmpty() ? 0 : this.ratingMean(foundGuide.getRatings()),
                         userRating.isEmpty() ? 0 : userRating.get(0).getPunctuation(),

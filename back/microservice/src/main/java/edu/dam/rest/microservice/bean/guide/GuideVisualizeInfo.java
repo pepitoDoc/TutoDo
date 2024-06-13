@@ -16,6 +16,7 @@ public class GuideVisualizeInfo {
 
     private String id;
     private String userId;
+    private String username;
     private String title;
     private String description;
     private List<Step> steps;
@@ -27,13 +28,14 @@ public class GuideVisualizeInfo {
     private String thumbnail;
     private boolean rated;
     private boolean completed;
-    private boolean guideOwnership;
+    private boolean ownership;
 
     public GuideVisualizeInfo(
-            Guide guide, List<Comment> comments, float ratingMean, int userRating,
-            boolean completed, boolean rated, boolean guideOwnership) {
+            Guide guide, String username, List<Comment> comments, float ratingMean, int userRating,
+            boolean completed, boolean rated, boolean ownership) {
         this.id = guide.getId();
         this.userId = guide.getId();
+        this.username = username;
         this.title = guide.getTitle();
         this.description = guide.getDescription();
         this.steps = guide.getSteps();
@@ -45,7 +47,7 @@ public class GuideVisualizeInfo {
         this.rated = rated;
         this.userRating = userRating;
         this.completed = completed;
-        this.guideOwnership = guideOwnership;
+        this.ownership = ownership;
     }
 
 }

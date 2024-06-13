@@ -34,14 +34,14 @@
               <div class="align-flex-column mt-3 mb-3" *ngIf="step.controls.imageBase64.value !== '' 
                 && step.controls.loadedImage.getRawValue() === null">
                 <p>Imagen actualmente seleccionada</p>
-                <button type="button" mat-flat-button class="buttonSpace mx-5" color="warn"
+                <button type="button" mat-flat-button class="button-space" color="warn"
                   *ngIf="step.controls.modifying.value" (click)="deleteImage(i)">Eliminar imagen</button>
                 <img [src]="'data:image/jpeg;base64,' + step.controls.imageBase64.value" 
                   alt="No se ha podido cargar la imagen correctamente">
               </div>
               <div class="align-flex-column mt-3 mb-3" *ngIf="step.controls.loadedImage.getRawValue() !== null">
                 <p>Imagen actualmente seleccionada</p>
-                <button type="button" mat-flat-button class="button-space mx-5" color="warn"
+                <button type="button" mat-flat-button class="button-space" color="warn"
                   *ngIf="step.controls.modifying.value" (click)="deleteImage(i)">Eliminar imagen</button>
                 <img [src]="step.controls.loadedImage.getRawValue()" alt="No se ha podido cargar la imagen correctamente">
               </div>

@@ -5,8 +5,8 @@
       <div class="gradient-content title-content">
         <h1>{{ guideWatching.title }}</h1>
         <h2>{{ guideWatching.description }}</h2>
-        <h2>Guía sobre {{ formatGuideTypes() }}</h2>
-        <h3 *ngIf="userData"><strong>Usuario creador: </strong>{{ userData.username }}</h3>
+        <h2>Guía sobre {{ formatGuideTypes() | lowercase }}</h2>
+        <h3 *ngIf="userData"><strong>Usuario creador: </strong>{{ guideWatching.username }}</h3>
         <h3><strong>Puntuación media: </strong>{{ guideWatching.ratingMean }}</h3>
         <div class="align-flex-row options">
           @if(!findGuideIsSaved(guideWatching.id)) {

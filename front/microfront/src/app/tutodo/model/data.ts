@@ -211,6 +211,7 @@ export interface GuideInfo {
 export interface GuideVisualizeInfo {
     id: string;
     userId: string;
+    username: string;
     title: string;
     description: string;
     steps: Step[];

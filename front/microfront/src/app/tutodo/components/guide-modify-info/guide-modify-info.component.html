@@ -9,7 +9,7 @@
                     <mat-label>Título</mat-label>
                     <input type="text" matInput #inputTitle minlength="10" maxlength="50" formControlName="title"
                         placeholder="Título de la guía">
-                    <mat-hint align="start">{{inputTitle.value.length}}/50 (mínimo 10 caracteres)</mat-hint>
+                    <mat-hint align="start">{{inputTitle.value.length}}/100 (mínimo 10 caracteres)</mat-hint>
                     <mat-error *ngIf="guideInfo.controls.title.hasError('required')">
                         <strong>Es necesario el título de la guía</strong>
                     </mat-error>
@@ -19,8 +19,8 @@
                     <textarea type="text" matInput formControlName="description"
                         placeholder="Breve descripción de la guía" cdkTextareaAutosize #autosize="cdkTextareaAutosize"
                         cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5" #inputDescription minlength="40"
-                        maxlength="100"></textarea>
-                    <mat-hint align="start">{{inputDescription.value.length}}/100 (mínimo 40 caracteres)</mat-hint>
+                        maxlength="200"></textarea>
+                    <mat-hint align="start">{{inputDescription.value.length}}/200 (mínimo 40 caracteres)</mat-hint>
                     <mat-error *ngIf="guideInfo.controls.description.hasError('required')">
                         <strong>Es necesaria una descripción de la guía</strong>
                     </mat-error>

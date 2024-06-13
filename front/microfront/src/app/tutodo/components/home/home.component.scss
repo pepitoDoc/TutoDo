@@ -122,3 +122,12 @@ mat-card {
   }
 
 }
+
+.align-flex-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+}

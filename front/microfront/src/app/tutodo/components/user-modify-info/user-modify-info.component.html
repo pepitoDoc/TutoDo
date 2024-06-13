@@ -20,7 +20,8 @@
                     <button mat-flat-button color="primary" (click)="modifyInfo(2)">Modificar contraseña</button>
                 </div>
                 <div class="user-control">
-                    <p><strong>Preferencias de guía: </strong>{{ listToString(userData.preferences) | titlecase }}</p>
+                    <p><strong>Preferencias de guía: </strong>{{ userData.preferences.length > 0 
+                        ? (listToString(userData.preferences) | titlecase) : 'Ninguna preferencia elegida'}}</p>
                     <button mat-flat-button color="primary" (click)="modifyInfo(3)">Modificar preferencias</button>
                 </div>
             </div>

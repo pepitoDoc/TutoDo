@@ -109,6 +109,7 @@ export class UserModifyInfoComponent implements OnInit{
     this.dataModifying[this.dataIndex] = false;
     this.showModify = false;
     this.dataIndex = -1;
+    this.modifyMessage = '';
   }
 
   changeUsername(): void {
