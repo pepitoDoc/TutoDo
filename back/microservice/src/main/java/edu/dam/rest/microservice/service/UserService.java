@@ -20,19 +20,33 @@ import java.util.regex.Pattern;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
+/**
+ * Service class for managing user-related operations.
+ */
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
     private final MongoTemplate mongoTemplate;
 
-
+    /**
+     * Constructs a UserService instance with necessary dependencies.
+     *
+     * @param userRepository The repository for managing user data.
+     * @param mongoTemplate  The MongoDB template for executing queries.
+     */
     @Autowired
     public UserService(UserRepository userRepository, MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
         this.userRepository = userRepository;
     }
 
+    /**
+     * Creates a new user based on the provided request.
+     *
+     * @param insertUserRequest The request containing user data.
+     * @return A string indicating the operation status ("operation_successful" or "operation_unsuccessful").
+     */
     public String create(InsertUserRequest insertUserRequest) {
         var createUser = User.builder()
                 .username(insertUserRequest.getUsername())
@@ -58,6 +72,12 @@ public class UserService {
 
     }
 
+    /**
+     * Logs in a user using the provided credentials.
+     *
+     * @param loginUserRequest The request containing login credentials.
+     * @return A UserSession object if login is successful, otherwise null.
+     */
     public UserSession login(LoginUserRequest loginUserRequest) {
         var foundUser = this.userRepository.findByEmail(loginUserRequest.getEmail());
         if (foundUser != null) {
@@ -71,6 +91,12 @@ public class UserService {
         }
     }
 
+    /**
+     * Finds a user by their ID.
+     *
+     * @param id The ID of the user to find.
+     * @return A UserData object representing the user's data, or null if not found.
+     */
     public UserData findById(String id) {
         var foundUser = this.userRepository.findById(id);
         if (foundUser.isPresent()) {
@@ -87,6 +113,14 @@ public class UserService {
         }
     }
 
+    /**
+     * Adds a value to a specific string array field in an user's document.
+     *
+     * @param id      The ID of the user.
+     * @param guideId The ID of the guide to add.
+     * @param field   The field in the user's document (e.g., "completed", "saved") to add the value to.
+     * @return A string indicating the operation status ("operation_successful" or "operation_unsuccessful").
+     */
     public String addToUserStringArray(String id, String guideId, String field) {
         var result = this.mongoTemplate.updateFirst(
                 query(where(Constants.ID).is(id)),
@@ -98,6 +132,14 @@ public class UserService {
         }
     }
 
+    /**
+     * Deletes a value from a specific string array field in an user's document.
+     *
+     * @param id      The ID of the user.
+     * @param guideId The ID of the guide to delete.
+     * @param field   The field in the user's document (e.g., "completed", "saved") to delete the value from.
+     * @return A string indicating the operation status ("operation_successful" or "operation_unsuccessful").
+     */
     public String deleteFromUserStringArray(String id, String guideId, String field) {
         var result = this.mongoTemplate.updateFirst(
                 query(where(Constants.ID).is(id)),
@@ -109,6 +151,12 @@ public class UserService {
         }
     }
 
+    /**
+     * Checks if a user is confirmed.
+     *
+     * @param id The ID of the user to check.
+     * @return A string indicating the user's confirmation status ("user_confirmed", "user_not_confirmed", or "user_not_found").
+     */
     public String checkUserConfirmed(String id) {
         var result = this.userRepository.findById(id);
         if (result.isPresent()) {
@@ -123,6 +171,13 @@ public class UserService {
         }
     }
 
+    /**
+     * Updates a user's confirmation status.
+     *
+     * @param id        The ID of the user to update.
+     * @param confirmed The new confirmation status.
+     * @return A string indicating the operation status ("operation_successful" or "operation_unsuccessful").
+     */
     public String updateUserConfirmed(String id, boolean confirmed) {
         var result = this.mongoTemplate.updateFirst(
                 query(where(Constants.ID).is(id)),
@@ -136,11 +191,25 @@ public class UserService {
         }
     }
 
+    /**
+     * Sends a verification email to the user.
+     *
+     * @param codeType  The type of verification code.
+     * @param codeValue The value of the verification code.
+     * @param email     The email address to send the verification to.
+     * @return true if the email was sent successfully, otherwise false.
+     */
     public boolean sendVerification(String codeType, String codeValue, String email) {
         var sender = new Sender();
         return sender.send("TutoDo", email, Constants.EMAIL_TITLES.get(codeType), codeValue);
     }
 
+    /**
+     * Changes the user's password using their email.
+     *
+     * @param changePasswordByEmailRequest The request containing the user's email and new password.
+     * @return A string indicating the operation status ("operation_successful" or "operation_unsuccessful").
+     */
     public String changePasswordByEmail(ChangePasswordByEmailRequest changePasswordByEmailRequest) {
         var userFound = this.userRepository.findByEmail(changePasswordByEmailRequest.getEmail());
         if (userFound != null) {
@@ -159,6 +228,14 @@ public class UserService {
         }
     }
 
+    /**
+     * Changes the user's password using their ID and old password.
+     *
+     * @param id          The ID of the user.
+     * @param oldPassword The user's current password.
+     * @param newPassword The new password to set.
+     * @return A string indicating the operation status ("operation_successful", "operation_unsuccessful", or "password_incorrect").
+     */
     public String changePasswordById(String id, String oldPassword, String newPassword) {
         var userFound = this.userRepository.findById(id);
         if (userFound.isPresent()) {
@@ -181,6 +258,13 @@ public class UserService {
         }
     }
 
+    /**
+     * Finds users by their username, supporting pagination.
+     *
+     * @param username   The username to search for.
+     * @param pageNumber The page number of results to retrieve.
+     * @return A UserPaginationResponse object containing found users.
+     */
     public UserPaginationResponse findAllByUsername(String username, Integer pageNumber) {
         var userPattern = Pattern.compile(username, Pattern.CASE_INSENSITIVE);
         var pageable = PageRequest.of(pageNumber == null ? 0 : pageNumber, Constants.PAGE_SIZE,
@@ -198,6 +282,13 @@ public class UserService {
                 .build();
     }
 
+    /**
+     * Adds a guide ID to the "completed" field in a user's document.
+     *
+     * @param guideId The ID of the guide to mark as completed.
+     * @param id      The ID of the user.
+     * @return A string indicating the operation status ("operation_successful" or "operation_unsuccessful").
+     */
     public String addCompleted(String guideId, String id) {
         var result = this.mongoTemplate.updateFirst(
                 query(where(Constants.ID).is(id)),
@@ -210,6 +301,13 @@ public class UserService {
         }
     }
 
+    /**
+     * Changes the user's username.
+     *
+     * @param username The new username to set.
+     * @param id       The ID of the user.
+     * @return A string indicating the operation status ("operation_successful", "operation_unsuccessful", or "username_taken").
+     */
     public String changeUsername(String username, String id) {
         var usernameCheck = this.findAllByUsernameOrEmail(username, StringUtils.EMPTY);
         if (!usernameCheck.equals("username_taken")) {
@@ -227,6 +325,13 @@ public class UserService {
         }
     }
 
+    /**
+     * Changes the user's email address.
+     *
+     * @param email The new email address to set.
+     * @param id    The ID of the user.
+     * @return A string indicating the operation status ("operation_successful", "operation_unsuccessful", or "email_taken").
+     */
     public String changeEmail(String email, String id) {
         var emailCheck = this.findAllByUsernameOrEmail(StringUtils.EMPTY, email);
         if (!emailCheck.equals("email_taken")) {
@@ -244,6 +349,13 @@ public class UserService {
         }
     }
 
+    /**
+     * Changes the user's preferences.
+     *
+     * @param preferences The new list of preferences to set.
+     * @param id          The ID of the user.
+     * @return A string indicating the operation status ("operation_successful" or "operation_unsuccessful").
+     */
     public String changeUserPreferences(List<String> preferences, String id) {
         var result = this.mongoTemplate.updateFirst(
                 query(where(Constants.ID).is(id)),
@@ -256,6 +368,13 @@ public class UserService {
         }
     }
 
+    /**
+     * Finds all users matching the given username or email.
+     *
+     * @param username The username to search for.
+     * @param email    The email to search for.
+     * @return A string indicating the result of the search ("username_taken", "email_taken", "username_takenemail_taken", or "user_valid").
+     */
     private String findAllByUsernameOrEmail(String username, String email) {
         var foundUsers = this.userRepository.findAllByUsernameOrEmail(username, email);
         var sb = new StringBuilder();

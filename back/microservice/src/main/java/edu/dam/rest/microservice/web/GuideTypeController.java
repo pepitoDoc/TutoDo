@@ -12,17 +12,30 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * Controller class for managing guide type-related operations.
+ */
 @RestController
 @RequestMapping(ApiConstants.GUIDE_TYPE_ENDPOINT)
 public class GuideTypeController {
 
     private GuideTypeService guideTypeService;
 
+    /**
+     * Constructor injection to initialize GuideTypeController with GuideTypeService.
+     *
+     * @param guideTypeService Service layer for Guide Types.
+     */
     @Autowired
     public GuideTypeController(GuideTypeService guideTypeService) {
         this.guideTypeService = guideTypeService;
     }
 
+    /**
+     * Endpoint to fetch all guide types.
+     *
+     * @return ResponseEntity containing a list of guide types in JSON format with HTTP status OK.
+     */
     @GetMapping("findAll")
     public ResponseEntity<List<String>> findAll() {
         var response = this.guideTypeService.findAllGuideTypes();
@@ -30,6 +43,4 @@ public class GuideTypeController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(response);
     }
-
-
 }

@@ -29,6 +29,9 @@ import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
+/**
+ * Service class for managing guides, including creation, modification, retrieval, and deletion operations.
+ */
 @Service
 public class GuideService {
 
@@ -37,6 +40,14 @@ public class GuideService {
     private final UserRepository userRepository;
     private final MongoTemplate mongoTemplate;
 
+    /**
+     * Constructs a GuideService instance with necessary dependencies injected.
+     *
+     * @param guideRepository The repository for Guide entities, injected by Spring.
+     * @param userService The service for user-related operations, injected by Spring.
+     * @param mongoTemplate The MongoDB template for executing database operations, injected by Spring.
+     * @param userRepository The repository for User entities, injected by Spring.
+     */
     @Autowired
     public GuideService(GuideRepository guideRepository, UserService userService,
                         MongoTemplate mongoTemplate, UserRepository userRepository) {
@@ -46,6 +57,14 @@ public class GuideService {
         this.mongoTemplate = mongoTemplate;
     }
 
+    /**
+     * Creates a new guide with the provided details.
+     *
+     * @param createGuideRequest The request object containing guide details.
+     * @param userId             The ID of the user creating the guide.
+     * @param guideThumbnail     The thumbnail image for the guide.
+     * @return A string indicating the result of guide creation operation.
+     */
     public String guideCreate(CreateGuideRequest createGuideRequest, String userId, MultipartFile guideThumbnail) {
         var guide = Guide.builder()
                 .userId(userId)
@@ -74,6 +93,13 @@ public class GuideService {
         return this.insertGuide(userId, guide);
     }
 
+    /**
+     * Saves or updates a step in an existing guide.
+     *
+     * @param saveGuideStepRequest The request object containing step details.
+     * @param stepImage            The image for the step.
+     * @return A string indicating the result of saving or updating the guide step operation.
+     */
     public String saveGuideStep(SaveGuideStepRequest saveGuideStepRequest, MultipartFile stepImage) {
         try {
             var step = new Step();
@@ -116,6 +142,12 @@ public class GuideService {
         }
     }
 
+    /**
+     * Deletes a step from an existing guide.
+     *
+     * @param deleteGuideStepRequest The request object containing guide and step details.
+     * @return A string indicating the result of guide step deletion operation.
+     */
     public String deleteGuideStep(DeleteGuideStepRequest deleteGuideStepRequest) {
         var query = new Query().addCriteria(where(Constants.ID).is(deleteGuideStepRequest.getGuideId()));
         query.fields().include(Constants.STEPS);
@@ -136,6 +168,13 @@ public class GuideService {
         }
     }
 
+    /**
+     * Saves updated information of an existing guide.
+     *
+     * @param saveGuideInfoRequest The request object containing updated guide information.
+     * @param guideThumbnail       The updated thumbnail image for the guide.
+     * @return A string indicating the result of saving guide information operation.
+     */
     public String saveGuideInfo(SaveGuideInfoRequest saveGuideInfoRequest, MultipartFile guideThumbnail) {
         try {
             var updates = new Update();
@@ -166,6 +205,13 @@ public class GuideService {
         }
     }
 
+    /**
+     * Retrieves detailed information about a guide for visualization.
+     *
+     * @param guideId The ID of the guide to visualize.
+     * @param userId  The ID of the user viewing the guide.
+     * @return A {@link GuideVisualizeInfo} object containing detailed visualization information about the guide.
+     */
     public GuideVisualizeInfo findGuideVisualize(String guideId, String userId) {
         var foundGuide = this.guideRepository.findByIdAndPublished(guideId, true);
         if (foundGuide != null) {
@@ -181,6 +227,7 @@ public class GuideService {
                 return new GuideVisualizeInfo(
                         foundGuide,
                         owner.getUsername(),
+                        owner.getId(),
                         foundGuide.getComments(),
                         foundGuide.getRatings().isEmpty() ? 0 : this.ratingMean(foundGuide.getRatings()),
                         userRating.isEmpty() ? 0 : userRating.get(0).getPunctuation(),
@@ -196,6 +243,12 @@ public class GuideService {
         }
     }
 
+    /**
+     * Retrieves guide details required for modifying its steps.
+     *
+     * @param guideId The ID of the guide for which modification details are required.
+     * @return A {@link GuideModifySteps} object containing guide details for step modification.
+     */
     public GuideModifySteps findGuideModifySteps(String guideId) {
         var foundGuide = this.guideRepository.findById(guideId);
         if (foundGuide.isPresent()) {
@@ -205,6 +258,12 @@ public class GuideService {
         }
     }
 
+    /**
+     * Retrieves guide details required for modifying its information.
+     *
+     * @param guideId The ID of the guide for which modification details are required.
+     * @return A {@link GuideModifyInfo} object containing guide details for information modification.
+     */
     public GuideModifyInfo findGuideModifyInfo(String guideId) {
         var foundGuide = this.guideRepository.findById(guideId);
         if (foundGuide.isPresent()) {
@@ -215,6 +274,12 @@ public class GuideService {
         }
     }
 
+    /**
+     * Checks if a guide is published.
+     *
+     * @param guideId The ID of the guide to check.
+     * @return {@code true} if the guide is published, {@code false} otherwise.
+     */
     public Boolean findGuidePublished(String guideId) {
         var foundGuide = this.guideRepository.findById(guideId);
         if (foundGuide.isPresent()) {
@@ -228,6 +293,12 @@ public class GuideService {
         }
     }
 
+    /**
+     * Retrieves guides based on filter criteria.
+     *
+     * @param findByFilterRequest The request object containing filter criteria.
+     * @return A {@link FindByFilterResponse} object containing filtered guides and total count.
+     */
     public FindByFilterResponse findByFilter(FindByFilterRequest findByFilterRequest) {
         var operations = new ArrayList<AggregationOperation>();
         if (!findByFilterRequest.getTitle().isEmpty()) {
@@ -310,6 +381,13 @@ public class GuideService {
         }
     }
 
+    /**
+     * Retrieves guides created by a specific user.
+     *
+     * @param userId     The ID of the user whose guides are to be retrieved.
+     * @param pageNumber The page number for paginated results.
+     * @return A {@link GuidePaginationResponse} object containing paginated guides created by the user.
+     */
     public GuidePaginationResponse findOwnGuides(String userId, Integer pageNumber) {
         var userQuery = new Query().addCriteria(where(Constants.ID).is(userId));
         userQuery.fields().include(Constants.CREATED);
@@ -327,6 +405,13 @@ public class GuideService {
         }
     }
 
+    /**
+     * Retrieves guides saved by a specific user.
+     *
+     * @param userId     The ID of the user whose saved guides are to be retrieved.
+     * @param pageNumber The page number for paginated results.
+     * @return A {@link GuidePaginationResponse} object containing paginated guides saved by the user.
+     */
     public GuidePaginationResponse findSaved(String userId, Integer pageNumber) {
         var userQuery = new Query().addCriteria(where(Constants.ID).is(userId));
         userQuery.fields().include(Constants.SAVED);
@@ -344,6 +429,13 @@ public class GuideService {
         }
     }
 
+    /**
+     * Adds a comment to a guide.
+     *
+     * @param addCommentRequest The request object containing comment details.
+     * @param userSession       The session information of the user adding the comment.
+     * @return An {@link AddCommentResponse} object containing the result of the add comment operation.
+     */
     public AddCommentResponse addComent(AddCommentRequest addCommentRequest, UserSession userSession) {
         try {
             var comment = Comment.builder()
@@ -368,6 +460,13 @@ public class GuideService {
         }
     }
 
+    /**
+     * Adds or updates a rating for a guide.
+     *
+     * @param addRatingRequest The request object containing rating details.
+     * @param userId           The ID of the user adding the rating.
+     * @return A string indicating the result of adding or updating the guide rating operation.
+     */
     public String addRating(AddRatingRequest addRatingRequest, String userId) {
         try {
             UpdateResult setResult = this.mongoTemplate.updateFirst(
@@ -396,6 +495,13 @@ public class GuideService {
         }
     }
 
+    /**
+     * Checks if a user has permission to access a published guide.
+     *
+     * @param guideId The ID of the guide to check access permission.
+     * @param userId  The ID of the user requesting access.
+     * @return {@code true} if the user has permission, {@code false} otherwise.
+     */
     public boolean getPublishedPermission(String guideId, String userId) {
         var foundGuide = this.guideRepository.findById(guideId);
         if (foundGuide.isPresent()) {
@@ -406,6 +512,13 @@ public class GuideService {
         }
     }
 
+    /**
+     * Deletes a guide.
+     *
+     * @param guideId The ID of the guide to delete.
+     * @param userId  The ID of the user deleting the guide.
+     * @return A string indicating the result of guide deletion operation.
+     */
     public String deleteGuide(String guideId, String userId) {
         var deleteResult = this.mongoTemplate.remove(
                 query(where(Constants.ID).is(guideId)), Constants.GUIDE_COLLECTION);
@@ -421,6 +534,12 @@ public class GuideService {
         }
     }
 
+    /**
+     * Deletes a comment from a guide.
+     *
+     * @param deleteCommentRequest The request object containing comment details.
+     * @return A string indicating the result of comment deletion operation.
+     */
     public String deleteComment(DeleteCommentRequest deleteCommentRequest) {
         Comment comment = Comment.builder()
                 .userId(deleteCommentRequest.getUserId())
@@ -439,6 +558,11 @@ public class GuideService {
         }
     }
 
+    /**
+     * Retrieves a list of newest guides.
+     *
+     * @return A list of {@link GuideInfo} objects representing the newest guides.
+     */
     public List<GuideInfo> findNewestGuides() {
         var result = this.mongoTemplate.find(
                 new Query(where(Constants.PUBLISHED).is(true))
@@ -448,6 +572,12 @@ public class GuideService {
         return result.stream().map(this::buildGuideInfo).toList();
     }
 
+    /**
+     * Retrieves a list of newest guides based on guide type preference.
+     *
+     * @param preference The guide type preference for filtering newest guides.
+     * @return A list of {@link GuideInfo} objects representing the newest guides by preference.
+     */
     public List<GuideInfo> findNewestGuidesByPreference(String preference) {
         var result = this.mongoTemplate.find(
                 new Query(where(Constants.PUBLISHED).is(true).and(Constants.GUIDE_TYPES).in(preference))
@@ -457,6 +587,13 @@ public class GuideService {
         return result.stream().map(this::buildGuideInfo).toList();
     }
 
+    /**
+     * Encodes the content of a multipart file image as Base64 string.
+     *
+     * @param image The multipart file image to encode.
+     * @return The Base64-encoded string representation of the image content.
+     *         Returns "error_encoding" if an IOException occurs during encoding.
+     */
     private String encodeImageAsBase64(MultipartFile image) {
         try {
             return Base64.getEncoder().encodeToString(image.getBytes());
@@ -465,6 +602,15 @@ public class GuideService {
         }
     }
 
+    /**
+     * Inserts a guide into the database and updates user information accordingly.
+     *
+     * @param userId The ID of the user inserting the guide.
+     * @param guide  The guide object to insert into the database.
+     * @return A string indicating the result of the insert operation.
+     *         If successful, returns "operation_successful?id={guideId}".
+     *         Otherwise, returns "operation_unsuccessful".
+     */
     private String insertGuide(String userId, Guide guide) {
         var dbCheck = this.guideRepository.save(guide);
         if (this.guideRepository.existsById(dbCheck.getId())) {
@@ -477,6 +623,12 @@ public class GuideService {
         }
     }
 
+    /**
+     * Constructs a GuideInfo object from a Guide entity.
+     *
+     * @param guide The Guide entity from which to build the GuideInfo object.
+     * @return A GuideInfo object populated with details from the provided Guide entity.
+     */
     private GuideInfo buildGuideInfo(Guide guide) {
         return GuideInfo.builder()
                 .id(guide.getId())
@@ -493,6 +645,12 @@ public class GuideService {
                 .build();
     }
 
+    /**
+     * Calculates the mean rating from a list of ratings.
+     *
+     * @param ratings The list of Rating objects from which to calculate the mean.
+     * @return The mean rating as a float value, rounded to one decimal place.
+     */
     private float ratingMean(List<Rating> ratings) {
         var ratingSum = ratings.stream().mapToInt(Rating::getPunctuation).sum();
         return (float) Math.round(((float) ratingSum / ratings.size()) * 10) / 10;
