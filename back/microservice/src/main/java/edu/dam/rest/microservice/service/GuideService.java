@@ -442,7 +442,7 @@ public class GuideService {
     public List<GuideInfo> findNewestGuides() {
         var result = this.mongoTemplate.find(
                 new Query(where(Constants.PUBLISHED).is(true))
-                        .with(Sort.by(Sort.Order.desc(Constants.CREATION_DATE))).limit(10),
+                        .with(Sort.by(Sort.Order.desc(Constants.CREATION_DATE))).limit(12),
                 Guide.class,
                 Constants.GUIDE_COLLECTION);
         return result.stream().map(this::buildGuideInfo).toList();
@@ -451,7 +451,7 @@ public class GuideService {
     public List<GuideInfo> findNewestGuidesByPreference(String preference) {
         var result = this.mongoTemplate.find(
                 new Query(where(Constants.PUBLISHED).is(true).and(Constants.GUIDE_TYPES).in(preference))
-                        .with(Sort.by(Sort.Order.desc(Constants.CREATION_DATE))).limit(10),
+                        .with(Sort.by(Sort.Order.desc(Constants.CREATION_DATE))).limit(12),
                 Guide.class,
                 Constants.GUIDE_COLLECTION);
         return result.stream().map(this::buildGuideInfo).toList();

@@ -71,7 +71,7 @@ export class ApiService {
 
   findGuideByIdVisualize$(guideId: string): Observable<GuideVisualizeInfo> {
     return this._http.get<GuideVisualizeInfo>(`${this._guideEndpoint}/find-by-id-visualize/${guideId}`, { withCredentials: true }).pipe(
-      map(guide => { return { ...guide, comments: guide.comments.map(comment => { return { ...comment, date: new Date(comment.date) } }) } }),
+      map(guide => { return { ...guide, comments: guide.comments.map(comment => { return { ...comment, formattedDate: new Date(comment.date) } }) } }),
       shareReplay(1));
   }
 
