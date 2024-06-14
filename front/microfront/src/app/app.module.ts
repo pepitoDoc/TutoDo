@@ -5,8 +5,10 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { TutodoModule } from './tutodo/tutodo.module';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { TranslocoRootModule } from './transloco-root.module';
+import { InterceptorService } from './tutodo/service/spinner/interceptor.service';
+import { SpinnerComponent } from './tutodo/shared/components/spinner/spinner.component';
 
 @NgModule({
   declarations: [
@@ -17,10 +19,16 @@ import { TranslocoRootModule } from './transloco-root.module';
     AppRoutingModule,
     TutodoModule,
     HttpClientModule,
-    TranslocoRootModule
+    TranslocoRootModule,
+    SpinnerComponent
   ],
   providers: [
-    provideAnimationsAsync()
+    provideAnimationsAsync(),
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: InterceptorService,
+      multi: true
+    }
   ],
   bootstrap: [AppComponent]
 })

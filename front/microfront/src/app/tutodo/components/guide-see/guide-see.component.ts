@@ -69,7 +69,6 @@ export class GuideSeeComponent implements OnInit {
 
   nextStep(): void {
     this.currentStep++;
-    this._shared.setPersistedData$({ [this.guideWatching.id]: this.currentStep }).subscribe();
     if (this.currentStep === this.guideWatching.steps.length) {
       this._service.addCompleted$(this.guideWatching.id).subscribe({
         next: (response) => {
@@ -91,7 +90,6 @@ export class GuideSeeComponent implements OnInit {
 
   previousStep(): void {
     this.currentStep--;
-    this._shared.setPersistedData$({[this.guideWatching.id]: this.currentStep}).subscribe();
   }
 
   submitRating(punctuation: number): void {

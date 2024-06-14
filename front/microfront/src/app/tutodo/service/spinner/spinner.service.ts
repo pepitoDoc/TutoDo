@@ -1,0 +1,23 @@
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class SpinnerService {
+
+  private loadingSubject = new BehaviorSubject<boolean>(false);
+
+  loading$ = this.loadingSubject.asObservable();
+
+  constructor() { }
+
+  loadingOn() {
+    this.loadingSubject.next(true);
+  }
+
+  loadingOff() {
+    this.loadingSubject.next(false);
+  }
+  
+}

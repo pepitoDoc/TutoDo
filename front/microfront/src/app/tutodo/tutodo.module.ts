@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 
 import { TutodoRoutingModule } from './tutodo-routing.module';
 import { LoginComponent } from './components/login/login.component';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { TutodoComponent } from './tutodo.component';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -44,6 +44,9 @@ import { ResetPasswordComponent } from './components/reset-password/reset-passwo
 import { SearchUserComponent } from './components/search-user/search-user.component';
 import { SavedGuidesComponent } from './components/saved-guides/saved-guides.component';
 import { UserModifyInfoComponent } from './components/user-modify-info/user-modify-info.component';
+import { SpinnerComponent } from './shared/components/spinner/spinner.component';
+import { MatProgressSpinner, MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
 
 
 @NgModule({
@@ -94,6 +97,8 @@ import { UserModifyInfoComponent } from './components/user-modify-info/user-modi
     MatProgressBarModule,
     MatListModule,
     MatButtonToggleModule,
+    SpinnerComponent,
+    MatProgressSpinnerModule,
     ToastrModule.forRoot({
       timeOut: 4000,
       positionClass: 'toast-bottom-right'
